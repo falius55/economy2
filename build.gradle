@@ -15,10 +15,13 @@ javadoc {
 
 repositories {
     jcenter()
+    maven { url 'https://jitpack.io' }
+    maven { url "http://www.pyx4me.com/maven2-snapshot" }
 }
 
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.21'
+    compile 'com.github.falius55:java-util:1.1.5'
 
     testCompile 'org.slf4j:slf4j-api:1.7.21'
 
