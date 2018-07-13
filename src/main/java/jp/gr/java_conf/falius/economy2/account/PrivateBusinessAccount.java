@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
-import jp.gr.java_conf.falius.economy2.enumpack.Product;
 
 public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle> {
 
@@ -160,13 +159,5 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
     @Override
     public PrivateBusinessAccount payTax(int amount) {
         return this;
-    }
-
-    public static void main(String[] args) {
-        PrivateBusinessAccount account = PrivateBusinessAccount.newInstance();
-        account.add(PrivateBusinessAccountTitle.SALES, 2000);
-        System.out.println(account);
-        account.test_fixedAssets(1000);
-        Product.printAll();
     }
 }
