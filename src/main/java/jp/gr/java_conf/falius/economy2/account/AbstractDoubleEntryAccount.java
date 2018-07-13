@@ -40,7 +40,7 @@ public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitl
      * @param item 勘定科目
      * @param amount 金額
      */
-    protected final void add(AccountType.RL rl, T item, int amount) {
+    private final void add(AccountType.RL rl, T item, int amount) {
         if (item.type().rl().equals(rl)) {
             increase(item, amount);
         } else {
@@ -54,7 +54,8 @@ public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitl
      * @param amount 金額
      * @throws IllegalArgumentException サブタイプで定義した標準科目が資産科目でない場合
      */
-    protected final void add(T item, int amount) {
+    @Override
+    public final void add(T item, int amount) {
         T defaultItem = defaultItem();
         if (!defaultItem.type().equals(AccountType.ASSETS)) { throw new IllegalArgumentException("defaultItem is not Assets"); }
         add(item.type().rl(), item, amount);
@@ -66,7 +67,8 @@ public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitl
      * @param item 勘定科目
      * @param amount 金額
      */
-    protected final void addLeft(T item, int amount) {
+    @Override
+    public final void addLeft(T item, int amount) {
         add(AccountType.RL.LEFT, item, amount);
     }
 
@@ -75,7 +77,8 @@ public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitl
      * @param item 勘定科目
      * @param amount 金額
      */
-    protected final void addRight(T item, int amount) {
+    @Override
+    public final void addRight(T item, int amount) {
         add(AccountType.RL.RIGHT, item, amount);
     }
 
@@ -150,10 +153,6 @@ public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitl
      */
     protected final int fixedAssetsValue() {
         return mFixedAssetManager.presentValue();
-    }
-
-    protected final void printAllFixedAssets() {
-        mFixedAssetManager.printAll();
     }
 
 }

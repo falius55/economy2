@@ -13,9 +13,10 @@ public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implemen
      */
     @Override
     public AbstractAccount<T> merge(Account<T> another) {
-        if (!(another instanceof AbstractAccount)) throw new IllegalArgumentException();
-        for (T item : items())
+        if (!(another instanceof AbstractAccount)) { throw new IllegalArgumentException(); }
+        for (T item : items()) {
             increase(item, another.get(item));
+        }
         return this;
     }
     // 特定科目の金額を単純に増加する

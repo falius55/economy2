@@ -1,10 +1,10 @@
 package jp.gr.java_conf.falius.economy2.account;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -12,7 +12,7 @@ final class FixedAssetManager {
     private final Set<FixedAsset> mFixedAssets; // TODO:建物は科目が別なので、別に保持する
 
     FixedAssetManager() {
-        mFixedAssets = new HashSet<FixedAsset>();
+        mFixedAssets = new TreeSet<FixedAsset>();
     }
 
     /**
@@ -46,17 +46,25 @@ final class FixedAssetManager {
     }
 
     void printAll() {
-        mFixedAssets.stream().sorted((a1, a2) -> a1.dateOfAcquisition().compareTo(a2.mDateOfAcquisition)) // 取得日でソート
-                .map(FixedAsset::print) // 最終計上日でマップされる
-                .collect(Collectors.maxBy((d1, d2) -> d1.compareTo(d2))).get();
+        for (FixedAsset asset : mFixedAssets) { asset.print(); }
+    }
+
+    int depreciatedBalance() {
+        return mFixedAssets.stream()
+                .collect(Collectors.summingInt(FixedAsset::depreciatedBalance));
+    }
+
+    int unDepreciatedBalance() {
+        return mFixedAssets.stream()
+                .collect(Collectors.summingInt(FixedAsset::unDepreciatedBalance));
     }
 
     /**
      * 固定資産の減価償却の計算を行うクラス
      * 土地は減価償却しないので土地以外
      */
-    private static class FixedAsset {
-        private static final int RESIDUAL_PERCENT = 10; // 取得原価に対する残存価額の割合(%)
+    static class FixedAsset implements Comparable<FixedAsset> {
+        static final int RESIDUAL_PERCENT = 10; // 取得原価に対する残存価額の割合(%)
         private final LocalDate mDateOfAcquisition; // 取得日
         private final int mAcquisitionCost; // 取得原価
         private final int mServiceLife; // 耐用年数
@@ -67,9 +75,9 @@ final class FixedAssetManager {
         private final SortedMap<LocalDate, Integer> mRecordMap; // 償却日から未償却額へのマップ
 
         /**
-         * @param mDateOfAcquisition 取得日
-         * @param mAcquisitionCost 取得原価
-         * @param mServiceLife 耐用年数
+         * @param dateOfAcquisition 取得日
+         * @param acquisitionCost 取得原価
+         * @param serviceLife 耐用年数
          */
         private FixedAsset(LocalDate dateOfAcquisition, int acquisitionCost, int serviceLife) {
             mDateOfAcquisition = dateOfAcquisition;
@@ -80,7 +88,7 @@ final class FixedAssetManager {
             mFixedAmountOfMonths = (int) Math.ceil((double) (acquisitionCost - mResidualValue) / (serviceLife * 12));
             mUndepreciatedBalance = acquisitionCost - mResidualValue;
 
-            mRecordMap = new TreeMap<LocalDate, Integer>(); // 償却日でソートされる
+            mRecordMap = new TreeMap<LocalDate, Integer>(); //  償却日から残存額へのマップ 償却日でソートされる
         }
 
         /**
@@ -91,18 +99,36 @@ final class FixedAssetManager {
         }
 
         /**
+         * この固定資産の償却額を返します。
+         * @return
+         */
+        private int depreciatedBalance() {
+            // 取得原価　ー　未償却額　ー　残存価額
+            return mAcquisitionCost - mUndepreciatedBalance - mResidualValue;
+        }
+
+        /**
+         * この固定資産の未償却額を返します。
+         * @return
+         */
+        private int unDepreciatedBalance() {
+            return mUndepreciatedBalance;
+        }
+
+        /**
          * その日が計上日であるかを返します(毎月。営業日無視)
          */
         private boolean isRecordedDate(LocalDate date) {
+            if (date.isBefore(mDateOfAcquisition)) { return false; }  // 取得日より前
             // TODO: 営業日を考慮する
             // 償却が終わっている
-            if (date.isAfter(mLastRecordedDate) || mRecordMap.containsKey(date))
-                return false;
+            if (date.isAfter(mLastRecordedDate) || mRecordMap.containsKey(date)) { return false; }
             // 対応する日がない
-            if (date.lengthOfMonth() < mDateOfAcquisition.getDayOfMonth())
-                return date.getDayOfMonth() == date.lengthOfMonth();
+            if (date.lengthOfMonth() < mDateOfAcquisition.getDayOfMonth()) {
+                return date.getDayOfMonth() == date.lengthOfMonth();  // その日が月末かどうか
+            }
             // 対応する日がある
-            return date.getDayOfMonth() == mDateOfAcquisition.getDayOfMonth();
+            return date.getDayOfMonth() == mDateOfAcquisition.getDayOfMonth();  // その日が取得日と同じかどうか
         }
 
         /**
@@ -113,8 +139,7 @@ final class FixedAssetManager {
         private int record(LocalDate date) {
             if (!isRecordedDate(date)) { return 0; }
             if (mUndepreciatedBalance <= 0) { return 0; }
-            int amount = mFixedAmountOfMonths;
-            amount = mUndepreciatedBalance < amount ? mUndepreciatedBalance : amount;
+            int amount = mUndepreciatedBalance < mFixedAmountOfMonths ? mUndepreciatedBalance : mFixedAmountOfMonths;
             mUndepreciatedBalance -= amount;
             mRecordMap.put(date, mUndepreciatedBalance); // 記録
             return amount;
@@ -128,7 +153,7 @@ final class FixedAssetManager {
          * 状態を表形式で表示します
          * @return 最終計上日
          */
-        LocalDate print() {
+        void print() {
             System.out.printf("get:%s, all-amount:%d円, per-amount:%d, life:%d年%n", mDateOfAcquisition, mAcquisitionCost,
                     mFixedAmountOfMonths, mServiceLife);
 
@@ -139,11 +164,11 @@ final class FixedAssetManager {
                     System.out.printf("%s　%d円%n", depreciateDate, undepreciatedAmount);
                 }
             });
+        }
 
-            System.out.printf("最終償却日の合致:%b%n",
-                    mRecordMap.lastKey().equals(mLastRecordedDate));
-
-            return mRecordMap.lastKey();
+        @Override
+        public int compareTo(FixedAsset another) {
+            return this.dateOfAcquisition().compareTo(another.dateOfAcquisition());
         }
     }
 
