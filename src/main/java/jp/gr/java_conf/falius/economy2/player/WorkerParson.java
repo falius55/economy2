@@ -27,7 +27,11 @@ public class WorkerParson extends AbstractEntity implements Worker {
 
     @Override
     public boolean seekJob() {
-        Optional<Organization> opt = PrivateBusiness.stream().map(pb -> (Organization) pb).filter(pb -> pb.isRecruit()).findAny();
+        Optional<Organization> opt = PrivateBusiness.stream()
+                .map(pb -> (Organization) pb)
+                .filter(pb -> !mJob.equals(Optional.of(pb)) && pb.isRecruit())
+                .findAny();
+
         if (opt.isPresent()) {
             retireJob();
             mJob = opt;

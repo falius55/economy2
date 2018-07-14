@@ -26,6 +26,14 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
     private final PrivateBusinessAccount mAccount = PrivateBusinessAccount.newInstance();
 
+    public static Stream<PrivateBusiness> stream() {
+        return sOwns.stream();
+    }
+
+    public static void clear() {
+        sOwns.clear();
+    }
+
     public PrivateBusiness(Industry industry, Set<Product> products) {
         mIndustry = industry;
         mProducts = products;
@@ -109,10 +117,6 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
      */
     PrivateBusinessAccountTitle saleAccount() {
         return PrivateBusinessAccountTitle.CHECKING_ACCOUNTS;
-    }
-
-    public static Stream<PrivateBusiness> stream() {
-        return sOwns.stream();
     }
 
     @Override

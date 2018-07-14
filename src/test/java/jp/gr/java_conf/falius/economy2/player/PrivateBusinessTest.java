@@ -3,6 +3,7 @@ package jp.gr.java_conf.falius.economy2.player;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+import org.junit.After;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
@@ -29,6 +30,11 @@ public class PrivateBusinessTest {
 
         worker.seekJob();
         assertThat(PrivateBusiness.stream().anyMatch(pb -> pb.has(worker)), is(true));
+    }
+
+    @After
+    public void clearBusiness() {
+        PrivateBusiness.clear();
     }
 
 }
