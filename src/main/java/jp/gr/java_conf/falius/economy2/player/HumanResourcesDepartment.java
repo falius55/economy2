@@ -7,36 +7,50 @@ import java.util.Map;
 import java.util.Set;
 
 public class HumanResourcesDepartment {
-    private Set<Parson> employers; // 社員のリスト
-    private Map<LocalDate, Set<Parson>> workingRecord; // 出勤記録
+    private final Set<Worker> mEmployers; // 社員のリスト
+    private final Map<LocalDate, Set<Worker>> mWorkingRecord; // 出勤記録
+    private final int mCapacity;
 
-    public HumanResourcesDepartment() {
-        employers = new HashSet<Parson>();
-        workingRecord = new HashMap<LocalDate, Set<Parson>>();
+    public HumanResourcesDepartment(int capacity) {
+        mEmployers = new HashSet<Worker>();
+        mWorkingRecord = new HashMap<LocalDate, Set<Worker>>();
+        mCapacity = capacity;
     }
 
     /**
      * 職員として採用します
      */
-    public HumanResourcesDepartment employ(Parson parson) {
-        employers.add(parson);
+    public HumanResourcesDepartment employ(Worker parson) {
+        mEmployers.add(parson);
         return this;
     }
     /**
      * 職員を解雇します
      */
-    public HumanResourcesDepartment fire(Parson parson) {
-        employers.remove(parson);
+    public HumanResourcesDepartment fire(Worker parson) {
+        mEmployers.remove(parson);
         return this;
     }
 
     /**
      * 勤務記録をつけます
      */
-    public HumanResourcesDepartment add(LocalDate date, Parson parson) {
-        if (!workingRecord.containsKey(date)) workingRecord.put(date, new HashSet<Parson>());
+    public HumanResourcesDepartment add(LocalDate date, Worker parson) {
+        if (!mWorkingRecord.containsKey(date)) mWorkingRecord.put(date, new HashSet<Worker>());
 
-        workingRecord.get(date).add(parson);
+        mWorkingRecord.get(date).add(parson);
         return this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean isRecruit() {
+     return mEmployers.size() < mCapacity;
+    }
+
+    public boolean has(Worker worker) {
+        return mEmployers.contains(worker);
     }
 }

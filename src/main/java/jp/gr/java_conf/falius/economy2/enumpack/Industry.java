@@ -14,12 +14,31 @@ import jp.gr.java_conf.falius.economy2.stockmanager.Factory;
 import jp.gr.java_conf.falius.economy2.stockmanager.Repository;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
+/**
+ * 業種
+ */
 public enum Industry {
- // このコンストラクタ実行時点でProductが初期化されているとは限らない
-    LIBLIO("書店", Type.RETAIL) { public Set<Product> products() { return EnumSet.of(Product.NOVEL); } },
-    REALTOR("不動産屋", Type.BIGMOUTHED_RETAIL) { public Set<Product> products() { return EnumSet.of(Product.LAND, Product.BUILDINGS); } },
-    FARMER("農家", Type.FIRST) { public Set<Product> products() { return EnumSet.of(Product.RICE); } },
-    SUPER_MARKET("スーパー", Type.RETAIL) { public Set<Product> products() { return EnumSet.of(Product.NOVEL, Product.RICE_BALL); } };
+    // このコンストラクタ実行時点でProductが初期化されているとは限らない
+    LIBLIO("書店", Type.RETAIL) {
+        public Set<Product> products() {
+            return EnumSet.of(Product.NOVEL);
+        }
+    },
+    REALTOR("不動産屋", Type.BIGMOUTHED_RETAIL) {
+        public Set<Product> products() {
+            return EnumSet.of(Product.LAND, Product.BUILDINGS);
+        }
+    },
+    FARMER("農家", Type.FIRST) {
+        public Set<Product> products() {
+            return EnumSet.of(Product.RICE);
+        }
+    },
+    SUPER_MARKET("スーパー", Type.RETAIL) {
+        public Set<Product> products() {
+            return EnumSet.of(Product.NOVEL, Product.RICE_BALL);
+        }
+    };
 
     private final String name; // 日本語名
     private final Type type;
@@ -37,6 +56,7 @@ public enum Industry {
         this.name = name;
         this.type = type;
     }
+
     /**
      * 日本語名から対象のenumインスタンスを取得します
      * @param name 日本語名
@@ -45,26 +65,35 @@ public enum Industry {
     public static Industry fromString(String name) {
         return stringToEnum.get(name);
     }
+
     /**
      * @return 日本語名
      */
-    @Override public String toString() { return name; }
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public Type type() {
         return type;
     }
+
     /**
      * 取扱商品の集合を返します
      */
     abstract public Set<Product> products();
+
     /**
      * 商品取り扱いの有無を返します
      */
     public boolean hasProduct(Product product) {
         return products().contains(product);
     }
+
     public PrivateBusiness createInstance() {
         return type().createInstance(this, products());
     }
+
     public void print() {
         System.out.printf("%s%n", this);
         System.out.printf("取扱商品:%s%n", products());
@@ -77,25 +106,31 @@ public enum Industry {
      */
     static public Set<Industry> selectSet(Predicate<Industry> filter) {
         return Arrays.stream(values())
-            .filter(filter)
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Industry.class)));
+                .filter(filter)
+                .collect(Collectors.toCollection(() -> EnumSet.noneOf(Industry.class)));
     }
 
     public enum Type {
         RETAIL("小売") {
-            @Override public PrivateBusiness createInstance(Industry industry, Set<Product> products) {
+            @Override
+            public PrivateBusiness createInstance(Industry industry, Set<Product> products) {
                 return new Retail(industry, products);
             }
-            @Override public StockManager newManager(Product product) {
+
+            @Override
+            public StockManager newManager(Product product) {
                 return new Repository(product, DISTRIBUTOR);
             }
-        }, MAKER("メーカー") {
-            @Override public StockManager newManager(Product product) {
+        },
+        MAKER("メーカー") {
+            @Override
+            public StockManager newManager(Product product) {
                 return new Factory(product);
             }
-        }, FIRST("第一次産業"),
-        DISTRIBUTOR("流通業") {
-            @Override public StockManager newManager(Product product) {
+        },
+        FIRST("第一次産業"), DISTRIBUTOR("流通業") {
+            @Override
+            public StockManager newManager(Product product) {
                 return new Repository(product, MAKER);
             }
         },
@@ -110,6 +145,7 @@ public enum Industry {
         public PrivateBusiness createInstance(Industry industry, Set<Product> products) {
             return new PrivateBusiness(industry, products);
         }
+
         public StockManager newManager(Product product) {
             return new Repository(product, MAKER);
         }

@@ -8,17 +8,18 @@ import jp.gr.java_conf.falius.economy2.account.DebtMediator;
 import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
 
 public abstract class AbstractEntity implements Entity {
-    final Account<? extends Enum<?>> mAccount;
     private Bank mainBank;
 
     private List<DebtMediator> mDebtList; // 借金のリスト
     private List<DebtMediator> mClaimList; // 貸金のリスト
 
-    AbstractEntity(Account<? extends Enum<?>> account) {
-        mAccount = account;
+    AbstractEntity() {
         mDebtList = new ArrayList<DebtMediator>();
         mClaimList = new ArrayList<DebtMediator>();
     }
+
+    protected abstract Account<? extends Enum<?>> account();
+
     /**
      * 貯金します
      * 対象はメインバンク
@@ -27,7 +28,7 @@ public abstract class AbstractEntity implements Entity {
      */
     @Override // TODO:中央銀行はさらにオーバーライド
         public Entity saveMoney(int amount) {
-            mAccount.saveMoney(amount);
+            account().saveMoney(amount);
             mainBank.keep(amount);
             return this;
         }
@@ -40,7 +41,7 @@ public abstract class AbstractEntity implements Entity {
      */
     @Override
     public Entity downMoney(int amount) {
-        mAccount.downMoney(amount);
+        account().downMoney(amount);
         mainBank.paidOut(amount);
         return this;
     }
@@ -53,8 +54,8 @@ public abstract class AbstractEntity implements Entity {
      *  subject.acceptDebt(debt);
      *  }
      */
-    public DebtMediator offerDebt(int amount) {
-        DebtMediator debt = new DebtMediator(mAccount, amount);
+    public final DebtMediator offerDebt(int amount) {
+        DebtMediator debt = new DebtMediator(account(), amount);
         mDebtList.add(debt);
         return debt;
     }
@@ -62,25 +63,28 @@ public abstract class AbstractEntity implements Entity {
      * 借金の申し込むを受け入れ、お金を貸します
      * @return 貸した金額
      */
-    public int acceptDebt(DebtMediator debt) {
+    public final int acceptDebt(DebtMediator debt) {
         mClaimList.add(debt);
-        debt.accepted(mAccount, MarketInfomation.INSTANCE.nowDate());
+        debt.accepted(account(), MarketInfomation.INSTANCE.nowDate());
         return debt.amount();
     }
 
     @Override
-    public void payTax(int amount) {
+    public final void payTax(int amount) {
+        account().payTax(amount);
     }
     /**
      * 借金を返済します
      * 中央銀行が実行すると、お金が市場から消えます
      */
-    public void repay(int amount) {
+    public final void repay(int amount) {
+        account().repay(amount);
     }
     /**
      * 返済を受けます
      */
     @Override
-    public void repaid(int amount) {
+    public final void repaid(int amount) {
+        account().repaid(amount);
     }
 }

@@ -16,23 +16,29 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
-public class PrivateBusiness extends AbstractEntity {
-    private static final List<PrivateBusiness> owns = new ArrayList<PrivateBusiness>();
-    private final Set<Product> products;
-    private final Industry industry;
-    private final HumanResourcesDepartment stuffManager = new HumanResourcesDepartment();
-    private final Map<Product, StockManager> stockManagers; // 製品ごとに在庫管理
+public class PrivateBusiness extends AbstractEntity implements Organization {
+    private static final List<PrivateBusiness> sOwns = new ArrayList<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
 
+    private final Set<Product> mProducts;
+    private final Map<Product, StockManager> mStockManagers; // 製品ごとに在庫管理
+    private final Industry mIndustry;
+    private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
+    private final PrivateBusinessAccount mAccount = PrivateBusinessAccount.newInstance();
+
     public PrivateBusiness(Industry industry, Set<Product> products) {
-        super(PrivateBusinessAccount.newInstance());
-        this.industry = industry;
-        this.products = products;
-        stockManagers = products.stream()
+        mIndustry = industry;
+        mProducts = products;
+        mStockManagers = products.stream()
                 .collect(Collectors.toMap(Function.identity(), industry.type()::newManager, (p1, p2) -> p1,
                         () -> new EnumMap<Product, StockManager>(Product.class)));
 
-        owns.add(this);
+        sOwns.add(this);
+    }
+
+    @Override
+    protected final PrivateBusinessAccount account() {
+        return mAccount;
     }
 
     /**
@@ -42,7 +48,7 @@ public class PrivateBusiness extends AbstractEntity {
      */
     public boolean canSale(Product product, int lot) {
         // 製品を取り扱っており、在庫があればtrue
-        return products.contains(product) && stockManagers.get(product).canShipOut(lot);
+        return mProducts.contains(product) && mStockManagers.get(product).canShipOut(lot);
     }
 
     public boolean canSale(String product, int lot) {
@@ -56,7 +62,7 @@ public class PrivateBusiness extends AbstractEntity {
     public OptionalInt sale(String strProduct, int requireLot) {
         Product product = Product.fromString(strProduct);
         // 倉庫、工場から製品を持ってくる
-        OptionalInt cost = stockManagers.get(product).shipOut(requireLot);
+        OptionalInt cost = mStockManagers.get(product).shipOut(requireLot);
         if (!cost.isPresent())
             return OptionalInt.empty();
 
@@ -64,7 +70,7 @@ public class PrivateBusiness extends AbstractEntity {
         int price = (int) (cost.getAsInt() * MARGIN);
 
         // 帳簿に記帳する
-        mAccount.<PrivateBusinessAccountTitle> saleBy(saleAccount(), price);
+        mAccount.saleBy(saleAccount(), price);
         return OptionalInt.of(price);
     }
 
@@ -87,14 +93,14 @@ public class PrivateBusiness extends AbstractEntity {
      * 業種が同じかどうかを判定します
      */
     public boolean is(Industry industry) {
-        return industry == this.industry;
+        return industry == mIndustry;
     }
 
     /**
      * 業態が同じかどうかを判定します
      */
     public boolean is(Industry.Type type) {
-        return type == industry.type();
+        return type == mIndustry.type();
     }
 
     /**
@@ -106,7 +112,35 @@ public class PrivateBusiness extends AbstractEntity {
     }
 
     public static Stream<PrivateBusiness> stream() {
-        return owns.stream();
+        return sOwns.stream();
+    }
+
+    @Override
+    public boolean isRecruit() {
+        return mStuffManager.isRecruit();
+    }
+
+    @Override
+    public Organization employ(Worker worker) {
+        mStuffManager.employ(worker);
+        return this;
+    }
+
+    @Override
+    public Organization fire(Worker worker) {
+        mStuffManager.fire(worker);
+        return this;
+    }
+
+    @Override
+    public int paySalary(Worker worker) {
+        // TODO 自動生成されたメソッド・スタブ
+        return 0;
+    }
+
+    @Override
+    public boolean has(Worker worker) {
+        return mStuffManager.has(worker);
     }
 
 }
