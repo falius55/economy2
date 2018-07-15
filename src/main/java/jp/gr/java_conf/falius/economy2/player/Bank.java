@@ -10,11 +10,11 @@ public interface Bank extends Organization {
     /**
      * お金を預かる
      */
-    void keep(int money);
+    public void keep(int money);
 
     /**
      * お金を払い出す
      */
-    void paidOut(int money);
+    public void paidOut(int money);
 
 }

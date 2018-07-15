@@ -30,6 +30,10 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
         return sOwns.stream();
     }
 
+    public static Stream<PrivateBusiness> stream(Industry.Type type) {
+        return sOwns.stream().filter(pb -> pb.mIndustry.type() == type);
+    }
+
     public static void clear() {
         sOwns.clear();
     }
@@ -54,47 +58,24 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
      * @param product 製品
      * @param lot 必要となるロット数
      */
-    public boolean canSale(Product product, int lot) {
+    public boolean canSale(Product product, int require) {
         // 製品を取り扱っており、在庫があればtrue
-        return mProducts.contains(product) && mStockManagers.get(product).canShipOut(lot);
-    }
-
-    public boolean canSale(String product, int lot) {
-        return canSale(Product.fromString(product), lot);
+        return mProducts.contains(product) && mStockManagers.get(product).canShipOut(require);
     }
 
     /**
      * 指定された製品を指定されたロット分売ります
      * @return 売値。販売できなければ空のOptionalInt
      */
-    public OptionalInt sale(String strProduct, int requireLot) {
-        Product product = Product.fromString(strProduct);
+    public OptionalInt sale(Product product, int require) {
         // 倉庫、工場から製品を持ってくる
-        OptionalInt cost = mStockManagers.get(product).shipOut(requireLot);
-        if (!cost.isPresent())
-            return OptionalInt.empty();
+        OptionalInt cost = mStockManagers.get(product).shipOut(require);
+        if (!cost.isPresent()) { return OptionalInt.empty(); }
 
-        // 原価にマージンを上乗せして売値を決める
-        int price = (int) (cost.getAsInt() * MARGIN);
-
-        // 帳簿に記帳する
+        int price = (int) (cost.getAsInt() * (1 + MARGIN)); // 原価にマージンを上乗せして売値を決める
         mAccount.saleBy(saleAccount(), price);
+
         return OptionalInt.of(price);
-    }
-
-    /**
-     * @return 売値
-     */
-    public OptionalInt sale(String strProduct) {
-        return sale(strProduct, 1);
-    }
-
-    public OptionalInt sale(Product product) {
-        return sale(product.toString());
-    }
-
-    public OptionalInt sale(Product product, int requireLot) {
-        return sale(product.toString(), requireLot);
     }
 
     /**
@@ -145,6 +126,11 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
     @Override
     public boolean has(Worker worker) {
         return mStuffManager.has(worker);
+    }
+
+    @Override
+    protected Bank searchBank() {
+        return PrivateBank.stream().findAny().get();
     }
 
 }

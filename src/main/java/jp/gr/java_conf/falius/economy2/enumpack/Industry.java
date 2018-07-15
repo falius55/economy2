@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.Retail;
 import jp.gr.java_conf.falius.economy2.stockmanager.Factory;
+import jp.gr.java_conf.falius.economy2.stockmanager.Farm;
 import jp.gr.java_conf.falius.economy2.stockmanager.Repository;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
@@ -37,6 +38,11 @@ public enum Industry {
     SUPER_MARKET("スーパー", Type.RETAIL) {
         public Set<Product> products() {
             return EnumSet.of(Product.NOVEL, Product.RICE_BALL);
+        }
+    },
+    RICE_BALL_MAKER("おにぎりメーカー", Type.MAKER) {
+        public Set<Product> products() {
+            return EnumSet.of(Product.RICE_BALL);
         }
     };
 
@@ -110,8 +116,13 @@ public enum Industry {
                 .collect(Collectors.toCollection(() -> EnumSet.noneOf(Industry.class)));
     }
 
+    /**
+     * 流通経路は、第一次産業 -> メーカー -> 小売り
+     * @author "ymiyauchi"
+     *
+     */
     public enum Type {
-        RETAIL("小売") {
+        /** 小売り */ RETAIL("小売") {
             @Override
             public PrivateBusiness createInstance(Industry industry, Set<Product> products) {
                 return new Retail(industry, products);
@@ -119,22 +130,28 @@ public enum Industry {
 
             @Override
             public StockManager newManager(Product product) {
-                return new Repository(product, DISTRIBUTOR);
+                return new Repository(product, MAKER);
             }
         },
-        MAKER("メーカー") {
+        /** メーカー */ MAKER("メーカー") {
             @Override
             public StockManager newManager(Product product) {
                 return new Factory(product);
             }
         },
-        FIRST("第一次産業"), DISTRIBUTOR("流通業") {
+        /** 第一次産業 */ FIRST("第一次産業") {
+            @Override
+            public StockManager newManager(Product product) {
+                return new Farm(product);
+            }
+        },
+        /** 流通業 */ DISTRIBUTOR("流通業") {
             @Override
             public StockManager newManager(Product product) {
                 return new Repository(product, MAKER);
             }
         },
-        BIGMOUTHED_RETAIL("大口小売");
+        /** 大口小売り */ BIGMOUTHED_RETAIL("大口小売");
 
         private final String name;
 

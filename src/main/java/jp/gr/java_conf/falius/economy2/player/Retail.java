@@ -10,6 +10,7 @@ public class Retail extends PrivateBusiness {
 
     public Retail(Industry industry, Set<Product> products) {
         super(industry, products);
+        System.out.println("new Retail");
     }
 
     PrivateBusinessAccountTitle saleAccount() {

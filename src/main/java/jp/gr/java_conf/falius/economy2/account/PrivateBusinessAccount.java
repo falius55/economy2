@@ -2,7 +2,6 @@ package jp.gr.java_conf.falius.economy2.account;
 
 import java.time.LocalDate;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 
 public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle> {
@@ -33,9 +32,8 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
      * receiveItemにPrivateBusinessAccountTitle以外を渡すと内部でキャストに失敗して例外が発生しますので注意してください
      * @param receiveItem 受取科目
      */
-    @Override
-    public PrivateBusinessAccount saleBy(AccountTitle receiveItem, int mount) {
-        addLeft((PrivateBusinessAccountTitle)receiveItem, mount);
+    public PrivateBusinessAccount saleBy(PrivateBusinessAccountTitle receiveItem, int mount) {
+        addLeft(receiveItem, mount);
         addRight(PrivateBusinessAccountTitle.SALES, mount);
         return this;
     }

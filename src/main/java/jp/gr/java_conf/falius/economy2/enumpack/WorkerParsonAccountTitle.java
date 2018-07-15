@@ -1,5 +1,9 @@
 package jp.gr.java_conf.falius.economy2.enumpack;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
+
 public enum WorkerParsonAccountTitle implements AccountTitle {
     /** 食費 */ FOOD_EXPENSE(AccountType.EXPENSE),
     /** 雑費(費用) */ MISCELLANEOUS_EXPENSE(AccountType.EXPENSE),
@@ -25,18 +29,36 @@ public enum WorkerParsonAccountTitle implements AccountTitle {
 
     /** 開始残高(資本) */ OPENING_BALANCE(AccountType.EQUITY);
 
-    private final AccountType type;
-    private static final WorkerParsonAccountTitle defaultItem = CASH;
+    private final AccountType mType;
+    private static final WorkerParsonAccountTitle sDefaultItem = CASH;
+    private static final Map<Product, WorkerParsonAccountTitle> sProductToTitle;
+
+    static {
+        sProductToTitle = new EnumMap<Product, WorkerParsonAccountTitle>(Product.class) {
+            {
+                put(Product.RICE_BALL, FOOD_EXPENSE);
+            }
+        };
+    }
 
     WorkerParsonAccountTitle(AccountType type) {
-        this.type = type;
+        mType = type;
     }
 
     public AccountType type() {
-        return this.type;
+        return mType;
     }
     public static WorkerParsonAccountTitle defaultItem() {
-        return defaultItem;
+        return sDefaultItem;
+    }
+
+    /**
+     * 製品を購入した際に利用する費用・資産科目を返します。
+     * @param product
+     * @return 労働者が購入するような製品でない場合は空のOptional
+     */
+    public static Optional<WorkerParsonAccountTitle> titleFrom(Product product) {
+        return Optional.ofNullable(sProductToTitle.get(product));
     }
 
 }

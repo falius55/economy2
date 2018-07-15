@@ -4,11 +4,17 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 
 public class PrivateBusinessTest {
+
+    @BeforeClass
+    public static void first() {
+        Bank bank = new PrivateBank();
+    }
 
     @Test
     public void employerTest() {

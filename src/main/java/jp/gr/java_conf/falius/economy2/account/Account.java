@@ -58,10 +58,6 @@ public interface Account<T extends Enum<T> & AccountTitle> {
      */
     public Account<T> repaid(int amount);
 
-    default public <E extends AccountTitle> Account<T> saleBy(E item, int amount) {
-        throw new UnsupportedOperationException();
-    }
-
     /**
      * 納税処理を行います
      * 公的機関ではサポートされません

@@ -58,8 +58,8 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
 
     @Override
     public Account<WorkerParsonAccountTitle> downMoney(int amount) {
-        super.decrease(WorkerParsonAccountTitle.CASH, amount);
-        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
+        super.increase(WorkerParsonAccountTitle.CASH, amount);
+        super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
         return this;
     }
 

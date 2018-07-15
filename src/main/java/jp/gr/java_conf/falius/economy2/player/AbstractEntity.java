@@ -16,9 +16,13 @@ public abstract class AbstractEntity implements Entity {
     AbstractEntity() {
         mDebtList = new ArrayList<DebtMediator>();
         mClaimList = new ArrayList<DebtMediator>();
+
+        mainBank = searchBank();
     }
 
     protected abstract Account<? extends Enum<?>> account();
+
+    protected abstract Bank searchBank();
 
     /**
      * 貯金します
