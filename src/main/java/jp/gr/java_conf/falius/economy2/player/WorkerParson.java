@@ -65,45 +65,46 @@ public class WorkerParson extends AbstractEntity implements Worker {
     }
 
     @Override
-    public void buy(Product product, int require) {
+    public OptionalInt buy(Product product, int require) {
         Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
-        if (!optTitle.isPresent()) { return; }  // 労働者が買うような代物じゃない
+        if (!optTitle.isPresent()) { return OptionalInt.empty(); }  // 労働者が買うような代物じゃない
         WorkerParsonAccountTitle title = optTitle.get();
 
         Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.RETAIL)
                 .filter(pb -> pb.canSale(product, require)).findAny();
         if (!optStore.isPresent()) {
-            return;
+            return OptionalInt.empty();
         }
         PrivateBusiness store = optStore.get();
 
-        OptionalInt optPrice = store.sale(product, require);
+        OptionalInt optPrice = store.saleByCash(product, require);
         if (!optPrice.isPresent()) {
-            return;
+            return OptionalInt.empty();
         }
         int price = optPrice.getAsInt();
 
         final int cash = mAccount.get(WorkerParsonAccountTitle.CASH);
         if (cash >= price) {
             mAccount.add(title, price);
-            return;
+            return optPrice;
         }
 
         final int deposit = mAccount.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
         if (cash + deposit >= price) {
             downMoney(price - cash);
             mAccount.add(title, price);
-            return;
+            return optPrice;
         }
 
         downMoney(deposit);
         borrow(price - (cash + deposit));
         mAccount.add(title, price);
+        return optPrice;
     }
 
     @Override
-    public void buy(Product product) {
-        buy(product, 1);
+    public OptionalInt buy(Product product) {
+        return buy(product, 1);
     }
 
     @Override

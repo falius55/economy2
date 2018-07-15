@@ -28,8 +28,19 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
      */
 
     /**
+     * 創業処理
+     * @param initialExpenses 創業費
+     * @return
+     */
+    public PrivateBusinessAccount establish(int initialExpenses) {
+        addLeft(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, initialExpenses);
+        addRight(PrivateBusinessAccountTitle.CAPITAL_STOCK, initialExpenses);
+        return this;
+    }
+
+
+    /**
      * 売り上げます
-     * receiveItemにPrivateBusinessAccountTitle以外を渡すと内部でキャストに失敗して例外が発生しますので注意してください
      * @param receiveItem 受取科目
      */
     public PrivateBusinessAccount saleBy(PrivateBusinessAccountTitle receiveItem, int mount) {
@@ -37,18 +48,21 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.SALES, mount);
         return this;
     }
+
     // 現金受け取り
     public PrivateBusinessAccount saleByCash(int mount) {
         addLeft(PrivateBusinessAccountTitle.CASH, mount);
         addRight(PrivateBusinessAccountTitle.SALES, mount);
         return this;
     }
+
     // 売掛金
     public PrivateBusinessAccount saleByReceivable(int mount) {
         addLeft(PrivateBusinessAccountTitle.RECEIVABLE, mount);
         addRight(PrivateBusinessAccountTitle.SALES, mount);
         return this;
     }
+
     /**
      * 仕入れる(買掛金)
      */
@@ -57,6 +71,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.PAYABLE, amount);
         return this;
     }
+
     /**
      * 固定資産の購入
      * @param date 購入日
@@ -70,6 +85,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS,amount);
         return this;
     }
+
     /**
      * 間接法で減価償却する
      * @param date 減価償却日。この日が減価償却日である固定資産が減価償却される
@@ -80,6 +96,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.ACCUMULATED_DEPRECIATION, amount);
         return this;
     }
+
     /**
      * 直接法で減価償却する
      */
@@ -89,6 +106,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.TANGIBLE_ASSETS, amount);
         return this;
     }
+
     /**
      * 土地の購入
      */
@@ -107,6 +125,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.CASH, amount);
         return this;
     }
+
     /**
      * お金を下ろした時の処理を行う
      */
@@ -116,6 +135,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
+
     /**
      * 借金処理
      */
@@ -125,6 +145,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.LOANS_PAYABLE, amount);
         return this;
     }
+
     /**
      * 返済処理を行う
      */
@@ -144,6 +165,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
+
     /**
      * 返済を受けた時の処理を行う
      */
@@ -156,6 +178,12 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
 
     @Override
     public PrivateBusinessAccount payTax(int amount) {
+        return this;
+    }
+
+    public PrivateBusinessAccount purchase(int amount) {
+        addLeft(PrivateBusinessAccountTitle.PURCHESES, amount);
+        addRight(PrivateBusinessAccountTitle.PAYABLE, amount);
         return this;
     }
 }

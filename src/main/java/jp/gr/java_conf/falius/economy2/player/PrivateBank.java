@@ -17,6 +17,10 @@ public class PrivateBank extends AbstractEntity implements Bank {
         return sOwns.stream();
     }
 
+    public static void clear() {
+        sOwns.clear();
+    }
+
     public PrivateBank() {
         sOwns.add(this);
     }

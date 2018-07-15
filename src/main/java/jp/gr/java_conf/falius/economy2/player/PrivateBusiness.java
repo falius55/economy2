@@ -38,12 +38,13 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
         sOwns.clear();
     }
 
-    public PrivateBusiness(Industry industry, Set<Product> products) {
+    public PrivateBusiness(Industry industry, Set<Product> products, int initialExpenses) {
         mIndustry = industry;
         mProducts = products;
         mStockManagers = products.stream()
                 .collect(Collectors.toMap(Function.identity(), industry.type()::newManager, (p1, p2) -> p1,
                         () -> new EnumMap<Product, StockManager>(Product.class)));
+        mAccount.establish(initialExpenses);
 
         sOwns.add(this);
     }
@@ -64,18 +65,50 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
     }
 
     /**
-     * 指定された製品を指定されたロット分売ります
+     * 指定された製品を指定された数量分売ります
      * @return 売値。販売できなければ空のOptionalInt
      */
-    public OptionalInt sale(Product product, int require) {
-        // 倉庫、工場から製品を持ってくる
-        OptionalInt cost = mStockManagers.get(product).shipOut(require);
-        if (!cost.isPresent()) { return OptionalInt.empty(); }
+    public OptionalInt saleByCash(Product product, int require) {
+        return saleBy(PrivateBusinessAccountTitle.CASH, product, require);
+    }
 
-        int price = (int) (cost.getAsInt() * (1 + MARGIN)); // 原価にマージンを上乗せして売値を決める
-        mAccount.saleBy(saleAccount(), price);
+    public OptionalInt saleByReceivable(Product product, int require) {
+        return saleBy(PrivateBusinessAccountTitle.RECEIVABLE, product, require);
+    }
+
+    private OptionalInt saleBy(PrivateBusinessAccountTitle title, Product product, int require) {
+        // 倉庫、工場から製品を持ってくる
+        OptionalInt optCost = mStockManagers.get(product).shipOut(require);
+        if (!optCost.isPresent()) {
+            return OptionalInt.empty();
+        }
+        int cost = optCost.getAsInt();
+
+        int price = (int) (cost * (1 + MARGIN)); // 原価にマージンを上乗せして売値を決める
+        switch (title) {
+        case CASH:
+            mAccount.saleByCash(price);
+            break;
+        case RECEIVABLE:
+            mAccount.saleByReceivable(price);
+            break;
+        default:
+            throw new IllegalArgumentException();  // no reach
+        }
 
         return OptionalInt.of(price);
+    }
+
+    /**
+     * 未計上の仕入費を計上します。
+     */
+    public void calcPurchase() {
+        int purchase = mStockManagers.entrySet().stream()
+                .map(e -> e.getValue())
+                .mapToInt(sm -> sm.calcPurchaseExpense())
+                .sum();
+
+        mAccount.purchase(purchase);
     }
 
     /**

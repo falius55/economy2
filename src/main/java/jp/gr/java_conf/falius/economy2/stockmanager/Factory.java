@@ -90,11 +90,17 @@ public class Factory implements StockManager {
      * @return 仕入に要した費用
      */
     @Override
-    public int computePurchaseExpense() {
+    public int calcPurchaseExpense() {
         update();
         int ret = mPurchaseExpense;
         mPurchaseExpense = 0;
         return ret;
+    }
+
+    @Override
+    public int calcMerchandiseCost() {
+        update();
+        return mTotalCost;
     }
 
     /**
@@ -164,7 +170,7 @@ public class Factory implements StockManager {
      */
     private OptionalInt purchase(Product product, int require) {
         // 特定の原材料を指定された分の補充
-        Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.FIRST)
+        Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.FARMER)
                 .filter(e -> e.canSale(product, require))
                 .findAny();
         if (!optStore.isPresent()) {
@@ -172,7 +178,7 @@ public class Factory implements StockManager {
         }
         PrivateBusiness store = optStore.get();
 
-        OptionalInt optAmount = store.sale(product, require);
+        OptionalInt optAmount = store.saleByReceivable(product, require);
         if (!optAmount.isPresent()) {
             return OptionalInt.empty();
         }

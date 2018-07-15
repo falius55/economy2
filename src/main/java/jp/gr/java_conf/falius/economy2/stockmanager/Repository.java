@@ -71,10 +71,15 @@ public class Repository implements StockManager {
      * @return 仕入に要した費用
      */
     @Override
-    public int computePurchaseExpense() {
+    public int calcPurchaseExpense() {
         int ret = mPurchaseExpense;
         mPurchaseExpense = 0;
         return ret;
+    }
+
+    @Override
+    public int calcMerchandiseCost() {
+       return mTotalCost;
     }
 
     /**
@@ -93,7 +98,7 @@ public class Repository implements StockManager {
         if (!optStore.isPresent()) { return OptionalInt.empty(); }  // 仕入れできる店が見つからない
 
         // 購入する
-        OptionalInt cost = optStore.get().sale(mProduct, sourceRequire);
+        OptionalInt cost = optStore.get().saleByReceivable(mProduct, sourceRequire);
         if (!cost.isPresent()) { return OptionalInt.empty(); }  // 購入できなかった
 
         mStock += sourceRequire;

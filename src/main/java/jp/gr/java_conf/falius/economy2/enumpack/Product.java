@@ -177,10 +177,11 @@ public enum Product {
     public Map<Product, Integer> materials() {
         // ないとは思うが、もしオーバーライドしたcreateMaterialMap()でEnumMap以外を返すようにした場合にもHashMapで対応する
         Map<Product, Integer> materials = Product.sMaterials.get(this);
-        if (materials instanceof EnumMap)
+        if (materials instanceof EnumMap) {
             return new EnumMap<Product, Integer>((EnumMap<Product, Integer>) materials);
-        else
+        } else {
             return new HashMap<Product, Integer>(materials);
+        }
     }
 
     abstract protected Map<Product, Integer> createMaterialMap();

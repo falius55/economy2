@@ -30,7 +30,7 @@ public enum Industry {
             return EnumSet.of(Product.LAND, Product.BUILDINGS);
         }
     },
-    FARMER("農家", Type.FIRST) {
+    FARMER("農家", Type.FARMER) {
         public Set<Product> products() {
             return EnumSet.of(Product.RICE);
         }
@@ -40,36 +40,36 @@ public enum Industry {
             return EnumSet.of(Product.NOVEL, Product.RICE_BALL);
         }
     },
-    RICE_BALL_MAKER("おにぎりメーカー", Type.MAKER) {
+    FOOD_MAKER("飲食メーカー", Type.MAKER) {
         public Set<Product> products() {
             return EnumSet.of(Product.RICE_BALL);
         }
     };
 
-    private final String name; // 日本語名
-    private final Type type;
+    private final String mName; // 日本語名
+    private final Type mType;
 
-    private static final Map<String, Industry> stringToEnum = new HashMap<String, Industry>(); // 日本語名から業種enumへのマップ
+    private static final Map<String, Industry> sStringToEnum = new HashMap<String, Industry>(); // 日本語名から業種enumへのマップ
     static {
         for (Industry industry : values())
-            stringToEnum.put(industry.toString(), industry);
+            sStringToEnum.put(industry.toString(), industry);
     }
 
     /**
-     * @param name 日本語名
+     * @param mName 日本語名
      */
     Industry(String name, Type type) {
-        this.name = name;
-        this.type = type;
+        mName = name;
+        mType = type;
     }
 
     /**
      * 日本語名から対象のenumインスタンスを取得します
-     * @param name 日本語名
+     * @param mName 日本語名
      * @return 対象のenum
      */
     public static Industry fromString(String name) {
-        return stringToEnum.get(name);
+        return sStringToEnum.get(name);
     }
 
     /**
@@ -77,11 +77,11 @@ public enum Industry {
      */
     @Override
     public String toString() {
-        return name;
+        return mName;
     }
 
     public Type type() {
-        return type;
+        return mType;
     }
 
     /**
@@ -96,8 +96,8 @@ public enum Industry {
         return products().contains(product);
     }
 
-    public PrivateBusiness createInstance() {
-        return type().createInstance(this, products());
+    public PrivateBusiness createInstance(int initialExpenses) {
+        return type().createInstance(this, products(), initialExpenses);
     }
 
     public void print() {
@@ -124,8 +124,8 @@ public enum Industry {
     public enum Type {
         /** 小売り */ RETAIL("小売") {
             @Override
-            public PrivateBusiness createInstance(Industry industry, Set<Product> products) {
-                return new Retail(industry, products);
+            public PrivateBusiness createInstance(Industry industry, Set<Product> products, int initialExpenses) {
+                return new Retail(industry, products, initialExpenses);
             }
 
             @Override
@@ -139,7 +139,7 @@ public enum Industry {
                 return new Factory(product);
             }
         },
-        /** 第一次産業 */ FIRST("第一次産業") {
+        /** 第一次産業 */ FARMER("第一次産業") {
             @Override
             public StockManager newManager(Product product) {
                 return new Farm(product);
@@ -159,8 +159,8 @@ public enum Industry {
             this.name = name;
         }
 
-        public PrivateBusiness createInstance(Industry industry, Set<Product> products) {
-            return new PrivateBusiness(industry, products);
+        public PrivateBusiness createInstance(Industry industry, Set<Product> products, int initialExpenses) {
+            return new PrivateBusiness(industry, products, initialExpenses);
         }
 
         public StockManager newManager(Product product) {

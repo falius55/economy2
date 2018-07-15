@@ -5,9 +5,11 @@ import static org.hamcrest.Matchers.*;
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,6 +25,11 @@ public class WorkerParsonTest {
         Bank bank = new PrivateBank();
     }
 
+    @AfterClass
+    public static void end() {
+        PrivateBank.clear();
+    }
+
     @After
     public void clearBusiness() {
         PrivateBusiness.clear();
@@ -30,8 +37,8 @@ public class WorkerParsonTest {
 
     @Test
     public void jobTest() {
-        PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products());
-        PrivateBusiness superMarket = new PrivateBusiness(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products());
+        PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products(), 10000);
+        PrivateBusiness superMarket = new PrivateBusiness(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), 10000);
 
         Worker worker = new WorkerParson();
         assertThat(worker.hasJob(), is(false));
@@ -47,7 +54,7 @@ public class WorkerParsonTest {
 
     @Test
     public void jobTest2() {
-        PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products());
+        PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products(), 10000);
 
         Worker worker = new WorkerParson();
         assertThat(worker.hasJob(), is(false));
@@ -63,15 +70,14 @@ public class WorkerParsonTest {
 
     @Test
     public void buyTest() {
-        PrivateBusiness farmar = new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE));
-        System.out.printf("now: %s%n", MarketInfomation.INSTANCE.nowDate());
+        int initialExpenses = 10000;
+        PrivateBusiness farmar = new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
         IntStream.range(0, 380).forEach(n -> MarketInfomation.INSTANCE.nextDay());
-        System.out.printf("now: %s%n", MarketInfomation.INSTANCE.nowDate());
 
-        PrivateBusiness maker = new PrivateBusiness(Industry.RICE_BALL_MAKER, Industry.RICE_BALL_MAKER.products());
+        PrivateBusiness maker = new PrivateBusiness(Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(), initialExpenses);
         IntStream.range(0, 5).forEach(n -> MarketInfomation.INSTANCE.nextDay());
 
-        PrivateBusiness coop = new PrivateBusiness(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products());
+        PrivateBusiness coop = new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
 
         WorkerParson worker = new WorkerParson();
         assertThat(worker.cash(), is(0));
@@ -84,15 +90,18 @@ public class WorkerParsonTest {
 
         Product product = Product.RICE_BALL;
         int require = 3;
-        worker.buy(product, require);
+        OptionalInt optPrice = worker.buy(product, require);
+        int price = optPrice.getAsInt();
+        assertThat(price, is(not(0)));
 
         Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
         WorkerParsonAccountTitle title = optTitle.get();
         int expense = worker.account().get(title);
 
         System.out.println(worker.account().toString());
-        assertThat(expense, is(not(0)));
+        assertThat(expense, is(price));
         assertThat(worker.cash() + worker.deposit(), is(salary - expense));
+        assertThat(worker.deposit(), is(lessThan(salary)));
 
     }
 
