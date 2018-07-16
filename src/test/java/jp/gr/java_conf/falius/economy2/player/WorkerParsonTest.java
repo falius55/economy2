@@ -49,10 +49,10 @@ public class WorkerParsonTest {
         PrivateBusiness farmar = new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
 
-        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(), initialExpenses);
+        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
-        PrivateBusiness coop = new Retail(new WorkerParson(), Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
+        PrivateBusiness coop = new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
 
         WorkerParson worker = new WorkerParson();
         assertThat(worker.cash(), is(0));

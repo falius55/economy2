@@ -133,14 +133,6 @@ public class PrivateBusiness extends AbstractEntity implements Employable {
         return type == mIndustry.type();
     }
 
-    /**
-     * 売り上げた時、通常使用する勘定科目を返します
-     * 当座預金でない場合は継承してオーバーライドしてください
-     */
-    PrivateBusinessAccountTitle saleAccount() {
-        return PrivateBusinessAccountTitle.CHECKING_ACCOUNTS;
-    }
-
     @Override
     public boolean isRecruit() {
         return mStuffManager.isRecruit();

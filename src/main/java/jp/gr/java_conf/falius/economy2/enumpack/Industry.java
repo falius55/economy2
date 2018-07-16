@@ -8,9 +8,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
-import jp.gr.java_conf.falius.economy2.player.Retail;
-import jp.gr.java_conf.falius.economy2.player.Worker;
 import jp.gr.java_conf.falius.economy2.stockmanager.Factory;
 import jp.gr.java_conf.falius.economy2.stockmanager.Farm;
 import jp.gr.java_conf.falius.economy2.stockmanager.Repository;
@@ -97,10 +94,6 @@ public enum Industry {
         return products().contains(product);
     }
 
-    public PrivateBusiness createInstance(Worker founder, int initialExpenses) {
-        return type().createInstance(founder, this, products(), initialExpenses);
-    }
-
     public void print() {
         System.out.printf("%s%n", this);
         System.out.printf("取扱商品:%s%n", products());
@@ -125,12 +118,6 @@ public enum Industry {
     public enum Type {
         /** 小売り */
         RETAIL("小売") {
-            @Override
-            public PrivateBusiness createInstance(Worker founder, Industry industry, Set<Product> products,
-                    int initialExpenses) {
-                return new Retail(founder, industry, products, initialExpenses);
-            }
-
             @Override
             public StockManager newManager(Product product) {
                 return new Repository(product, MAKER);
@@ -164,11 +151,6 @@ public enum Industry {
 
         Type(String name) {
             mName = name;
-        }
-
-        public PrivateBusiness createInstance(Worker founder, Industry industry, Set<Product> products,
-                int initialExpenses) {
-            return new PrivateBusiness(founder, industry, products, initialExpenses);
         }
 
         public StockManager newManager(Product product) {

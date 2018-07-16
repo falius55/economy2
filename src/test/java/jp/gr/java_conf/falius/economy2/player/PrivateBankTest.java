@@ -44,15 +44,14 @@ public class PrivateBankTest {
         WorkerParson worker2 = new WorkerParson();
         WorkerParson worker3 = new WorkerParson();
         PrivateBusiness farmer =
-                new PrivateBusiness(worker1, Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
+                new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses));
         assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses));
-        PrivateBusiness maker = new PrivateBusiness(worker2, Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(),
-                initialExpenses);
+        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 2));
         assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 2));
         PrivateBusiness coop =
-                new Retail(worker3, Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
+                new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 3));
         assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 3));
 
@@ -62,15 +61,11 @@ public class PrivateBankTest {
     public void distributionTest() {
         PrivateBank bank = new PrivateBank();
         int initialExpenses = 100000;
-        WorkerParson worker1 = new WorkerParson();
-        WorkerParson worker2 = new WorkerParson();
-        WorkerParson worker3 = new WorkerParson();
-        PrivateBusiness farmer = new PrivateBusiness(worker1, Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
+        PrivateBusiness farmer = new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
-        PrivateBusiness maker = new PrivateBusiness(worker2, Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(),
-                initialExpenses);
+        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
-        PrivateBusiness coop = new Retail(worker3, Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
+        PrivateBusiness coop = new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
 
         WorkerParson worker = new WorkerParson();
         int salary = 100000;

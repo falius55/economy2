@@ -39,9 +39,9 @@ public class PrivateBusinessTest {
     @Test
     public void employerTest() {
         PrivateBusiness liblio =
-                new PrivateBusiness(new WorkerParson(), Industry.LIBLIO, Industry.LIBLIO.products(), 10000);
+                new PrivateBusiness(new WorkerParson(), Industry.LIBLIO, 10000);
         PrivateBusiness superMarket =
-                new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), 10000);
+                new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, 10000);
 
 
         Worker worker = new WorkerParson();
@@ -72,11 +72,11 @@ public class PrivateBusinessTest {
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness maker =
-                new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(), initialExpenses);
+                new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness coop =
-                new Retail(new WorkerParson(), Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
+                new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
 
         Product product = Product.RICE_BALL;
         int require = 3;
