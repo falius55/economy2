@@ -186,4 +186,26 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.PAYABLE, amount);
         return this;
     }
+
+    /**
+     * 買掛金を精算します。
+     * @return
+     */
+    public int settlePayable() {
+        int amount = get(PrivateBusinessAccountTitle.PAYABLE);
+        addLeft(PrivateBusinessAccountTitle.PAYABLE, amount);
+        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
+        return amount;
+    }
+
+    /**
+     * 売掛金を精算します。
+     * @return
+     */
+    public int settleReceivable() {
+        int amount = get(PrivateBusinessAccountTitle.RECEIVABLE);
+        addLeft(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
+        addRight(PrivateBusinessAccountTitle.RECEIVABLE, amount);
+        return amount;
+    }
 }

@@ -17,4 +17,6 @@ public interface Bank extends Organization {
      */
     public void paidOut(int money);
 
+    public void credited(int amount);
+
 }

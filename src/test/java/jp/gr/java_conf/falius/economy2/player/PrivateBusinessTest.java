@@ -19,10 +19,12 @@ import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
 
 public class PrivateBusinessTest {
+    private static PrivateBank sBank;
 
     @BeforeClass
     public static void first() {
-        Bank bank = new PrivateBank();
+        sBank = new PrivateBank();
+        sBank.keep(1000000);
     }
 
     @AfterClass
@@ -61,6 +63,10 @@ public class PrivateBusinessTest {
 
     @Test
     public void distributionTest() {
+        WorkerParson worker = new WorkerParson();
+        int salary = 100000;
+        worker.getPaied(salary);
+
         int initialExpenses = 100000;
         PrivateBusiness farmer =
                 new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
@@ -73,25 +79,17 @@ public class PrivateBusinessTest {
         PrivateBusiness coop =
                 new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
 
-        WorkerParson worker = new WorkerParson();
-
-        int salary = 100000;
-        worker.getPaied(salary);
-
         Product product = Product.RICE_BALL;
         int require = 3;
         OptionalInt optPrice = worker.buy(product, require);
         int price = optPrice.getAsInt();
         assertThat(price, is(not(0)));
 
-        farmer.calcPurchase();
-        maker.calcPurchase();
-        coop.calcPurchase();
-
+        int countToEndOfMonth = MarketInfomation.INSTANCE.nowDate().lengthOfMonth() - MarketInfomation.INSTANCE.nowDate().getDayOfMonth();
+        IntStream.range(0, countToEndOfMonth + 10).forEach(n -> MarketInfomation.INSTANCE.nextDay());
         System.out.println(farmer.account().toString());
         System.out.println(maker.account().toString());
         System.out.println(coop.account().toString());
-        System.out.println(price);
 
         int farmerSales = farmer.account().get(PrivateBusinessAccountTitle.SALES);
         int makerSales = maker.account().get(PrivateBusinessAccountTitle.SALES);

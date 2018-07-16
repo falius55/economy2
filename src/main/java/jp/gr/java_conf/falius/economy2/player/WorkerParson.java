@@ -35,6 +35,7 @@ public class WorkerParson extends AbstractEntity implements Worker {
     @Override
     public void getPaied(int amount) {
         mAccount.getPaied(amount);
+        super.credited(amount);
     }
 
     @Override
@@ -120,6 +121,12 @@ public class WorkerParson extends AbstractEntity implements Worker {
     @Override
     protected Bank searchBank() {
         return PrivateBank.stream().findAny().get();
+    }
+
+    @Override
+    public void closeEndOfMonth() {
+        // TODO 自動生成されたメソッド・スタブ
+
     }
 
 }

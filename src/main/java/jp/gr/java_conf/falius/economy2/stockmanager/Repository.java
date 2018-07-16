@@ -105,4 +105,10 @@ public class Repository implements StockManager {
         return cost;
     }
 
+    @Override
+    public void update() {
+        // TODO 自動生成されたメソッド・スタブ
+
+    }
+
 }

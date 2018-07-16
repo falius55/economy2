@@ -142,4 +142,14 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     public void paidOut(int money) {
         repay(money);
     }
+
+    /**
+     * 振り込みを受ける
+     * @param amount
+     */
+    public PrivateBankAccount credited(int amount) {
+        addLeft(PrivateBankAccountTitle.CASH, amount);
+        addRight(PrivateBankAccountTitle.DEPOSIT, amount);
+        return this;
+    }
 }

@@ -79,4 +79,15 @@ public class PrivateBank extends AbstractEntity implements Bank {
         return null;
     }
 
+    @Override
+    public void closeEndOfMonth() {
+        // TODO 自動生成されたメソッド・スタブ
+
+    }
+
+    @Override
+    public void credited(int amount) {
+        mAccount.credited(amount);
+    }
+
 }

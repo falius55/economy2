@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jp.gr.java_conf.falius.economy2.account.DebtMediator;
 import jp.gr.java_conf.falius.economy2.account.PrivateBusinessAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
@@ -45,6 +47,7 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
                 .collect(Collectors.toMap(Function.identity(), industry.type()::newManager, (p1, p2) -> p1,
                         () -> new EnumMap<Product, StockManager>(Product.class)));
         mAccount.establish(initialExpenses);
+        super.credited(initialExpenses);
 
         sOwns.add(this);
     }
@@ -93,7 +96,7 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
             mAccount.saleByReceivable(price);
             break;
         default:
-            throw new IllegalArgumentException();  // no reach
+            throw new IllegalArgumentException(); // no reach
         }
 
         return OptionalInt.of(price);
@@ -164,6 +167,39 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
     @Override
     protected Bank searchBank() {
         return PrivateBank.stream().findAny().get();
+    }
+
+    public void borrow(int amount) {
+        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        PrivateBank bank = opt.get();
+        DebtMediator dm = super.offerDebt(amount);
+        bank.acceptDebt(dm);
+        super.credited(amount);
+    }
+
+    public void update() {
+        mStockManagers.entrySet().stream()
+                .map(e -> e.getValue())
+                .forEach(sm -> sm.update());
+    }
+
+    @Override
+    public void closeEndOfMonth() {
+        calcPurchase();
+        int payable = mAccount.settlePayable();
+        super.credited(-payable);
+        int receivable = mAccount.settleReceivable();
+        super.credited(receivable);
+
+        int cash = mAccount.get(PrivateBusinessAccountTitle.CASH);
+        if (cash < 0) {
+            downMoney(-cash);
+        }
+        int deposit = mAccount.get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
+        if (deposit < 0) {
+            borrow(-deposit);
+        }
+
     }
 
 }

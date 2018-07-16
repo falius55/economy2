@@ -23,7 +23,7 @@ public enum Product {
             return ret;
         }
     },
-    WOOD("木材", 600, Type.CONSUMER, 1000 /* g */, Period.ofYears(1), 100000 /* g */) {
+    WOOD("木材", 600, Type.CONSUMER, 1000 /* g */, Period.ofDays(364), 100000 /* g */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
             return ret;
@@ -42,7 +42,7 @@ public enum Product {
             return ret;
         }
     },
-    BUILDINGS("建物", 5000000, Type.FIXED_ASSET, 45 /* 年 */, 1 /* 棟 */, Period.ofYears(1), 1 /* 棟 */) {
+    BUILDINGS("建物", 5000000, Type.FIXED_ASSET, 45 /* 年 */, 1 /* 棟 */, Period.ofDays(364), 1 /* 棟 */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
             ret.put(WOOD, 100000 /* g */);
@@ -59,7 +59,7 @@ public enum Product {
     RICE_BALL("おにぎり", 120, Type.CONSUMER, 1 /* 個 */, Period.ofDays(1), 100 /* 個 */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
-            ret.put(RICE, 200 /* g */);
+            ret.put(RICE, 100 /* g */);
             return ret;
         }
     };
@@ -77,11 +77,13 @@ public enum Product {
             Product.class); // 原材料から必要数量へのマップ
 
     static {
-        for (Product product : values())
+        for (Product product : values()) {
             sStringToEnum.put(product.toString(), product);
+        }
 
-        for (Product product : values())
+        for (Product product : values()) {
             sMaterials.put(product, product.createMaterialMap());
+        }
     }
 
     /**
@@ -100,13 +102,13 @@ public enum Product {
 
     /**
      * 固定資産に利用するコンストラクタ
-     * @param mName 日本語名
-     * @param mPrice 値段(１単位あたり)
-     * @param mType 資産としての種類(消費財、固定資産など)
-     * @param servicelife 耐用年数
-     * @param mNumOfLot １単位あたり数量
-     * @param 製造期間
-     * @param mManufacturePeriod 一度の製造数
+     * @param name 日本語名
+     * @param price 値段(１単位あたり)
+     * @param type 資産としての種類(消費財、固定資産など)
+     * @param serviceLife 耐用年数
+     * @param numOfLot １単位あたり数量
+     * @param manufacturePeriod 製造期間
+     * @param productionVolume 一度の製造数
      * @throws IllegalArgumentException typeが固定資産ではない場合
      */
     Product(String name, int price, Type type, int serviceLife, int numOfLot, Period manufacturePeriod,
@@ -125,7 +127,7 @@ public enum Product {
 
     /**
      * 日本語名から対象のenumインスタンスを取得します
-     * @param mName 日本語名
+     * @param name 日本語名
      * @return 対象のenum
      */
     public static Product fromString(String name) {

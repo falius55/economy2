@@ -15,7 +15,7 @@ public interface Entity {
      * 銀行が実行すると中央銀行に預ける
      * 中央銀行ではサポートされません
      */
-    Entity saveMoney(int amount);
+    public Entity saveMoney(int amount);
 
     /**
      * お金をおろす
@@ -23,7 +23,7 @@ public interface Entity {
      * 銀行が実行すると中央銀行からおろす
      * 中央銀行ではサポートされません
      */
-    Entity downMoney(int amount);
+    public Entity downMoney(int amount);
 
     /**
      * 借金をするため、申し込むために使うDebtMediatorオブジェクトを作成する
@@ -31,26 +31,33 @@ public interface Entity {
      * 銀行から実行された場合は、コールナイトオーバー物で一時的な借受を申し込みます
      * 中央銀行から実行されると、お金を作成して負債として計上します
      */
-    DebtMediator offerDebt(int amount);
+    public DebtMediator offerDebt(int amount);
+
     /**
      * 借金の申し込むを受け入れ、お金を貸す
      * @return 貸した金額
      */
-    int acceptDebt(DebtMediator debt);
+    public int acceptDebt(DebtMediator debt);
 
     /**
      * 借金を返済する
      * 中央銀行が実行すると、お金が市場から消える
      */
-    void repay(int amount);
+    public void repay(int amount);
+
     /**
      * 返済を受ける
      */
-    void repaid(int amount);
+    public void repaid(int amount);
 
     /**
      * 納税します
      * 公的機関ではサポートされません
      */
-    void payTax(int amount);
+    public void payTax(int amount);
+
+    /**
+     * 月末処理を行います。
+     */
+    public void closeEndOfMonth();
 }

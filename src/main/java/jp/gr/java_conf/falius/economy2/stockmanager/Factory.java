@@ -2,6 +2,7 @@ package jp.gr.java_conf.falius.economy2.stockmanager;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
@@ -59,9 +60,10 @@ public class Factory implements StockManager {
     /**
      * 在庫や仕入れ情報を更新します。
      */
+    @Override
     public void update() {
         LocalDate today = MarketInfomation.INSTANCE.nowDate();
-        int count = mLastManufacture.until(today).getDays() / mManufacturePeriod.getDays(); // 製造日が何回きたか
+        int count = (int) mLastManufacture.until(today, ChronoUnit.DAYS) / mManufacturePeriod.getDays(); // 製造日が何回きたか
         IntStream.range(0, count)
                 .forEach(n -> manufacture());
     }

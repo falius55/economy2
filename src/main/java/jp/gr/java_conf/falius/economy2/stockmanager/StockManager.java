@@ -26,4 +26,6 @@ public interface StockManager {
      * @return
      */
     public int calcMerchandiseCost();
+
+    public void update();
 }

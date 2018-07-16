@@ -8,7 +8,7 @@ import jp.gr.java_conf.falius.economy2.account.DebtMediator;
 import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
 
 public abstract class AbstractEntity implements Entity {
-    private Bank mainBank;
+    private Bank mMainBank;
 
     private List<DebtMediator> mDebtList; // 借金のリスト
     private List<DebtMediator> mClaimList; // 貸金のリスト
@@ -17,7 +17,7 @@ public abstract class AbstractEntity implements Entity {
         mDebtList = new ArrayList<DebtMediator>();
         mClaimList = new ArrayList<DebtMediator>();
 
-        mainBank = searchBank();
+        mMainBank = searchBank();
     }
 
     protected abstract Account<? extends Enum<?>> account();
@@ -33,7 +33,7 @@ public abstract class AbstractEntity implements Entity {
     @Override // TODO:中央銀行はさらにオーバーライド
         public Entity saveMoney(int amount) {
             account().saveMoney(amount);
-            mainBank.keep(amount);
+            mMainBank.keep(amount);
             return this;
         }
 
@@ -46,7 +46,7 @@ public abstract class AbstractEntity implements Entity {
     @Override
     public Entity downMoney(int amount) {
         account().downMoney(amount);
-        mainBank.paidOut(amount);
+        mMainBank.paidOut(amount);
         return this;
     }
 
@@ -90,5 +90,9 @@ public abstract class AbstractEntity implements Entity {
     @Override
     public final void repaid(int amount) {
         account().repaid(amount);
+    }
+
+    public void credited(int amount) {
+        mMainBank.credited(amount);
     }
 }

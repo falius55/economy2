@@ -67,6 +67,7 @@ public class Farm implements StockManager {
     /**
      * 在庫や仕入れ情報を更新します。
      */
+    @Override
     public void update() {
         LocalDate today = MarketInfomation.INSTANCE.nowDate();
         int count = (int) mLastManufacture.until(today, ChronoUnit.DAYS) / mManufacturePeriod.getDays(); // 製造日が何回きたか
