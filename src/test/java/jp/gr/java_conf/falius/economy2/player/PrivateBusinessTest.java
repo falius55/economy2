@@ -16,7 +16,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class PrivateBusinessTest {
     private static PrivateBank sBank;
@@ -46,19 +46,19 @@ public class PrivateBusinessTest {
 
 
         Worker worker = new WorkerParson();
-        assertThat(PrivateBusiness.stream().anyMatch(pb -> pb.has(worker)), is(false));
+        assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(false));
 
         worker.seekJob();
-        assertThat(PrivateBusiness.stream().anyMatch(pb -> pb.has(worker)), is(true));
+        assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(true));
 
         worker.retireJob();
-        assertThat(PrivateBusiness.stream().anyMatch(pb -> pb.has(worker)), is(false));
+        assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(false));
 
         worker.seekJob();
-        assertThat(PrivateBusiness.stream().anyMatch(pb -> pb.has(worker)), is(true));
+        assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(true));
 
         worker.seekJob();
-        assertThat(PrivateBusiness.stream().anyMatch(pb -> pb.has(worker)), is(true));
+        assertThat(Market.INSTANCE.employables().anyMatch(pb -> pb.has(worker)), is(true));
     }
 
     @Test
@@ -70,11 +70,11 @@ public class PrivateBusinessTest {
         int initialExpenses = 100000;
         PrivateBusiness farmer =
                 new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
-        IntStream.range(0, 380).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness maker =
                 new PrivateBusiness(Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(), initialExpenses);
-        IntStream.range(0, 5).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness coop =
                 new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
@@ -85,8 +85,8 @@ public class PrivateBusinessTest {
         int price = optPrice.getAsInt();
         assertThat(price, is(not(0)));
 
-        int countToEndOfMonth = MarketInfomation.INSTANCE.nowDate().lengthOfMonth() - MarketInfomation.INSTANCE.nowDate().getDayOfMonth();
-        IntStream.range(0, countToEndOfMonth + 10).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        int countToEndOfMonth = Market.INSTANCE.nowDate().lengthOfMonth() - Market.INSTANCE.nowDate().getDayOfMonth();
+        IntStream.range(0, countToEndOfMonth + 10).forEach(n -> Market.INSTANCE.nextDay());
         System.out.println(farmer.account().toString());
         System.out.println(maker.account().toString());
         System.out.println(coop.account().toString());

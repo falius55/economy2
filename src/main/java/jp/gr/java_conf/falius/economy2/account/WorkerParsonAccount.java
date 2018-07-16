@@ -14,7 +14,7 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
     }
 
     @Override
-    public WorkerParsonAccountTitle[] items() {
+    protected WorkerParsonAccountTitle[] items() {
         return WorkerParsonAccountTitle.values();
     }
 

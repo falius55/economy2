@@ -5,18 +5,20 @@ package jp.gr.java_conf.falius.economy2.player;
  * @author "ymiyauchi"
  *
  */
-public interface Bank extends Organization {
+public interface Bank extends Employable {
 
     /**
      * お金を預かる
      */
-    public void keep(int money);
+    public void keep(int amount);
 
     /**
      * お金を払い出す
      */
-    public void paidOut(int money);
+    public void paidOut(int amount);
 
-    public void credited(int amount);
+    public void transfer(int amount);
+
+    public void transfered(int amount);
 
 }

@@ -31,6 +31,11 @@ public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implemen
         return this;
     }
 
+    /**
+     * 扱っている科目一覧を返します
+     */
+    protected abstract T[] items();
+
     // 帳簿を初期化する
     private Map<AccountType, Map<T, Integer>> initBook(Class<T> clazz) {
         // 0.13ミリ秒

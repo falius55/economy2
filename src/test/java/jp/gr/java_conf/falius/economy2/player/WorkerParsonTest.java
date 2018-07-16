@@ -9,34 +9,30 @@ import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
-import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class WorkerParsonTest {
 
-    @BeforeClass
-    public static void first() {
+    @Before
+    public void first() {
         Bank bank = new PrivateBank();
-    }
-
-    @AfterClass
-    public static void end() {
-        PrivateBank.clear();
     }
 
     @After
     public void clearBusiness() {
         PrivateBusiness.clear();
+        PrivateBank.clear();
     }
 
     @Test
     public void jobTest() {
+        System.out.println("job test 1");
         PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products(), 10000);
         PrivateBusiness superMarket = new PrivateBusiness(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), 10000);
 
@@ -53,29 +49,13 @@ public class WorkerParsonTest {
     }
 
     @Test
-    public void jobTest2() {
-        PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products(), 10000);
-
-        Worker worker = new WorkerParson();
-        assertThat(worker.hasJob(), is(false));
-        assertThat(worker.seekJob(), is(true));
-        assertThat(worker.hasJob(), is(true));
-        worker.retireJob();
-        assertThat(worker.hasJob(), is(false));
-        assertThat(worker.seekJob(), is(true));
-        assertThat(worker.hasJob(), is(true));
-        assertThat(worker.seekJob(), is(false));  // 今働いている会社以外が存在しないため、転職失敗
-        assertThat(worker.hasJob(), is(true));  // 転職に失敗したので、もとの会社も辞めない
-    }
-
-    @Test
     public void buyTest() {
         int initialExpenses = 10000;
         PrivateBusiness farmar = new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
-        IntStream.range(0, 380).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness maker = new PrivateBusiness(Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(), initialExpenses);
-        IntStream.range(0, 5).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness coop = new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
 

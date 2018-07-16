@@ -1,7 +1,5 @@
 package jp.gr.java_conf.falius.economy2.player;
 
-import jp.gr.java_conf.falius.economy2.account.DebtMediator;
-
 /**
  * 経済主体を表すインターフェースです。
  * @author "ymiyauchi"
@@ -24,20 +22,6 @@ public interface Entity {
      * 中央銀行ではサポートされません
      */
     public Entity downMoney(int amount);
-
-    /**
-     * 借金をするため、申し込むために使うDebtMediatorオブジェクトを作成する
-     * 政府から実行された場合は公債を発行します
-     * 銀行から実行された場合は、コールナイトオーバー物で一時的な借受を申し込みます
-     * 中央銀行から実行されると、お金を作成して負債として計上します
-     */
-    public DebtMediator offerDebt(int amount);
-
-    /**
-     * 借金の申し込むを受け入れ、お金を貸す
-     * @return 貸した金額
-     */
-    public int acceptDebt(DebtMediator debt);
 
     /**
      * 借金を返済する

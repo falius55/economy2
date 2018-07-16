@@ -1,34 +1,31 @@
 package jp.gr.java_conf.falius.economy2.player;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
 
-public class PrivateBank extends AbstractEntity implements Bank {
-    private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
+public class CentralBank extends AbstractEntity implements Bank {
+    public static final CentralBank INSTANCE;
 
+    private final CentralBankAccount mAccount = CentralBankAccount.newInstance();
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
-    private final PrivateBankAccount mAccount = PrivateBankAccount.newInstance();
 
-    public static Stream<PrivateBank> stream() {
-        return sOwns.stream();
+    static {
+        INSTANCE = new CentralBank();
     }
 
-    public static void clear() {
-        sOwns.clear();
+    private CentralBank() {
     }
 
-    public PrivateBank() {
-        sOwns.add(this);
+    @Override
+    public Entity saveMoney(int amount) {
+        throw new UnsupportedOperationException();
     }
 
-    public boolean canLend(int amount) {
-        int cash = mAccount.get(PrivateBankAccountTitle.CASH);
-        return cash >= amount;
+    @Override
+    public Entity downMoney(int amount) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -59,6 +56,9 @@ public class PrivateBank extends AbstractEntity implements Bank {
         return mStuffManager.has(worker);
     }
 
+    /**
+     * 民間からの預け入れ
+     */
     @Override
     public void keep(int amount) {
         mAccount.keep(amount);
@@ -70,19 +70,13 @@ public class PrivateBank extends AbstractEntity implements Bank {
     }
 
     @Override
-    protected PrivateBankAccount account() {
+    protected Account<? extends Enum<?>> account() {
         return mAccount;
     }
 
     @Override
     protected Optional<Bank> searchBank() {
-        return Optional.of(CentralBank.INSTANCE);
-    }
-
-    @Override
-    public void closeEndOfMonth() {
-        // TODO 自動生成されたメソッド・スタブ
-
+        return Optional.empty();
     }
 
     @Override
@@ -93,6 +87,11 @@ public class PrivateBank extends AbstractEntity implements Bank {
     @Override
     public void transfered(int amount) {
         mAccount.transfered(amount);
+    }
+
+    @Override
+    public void closeEndOfMonth() {
+        // TODO 自動生成されたメソッド・スタブ
     }
 
 }

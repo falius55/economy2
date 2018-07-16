@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
+import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
 public class Factory implements StockManager {
@@ -45,7 +45,7 @@ public class Factory implements StockManager {
                 .collect(
                         Collectors.toMap(
                                 Function.identity(), e -> 0, (s, t) -> s, () -> new EnumMap<>(Product.class)));
-        mLastManufacture = MarketInfomation.INSTANCE.nowDate();
+        mLastManufacture = Market.INSTANCE.nowDate();
     }
 
     /**
@@ -62,7 +62,7 @@ public class Factory implements StockManager {
      */
     @Override
     public void update() {
-        LocalDate today = MarketInfomation.INSTANCE.nowDate();
+        LocalDate today = Market.INSTANCE.nowDate();
         int count = (int) mLastManufacture.until(today, ChronoUnit.DAYS) / mManufacturePeriod.getDays(); // 製造日が何回きたか
         IntStream.range(0, count)
                 .forEach(n -> manufacture());

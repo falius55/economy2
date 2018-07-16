@@ -1,6 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player;
 
-public interface Organization extends Entity {
+public interface Employable extends Entity {
 
     /**
      * 求人の有無を返します。
@@ -11,12 +11,12 @@ public interface Organization extends Entity {
     /**
      * 人を雇用します
      */
-    public Organization employ(Worker worker);
+    public Employable employ(Worker worker);
 
     /**
      * 社員を解雇します
      */
-    public Organization fire(Worker worker);
+    public Employable fire(Worker worker);
 
     /**
      * 給与を支払います

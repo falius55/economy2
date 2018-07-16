@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -8,11 +9,12 @@ import jp.gr.java_conf.falius.economy2.account.WorkerParsonAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class WorkerParson extends AbstractEntity implements Worker {
     private final WorkerParsonAccount mAccount = WorkerParsonAccount.newInstance();
 
-    private Optional<Organization> mJob = Optional.<Organization> empty();
+    private Employable mJob = null;
 
     public WorkerParson() {
     }
@@ -35,40 +37,44 @@ public class WorkerParson extends AbstractEntity implements Worker {
     @Override
     public void getPaied(int amount) {
         mAccount.getPaied(amount);
-        super.credited(amount);
+        super.transfered(amount);
     }
 
     @Override
     public boolean seekJob() {
-        Optional<Organization> opt = PrivateBusiness.stream()
-                .map(pb -> (Organization) pb)
-                .filter(pb -> !mJob.equals(Optional.of(pb)) && pb.isRecruit())
+        Optional<Employable> optEp = Market.INSTANCE.employables()
+                .filter(ep -> ep.isRecruit() && (Objects.isNull(mJob) || !mJob.equals(ep)))
                 .findAny();
-
-        if (opt.isPresent()) {
-            retireJob();
-            mJob = opt;
-            mJob.ifPresent(pb -> pb.employ(this));
-            return true;
+        if (!optEp.isPresent()) {
+            return false;
         }
-        return false;
+        Employable ep = optEp.get();
+
+        retireJob();
+        mJob = ep;
+        ep.employ(this);
+        return true;
     }
 
     @Override
     public void retireJob() {
-        mJob.ifPresent(pb -> pb.fire(this));
-        mJob = Optional.empty();
+        if (hasJob()) {
+            mJob.fire(this);
+        }
+        mJob = null;
     }
 
     @Override
     public boolean hasJob() {
-        return mJob.isPresent();
+        return Objects.nonNull(mJob);
     }
 
     @Override
     public OptionalInt buy(Product product, int require) {
         Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
-        if (!optTitle.isPresent()) { return OptionalInt.empty(); }  // 労働者が買うような代物じゃない
+        if (!optTitle.isPresent()) {
+            return OptionalInt.empty();
+        } // 労働者が買うような代物じゃない
         WorkerParsonAccountTitle title = optTitle.get();
 
         Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.RETAIL)
@@ -119,8 +125,12 @@ public class WorkerParson extends AbstractEntity implements Worker {
     }
 
     @Override
-    protected Bank searchBank() {
-        return PrivateBank.stream().findAny().get();
+    protected Optional<Bank> searchBank() {
+        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
+        if (!opt.isPresent()) {
+            throw new IllegalStateException("market has no banks");
+        }
+        return Optional.of(opt.get());
     }
 
     @Override

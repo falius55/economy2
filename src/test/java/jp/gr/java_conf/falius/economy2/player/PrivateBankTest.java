@@ -14,7 +14,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
-import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class PrivateBankTest {
 
@@ -59,10 +59,10 @@ public class PrivateBankTest {
         PrivateBank bank = new PrivateBank();
         int initialExpenses = 100000;
         PrivateBusiness farmer = new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
-        IntStream.range(0, 380).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness maker = new PrivateBusiness(Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(),
                 initialExpenses);
-        IntStream.range(0, 5).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness coop = new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
 
         WorkerParson worker = new WorkerParson();
@@ -73,9 +73,9 @@ public class PrivateBankTest {
         int require = 3;
         worker.buy(product, require);
 
-        int countToEndOfMonth = MarketInfomation.INSTANCE.nowDate().lengthOfMonth()
-                - MarketInfomation.INSTANCE.nowDate().getDayOfMonth();
-        IntStream.range(0, countToEndOfMonth).forEach(n -> MarketInfomation.INSTANCE.nextDay());
+        int countToEndOfMonth = Market.INSTANCE.nowDate().lengthOfMonth()
+                - Market.INSTANCE.nowDate().getDayOfMonth();
+        IntStream.range(0, countToEndOfMonth).forEach(n -> Market.INSTANCE.nextDay());
         System.out.printf("worker: %s%n", worker.account().toString());
         System.out.printf("farmer: %s%n", farmer.account().toString());
         System.out.printf("maker: %s%n", maker.account().toString());

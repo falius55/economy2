@@ -18,7 +18,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
-public class PrivateBusiness extends AbstractEntity implements Organization {
+public class PrivateBusiness extends AbstractEntity implements Employable {
     private static final List<PrivateBusiness> sOwns = new ArrayList<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
 
@@ -47,7 +47,7 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
                 .collect(Collectors.toMap(Function.identity(), industry.type()::newManager, (p1, p2) -> p1,
                         () -> new EnumMap<Product, StockManager>(Product.class)));
         mAccount.establish(initialExpenses);
-        super.credited(initialExpenses);
+        super.transfered(initialExpenses);
 
         sOwns.add(this);
     }
@@ -142,13 +142,13 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
     }
 
     @Override
-    public Organization employ(Worker worker) {
+    public Employable employ(Worker worker) {
         mStuffManager.employ(worker);
         return this;
     }
 
     @Override
-    public Organization fire(Worker worker) {
+    public Employable fire(Worker worker) {
         mStuffManager.fire(worker);
         return this;
     }
@@ -164,9 +164,16 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
         return mStuffManager.has(worker);
     }
 
+    /**
+     * 候補が見つからなければ例外を投げる
+     */
     @Override
-    protected Bank searchBank() {
-        return PrivateBank.stream().findAny().get();
+    protected Optional<Bank> searchBank() {
+        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
+        if (!opt.isPresent()) {
+            throw new IllegalStateException("market has no banks");
+        }
+        return Optional.of(opt.get());
     }
 
     public void borrow(int amount) {
@@ -174,7 +181,7 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
         PrivateBank bank = opt.get();
         DebtMediator dm = super.offerDebt(amount);
         bank.acceptDebt(dm);
-        super.credited(amount);
+        super.transfered(amount);
     }
 
     public void update() {
@@ -187,9 +194,9 @@ public class PrivateBusiness extends AbstractEntity implements Organization {
     public void closeEndOfMonth() {
         calcPurchase();
         int payable = mAccount.settlePayable();
-        super.credited(-payable);
+        super.transfered(-payable);
         int receivable = mAccount.settleReceivable();
-        super.credited(receivable);
+        super.transfered(receivable);
 
         int cash = mAccount.get(PrivateBusinessAccountTitle.CASH);
         if (cash < 0) {

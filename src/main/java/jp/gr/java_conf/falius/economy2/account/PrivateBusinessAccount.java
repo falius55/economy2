@@ -19,7 +19,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         return PrivateBusinessAccountTitle.defaultItem();
     }
     @Override
-    public PrivateBusinessAccountTitle[] items() {
+    protected PrivateBusinessAccountTitle[] items() {
         return PrivateBusinessAccountTitle.values();
     }
 

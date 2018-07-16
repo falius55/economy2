@@ -4,7 +4,8 @@ import java.time.LocalDate;
 
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 
-public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAccountTitle> {
+public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAccountTitle>
+        implements BankAccount<PrivateBankAccountTitle> {
 
     private PrivateBankAccount() {
         super(PrivateBankAccountTitle.class);
@@ -18,8 +19,9 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     public PrivateBankAccountTitle defaultItem() {
         return PrivateBankAccountTitle.defaultItem();
     }
+
     @Override
-    public PrivateBankAccountTitle[] items() {
+    protected PrivateBankAccountTitle[] items() {
         return PrivateBankAccountTitle.values();
     }
 
@@ -34,22 +36,24 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * @param serviceLife 耐用年数
      */
     private PrivateBankAccount buyFixedAsset(LocalDate date, int amount, int serviceLife) {
-        addFixedAsset(date,amount, serviceLife);
+        addFixedAsset(date, amount, serviceLife);
 
-        addLeft(PrivateBankAccountTitle.TANGIBLE_ASSETS,amount);
-        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS,amount);
+        addLeft(PrivateBankAccountTitle.TANGIBLE_ASSETS, amount);
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
+
     /**
      * 間接法で減価償却する
      * @param date 減価償却日。この日が減価償却日である固定資産が減価償却される
      */
     private PrivateBankAccount depreciationByIndirect(LocalDate date) {
         int amount = recordFixedAssets(date);
-        addLeft(PrivateBankAccountTitle.DEPRECIATION,amount);
+        addLeft(PrivateBankAccountTitle.DEPRECIATION, amount);
         addRight(PrivateBankAccountTitle.ACCUMULATED_DEPRECIATION, amount);
         return this;
     }
+
     /**
      * 直接法で減価償却する
      */
@@ -59,6 +63,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
         addRight(PrivateBankAccountTitle.TANGIBLE_ASSETS, amount);
         return this;
     }
+
     /**
      * 土地の購入
      */
@@ -77,6 +82,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
         addRight(PrivateBankAccountTitle.CASH, amount);
         return this;
     }
+
     /**
      * お金を下ろした時の処理を行う
      */
@@ -86,22 +92,20 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
+
     /**
      * 預金処理
      */
     @Override
     public PrivateBankAccount borrow(int amount) {
-        addLeft(PrivateBankAccountTitle.CASH, amount);
-        addRight(PrivateBankAccountTitle.DEPOSIT, amount);
         return this;
     }
+
     /**
      * 預金返済処理を行う
      */
     @Override
     public PrivateBankAccount repay(int amount) {
-        addLeft(PrivateBankAccountTitle.DEPOSIT, amount);
-        addRight(PrivateBankAccountTitle.CASH, amount);
         return this;
     }
 
@@ -114,6 +118,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
         addRight(PrivateBankAccountTitle.CASH, amount);
         return this;
     }
+
     /**
      * 返済を受けた時の処理を行う
      */
@@ -132,23 +137,39 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     /**
      * お金を預かる
      */
-    public void keep(int money) {
-        borrow(money);
+    public PrivateBankAccount keep(int amount) {
+        addLeft(PrivateBankAccountTitle.CASH, amount);
+        addRight(PrivateBankAccountTitle.DEPOSIT, amount);
+        return this;
     }
 
     /**
-     * お金を払い出す
+     * 預金返済処理
      */
-    public void paidOut(int money) {
-        repay(money);
+    @Override
+    public PrivateBankAccount paidOut(int amount) {
+        addLeft(PrivateBankAccountTitle.DEPOSIT, amount);
+        addRight(PrivateBankAccountTitle.CASH, amount);
+        return this;
+    }
+
+    /**
+     * 民間預金への送金処理
+     */
+    @Override
+    public PrivateBankAccount transfer(int amount) {
+        addLeft(PrivateBankAccountTitle.DEPOSIT, amount);
+        addRight(PrivateBankAccountTitle.CASH, amount);  // CHECKING_ACCOUNTSもあり
+        return this;
     }
 
     /**
      * 振り込みを受ける
      * @param amount
      */
-    public PrivateBankAccount credited(int amount) {
-        addLeft(PrivateBankAccountTitle.CASH, amount);
+    @Override
+    public PrivateBankAccount transfered(int amount) {
+        addLeft(PrivateBankAccountTitle.CASH, amount);  // CHECKING_ACCOUNTSもあり
         addRight(PrivateBankAccountTitle.DEPOSIT, amount);
         return this;
     }

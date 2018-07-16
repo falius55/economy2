@@ -7,7 +7,7 @@ import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.market.MarketInfomation;
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 /**
  * 田畑
@@ -32,7 +32,7 @@ public class Farm implements StockManager {
         mProduct = product;
         mManufacturePeriod = product.manufacturePeriod();
         mProductionVolume = product.productionVolume();
-        mLastManufacture = MarketInfomation.INSTANCE.nowDate();
+        mLastManufacture = Market.INSTANCE.nowDate();
         int cost = product.price() / product.numOfLot();
         mCost = cost > 0 ? cost : 1;
 
@@ -69,7 +69,7 @@ public class Farm implements StockManager {
      */
     @Override
     public void update() {
-        LocalDate today = MarketInfomation.INSTANCE.nowDate();
+        LocalDate today = Market.INSTANCE.nowDate();
         int count = (int) mLastManufacture.until(today, ChronoUnit.DAYS) / mManufacturePeriod.getDays(); // 製造日が何回きたか
         IntStream.range(0, count)
                 .forEach(n -> manufacture());

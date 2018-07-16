@@ -14,11 +14,6 @@ public interface Account<T extends Enum<T> & AccountTitle> {
     public Account<T> merge(Account<T> another);
 
     /**
-     * 扱っている科目一覧を返します
-     */
-    public T[] items();
-
-    /**
      * 指定がないときに増減させる標準資産科目を返します。通常は現金を想定していますが、サブタイプごとに定義してください
      * @return 標準資産科目
      */
