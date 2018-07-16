@@ -19,17 +19,16 @@ import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class PrivateBusinessTest {
-    private static PrivateBank sBank;
 
     @BeforeClass
     public static void first() {
-        sBank = new PrivateBank();
-        sBank.keep(1000000);
+        Bank bank = new PrivateBank();
+        bank.keep(1000000);
     }
 
     @AfterClass
     public static void end() {
-        PrivateBank.clear();
+        Market.INSTANCE.clear();
     }
 
     @After
@@ -65,7 +64,7 @@ public class PrivateBusinessTest {
     public void distributionTest() {
         WorkerParson worker = new WorkerParson();
         int salary = 100000;
-        worker.getPaied(salary);
+        worker.getSalary(salary);
 
         int initialExpenses = 100000;
         PrivateBusiness farmer =

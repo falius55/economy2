@@ -93,9 +93,20 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
         return null;
     }
 
-    public Account<WorkerParsonAccountTitle> getPaied(int amount) {
+    /**
+     * 給与を銀行振り込みで受け取ります。
+     * @param amount
+     * @return
+     */
+    public Account<WorkerParsonAccountTitle> getSalary(int amount) {
         super.increase(WorkerParsonAccountTitle.SALARIES, amount);
         super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
+        return this;
+    }
+
+    public WorkerParsonAccount establish(int initialCapital) {
+        super.increase(WorkerParsonAccountTitle.ESTABLISH_EXPENSES, initialCapital);
+        super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, initialCapital);
         return this;
     }
 

@@ -41,7 +41,6 @@ public abstract class AbstractEntity implements Entity {
      * お金をおろします
      * 対象はメインバンク
      * 銀行が実行すると中央銀行からおろします
-     * 中央銀行が実行すると、新たなお金を作成します
      */
     @Override
     public Entity downMoney(int amount) {
@@ -84,9 +83,8 @@ public abstract class AbstractEntity implements Entity {
 
     /**
      * 借金を返済します
-     * 中央銀行が実行すると、お金が市場から消えます
      */
-    public final void repay(int amount) {
+    public void repay(int amount) {
         account().repay(amount);
     }
 

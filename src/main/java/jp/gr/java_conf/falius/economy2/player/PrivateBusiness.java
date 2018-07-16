@@ -52,6 +52,10 @@ public class PrivateBusiness extends AbstractEntity implements Employable {
         sOwns.add(this);
     }
 
+    public PrivateBusiness(Industry industry, int initialExpenses) {
+        this(industry, industry.products(), initialExpenses);
+    }
+
     @Override
     protected final PrivateBusinessAccount account() {
         return mAccount;

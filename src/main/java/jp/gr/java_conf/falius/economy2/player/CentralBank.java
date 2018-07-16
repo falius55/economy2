@@ -2,11 +2,11 @@ package jp.gr.java_conf.falius.economy2.player;
 
 import java.util.Optional;
 
-import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
 
 public class CentralBank extends AbstractEntity implements Bank {
     public static final CentralBank INSTANCE;
+    private static final int SALARY = 100000;
 
     private final CentralBankAccount mAccount = CentralBankAccount.newInstance();
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
@@ -18,13 +18,32 @@ public class CentralBank extends AbstractEntity implements Bank {
     private CentralBank() {
     }
 
+    public void clear() {
+        mAccount.clearBook();
+    }
+
+    /**
+     * 中央銀行はサポートしていません。
+     */
     @Override
-    public Entity saveMoney(int amount) {
+    public CentralBank saveMoney(int amount) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 中央銀行はサポートしていません。
+     */
     @Override
-    public Entity downMoney(int amount) {
+    public CentralBank downMoney(int amount) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 借金を返済します。
+     * 中央銀行はサポートしていません。
+     */
+    @Override
+    public  void repay(int amount) {
         throw new UnsupportedOperationException();
     }
 
@@ -34,21 +53,22 @@ public class CentralBank extends AbstractEntity implements Bank {
     }
 
     @Override
-    public Employable employ(Worker worker) {
+    public CentralBank employ(Worker worker) {
         mStuffManager.employ(worker);
         return this;
     }
 
     @Override
-    public Employable fire(Worker worker) {
+    public CentralBank fire(Worker worker) {
         mStuffManager.fire(worker);
         return this;
     }
 
     @Override
     public int paySalary(Worker worker) {
-        // TODO 自動生成されたメソッド・スタブ
-        return 0;
+        mAccount.paySalary(SALARY);
+        worker.getSalary(SALARY);
+        return SALARY;
     }
 
     @Override
@@ -57,20 +77,23 @@ public class CentralBank extends AbstractEntity implements Bank {
     }
 
     /**
-     * 民間からの預け入れ
+     * 市中銀行からの預け入れ
      */
     @Override
     public void keep(int amount) {
         mAccount.keep(amount);
     }
 
+    /**
+     * 市中銀行への払い出し
+     */
     @Override
     public void paidOut(int amount) {
         mAccount.paidOut(amount);
     }
 
     @Override
-    protected Account<? extends Enum<?>> account() {
+    protected CentralBankAccount account() {
         return mAccount;
     }
 

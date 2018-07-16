@@ -24,7 +24,9 @@ public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implemen
      */
     @Override
     public AbstractAccount<T> merge(Account<T> another) {
-        if (!(another instanceof AbstractAccount)) { throw new IllegalArgumentException(); }
+        if (!(another instanceof AbstractAccount)) {
+            throw new IllegalArgumentException();
+        }
         for (T item : items()) {
             increase(item, another.get(item));
         }
@@ -49,6 +51,11 @@ public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implemen
                                 (t, u) -> t, // キーが同じ要素が出てきたらどうするか
                                 () -> new EnumMap<T, Integer>(clazz)) // 中間生成物
         ));
+    }
+
+    public void clearBook() {
+        mAccountsBook.entrySet().stream().map(e -> e.getValue())
+                .forEach(m -> m.forEach((k, v) -> m.compute(k, (t, i) -> 0)));
     }
 
     // 特定科目の金額を増加する

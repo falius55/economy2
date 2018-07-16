@@ -9,30 +9,24 @@ import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class WorkerParsonTest {
 
-    @Before
-    public void first() {
-        Bank bank = new PrivateBank();
-    }
-
     @After
-    public void clearBusiness() {
-        PrivateBusiness.clear();
-        PrivateBank.clear();
+    public void clear() {
+        Market.INSTANCE.clear();
     }
 
     @Test
     public void jobTest() {
-        System.out.println("job test 1");
+        Bank bank = new PrivateBank();
         PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products(), 10000);
         PrivateBusiness superMarket = new PrivateBusiness(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), 10000);
 
@@ -50,6 +44,7 @@ public class WorkerParsonTest {
 
     @Test
     public void buyTest() {
+        Bank bank = new PrivateBank();
         int initialExpenses = 10000;
         PrivateBusiness farmar = new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
@@ -64,7 +59,7 @@ public class WorkerParsonTest {
         assertThat(worker.deposit(), is(0));
 
         int salary = 100000;
-        worker.getPaied(salary);
+        worker.getSalary(salary);
         assertThat(worker.cash(), is(0));
         assertThat(worker.deposit(), is(salary));
 
@@ -82,7 +77,21 @@ public class WorkerParsonTest {
         assertThat(expense, is(price));
         assertThat(worker.cash() + worker.deposit(), is(salary - expense));
         assertThat(worker.deposit(), is(lessThan(salary)));
+    }
 
+    @Test
+    public void establishTest() {
+        CentralBank centralBank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int salary = centralBank.paySalary(worker);
+        int initial = salary / 2;
+
+        Optional<PrivateBusiness> opt = worker.establish(Industry.FARMER, initial);
+        assertThat(opt.isPresent(), is(true));
+        PrivateBusiness farmer = opt.get();
+
+        assertThat(farmer.account().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
     }
 
 }

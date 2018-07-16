@@ -20,8 +20,7 @@ public class PrivateBankTest {
 
     @After
     public void clear() {
-        PrivateBusiness.clear();
-        PrivateBank.clear();
+        Market.INSTANCE.clear();
     }
 
     @Test
@@ -30,10 +29,10 @@ public class PrivateBankTest {
         int salary = 100000;
 
         WorkerParson worker = new WorkerParson();
-        worker.getPaied(salary);
+        worker.getSalary(salary);
 
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CASH), is(salary));
+        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary));
     }
 
     @Test
@@ -41,16 +40,18 @@ public class PrivateBankTest {
         int initialExpenses = 100000;
         PrivateBank bank = new PrivateBank();
 
-        PrivateBusiness farmer = new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
+        PrivateBusiness farmer =
+                new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CASH), is(initialExpenses));
+        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses));
         PrivateBusiness maker = new PrivateBusiness(Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(),
                 initialExpenses);
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 2));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CASH), is(initialExpenses * 2));
-        PrivateBusiness coop = new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
+        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 2));
+        PrivateBusiness coop =
+                new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 3));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CASH), is(initialExpenses * 3));
+        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 3));
 
     }
 
@@ -67,7 +68,7 @@ public class PrivateBankTest {
 
         WorkerParson worker = new WorkerParson();
         int salary = 100000;
-        worker.getPaied(salary);
+        worker.getSalary(salary);
 
         Product product = Product.RICE_BALL;
         int require = 3;
@@ -97,6 +98,7 @@ public class PrivateBankTest {
         assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(deposit));
 
         assertThat(bank.account().get(PrivateBankAccountTitle.CASH)
+                + bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS)
                 + bank.account().get(PrivateBankAccountTitle.LOANS_RECEIVABLE),
                 is(deposit));
 

@@ -137,7 +137,7 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * 政府から民間預金への振り込み
      */
     @Override
-    public BankAccount<CentralBankAccountTitle> transfer(int amount) {
+    public CentralBankAccount transfer(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         addRight(CentralBankAccountTitle.DEPOSIT, amount);
         return null;
@@ -147,9 +147,16 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * 民間預金からの政府への支払(税金)処理
      */
     @Override
-    public BankAccount<CentralBankAccountTitle> transfered(int amount) {
+    public CentralBankAccount transfered(int amount) {
         addLeft(CentralBankAccountTitle.DEPOSIT, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
+        return this;
+    }
+
+    @Override
+    public CentralBankAccount paySalary(int amount) {
+        addLeft(CentralBankAccountTitle.SALARIES_EXPENSE, amount);
+        addRight(CentralBankAccountTitle.DEPOSIT, amount);
         return this;
     }
 }

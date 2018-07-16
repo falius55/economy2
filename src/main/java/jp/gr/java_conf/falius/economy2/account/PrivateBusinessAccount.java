@@ -4,7 +4,8 @@ import java.time.LocalDate;
 
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 
-public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle> {
+public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle>
+        implements EmployableAccount<PrivateBusinessAccountTitle> {
 
     private PrivateBusinessAccount() {
         super(PrivateBusinessAccountTitle.class);
@@ -18,6 +19,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
     public PrivateBusinessAccountTitle defaultItem() {
         return PrivateBusinessAccountTitle.defaultItem();
     }
+
     @Override
     protected PrivateBusinessAccountTitle[] items() {
         return PrivateBusinessAccountTitle.values();
@@ -37,7 +39,6 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addRight(PrivateBusinessAccountTitle.CAPITAL_STOCK, initialExpenses);
         return this;
     }
-
 
     /**
      * 売り上げます
@@ -79,10 +80,10 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
      * @param serviceLife 耐用年数
      */
     private PrivateBusinessAccount buyFixedAsset(LocalDate date, int amount, int serviceLife) {
-        addFixedAsset(date,amount, serviceLife);
+        addFixedAsset(date, amount, serviceLife);
 
-        addLeft(PrivateBusinessAccountTitle.TANGIBLE_ASSETS,amount);
-        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS,amount);
+        addLeft(PrivateBusinessAccountTitle.TANGIBLE_ASSETS, amount);
+        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
 
@@ -92,7 +93,7 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
      */
     private PrivateBusinessAccount depreciationByIndirect(LocalDate date) {
         int amount = recordFixedAssets(date);
-        addLeft(PrivateBusinessAccountTitle.DEPRECIATION,amount);
+        addLeft(PrivateBusinessAccountTitle.DEPRECIATION, amount);
         addRight(PrivateBusinessAccountTitle.ACCUMULATED_DEPRECIATION, amount);
         return this;
     }
@@ -207,5 +208,11 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         addLeft(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBusinessAccountTitle.RECEIVABLE, amount);
         return amount;
+    }
+
+    @Override
+    public PrivateBusinessAccount paySalary(int amount) {
+        // TODO 自動生成されたメソッド・スタブ
+        return null;
     }
 }

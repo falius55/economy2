@@ -2,7 +2,7 @@ package jp.gr.java_conf.falius.economy2.account;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
 
-public interface BankAccount<T extends Enum<T> & AccountTitle> extends Account<T> {
+public interface BankAccount<T extends Enum<T> & AccountTitle> extends EmployableAccount<T> {
 
     /**
      * お金を預かる

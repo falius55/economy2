@@ -28,7 +28,8 @@ public class PrivateBank extends AbstractEntity implements Bank {
 
     public boolean canLend(int amount) {
         int cash = mAccount.get(PrivateBankAccountTitle.CASH);
-        return cash >= amount;
+        int checking = mAccount.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
+        return cash + checking >= amount;
     }
 
     @Override
@@ -66,6 +67,10 @@ public class PrivateBank extends AbstractEntity implements Bank {
 
     @Override
     public void paidOut(int amount) {
+        int cash = mAccount.get(PrivateBankAccountTitle.CASH);
+        if (cash < amount) {
+            downMoney(amount - cash);
+        }
         mAccount.paidOut(amount);
     }
 

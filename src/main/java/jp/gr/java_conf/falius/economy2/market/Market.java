@@ -21,14 +21,6 @@ public static final Market INSTANCE;
         mDate = date;
     }
 
-    public Market nextDay() {
-        mDate = mDate.plusDays(1);
-        if (mDate.getDayOfMonth() == mDate.lengthOfMonth()) {
-            closeEndOfMonth();
-        }
-        return this;
-    }
-
     public LocalDate nowDate() {
         return mDate;
     }
@@ -39,12 +31,25 @@ public static final Market INSTANCE;
         PrivateBank.stream().forEach(pb -> builder.add(pb));
         builder.add(CentralBank.INSTANCE);
         return builder.build();
+    }
 
+    public Market nextDay() {
+        mDate = mDate.plusDays(1);
+        if (mDate.getDayOfMonth() == mDate.lengthOfMonth()) {
+            closeEndOfMonth();
+        }
+        return this;
     }
 
     private void closeEndOfMonth() {
         PrivateBusiness.stream().forEach(pb -> pb.update());
         PrivateBusiness.stream().forEach(pb -> pb.closeEndOfMonth());
         PrivateBank.stream().forEach(pb -> pb.closeEndOfMonth());
+    }
+
+    public void clear() {
+        PrivateBusiness.clear();
+        PrivateBank.clear();
+        CentralBank.INSTANCE.clear();
     }
 }

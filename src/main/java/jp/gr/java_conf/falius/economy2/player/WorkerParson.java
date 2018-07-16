@@ -35,8 +35,8 @@ public class WorkerParson extends AbstractEntity implements Worker {
      * 給料を受け取る
      */
     @Override
-    public void getPaied(int amount) {
-        mAccount.getPaied(amount);
+    public void getSalary(int amount) {
+        mAccount.getSalary(amount);
         super.transfered(amount);
     }
 
@@ -137,6 +137,22 @@ public class WorkerParson extends AbstractEntity implements Worker {
     public void closeEndOfMonth() {
         // TODO 自動生成されたメソッド・スタブ
 
+    }
+
+    public Optional<PrivateBusiness> establish(Industry industry, int initialCapital) {
+        int cash = mAccount.get(WorkerParsonAccountTitle.CASH);
+        int deposit = mAccount.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
+        if (cash + deposit < initialCapital) {
+            return Optional.empty();
+        }
+
+        if (deposit < initialCapital) {
+            int shortfall = initialCapital - deposit;
+            super.saveMoney(shortfall);
+        }
+        mAccount.establish(initialCapital);
+        super.transfer(initialCapital);
+        return Optional.of(new PrivateBusiness(industry, initialCapital));
     }
 
 }

@@ -6,7 +6,7 @@ public interface Worker extends Parson {
      * 給与を受け取ります。
      * @param amount
      */
-    public void getPaied(int amount);
+    public void getSalary(int amount);
 
     /**
      * 求職活動をします。

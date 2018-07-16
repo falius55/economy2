@@ -115,7 +115,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     @Override
     public PrivateBankAccount lend(int amount) {
         addLeft(PrivateBankAccountTitle.LOANS_RECEIVABLE, amount);
-        addRight(PrivateBankAccountTitle.CASH, amount);
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
 
@@ -124,7 +124,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      */
     @Override
     public PrivateBankAccount repaid(int amount) {
-        addLeft(PrivateBankAccountTitle.CASH, amount);
+        addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBankAccountTitle.LOANS_RECEIVABLE, amount);
         return this;
     }
@@ -159,7 +159,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     @Override
     public PrivateBankAccount transfer(int amount) {
         addLeft(PrivateBankAccountTitle.DEPOSIT, amount);
-        addRight(PrivateBankAccountTitle.CASH, amount);  // CHECKING_ACCOUNTSもあり
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
 
@@ -169,8 +169,14 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      */
     @Override
     public PrivateBankAccount transfered(int amount) {
-        addLeft(PrivateBankAccountTitle.CASH, amount);  // CHECKING_ACCOUNTSもあり
+        addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBankAccountTitle.DEPOSIT, amount);
         return this;
+    }
+
+    @Override
+    public PrivateBankAccount paySalary(int amount) {
+        // TODO 自動生成されたメソッド・スタブ
+        return null;
     }
 }
