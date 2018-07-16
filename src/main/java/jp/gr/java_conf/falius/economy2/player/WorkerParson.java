@@ -152,7 +152,8 @@ public class WorkerParson extends AbstractEntity implements Worker {
         }
         mAccount.establish(initialCapital);
         super.transfer(initialCapital);
-        return Optional.of(new PrivateBusiness(industry, initialCapital));
+        retireJob();
+        return Optional.of(new PrivateBusiness(this, industry, initialCapital));
     }
 
 }

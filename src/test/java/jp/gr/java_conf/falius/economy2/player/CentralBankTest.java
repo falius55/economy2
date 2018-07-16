@@ -10,6 +10,7 @@ import org.junit.Test;
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class CentralBankTest {
@@ -28,7 +29,8 @@ public class CentralBankTest {
         CentralBank cbank = CentralBank.INSTANCE;
         int capital = 10000;
         PrivateBank  bank = new PrivateBank();
-        PrivateBusiness farmer = new PrivateBusiness(Industry.FARMER, capital);
+        WorkerParson worker = new WorkerParson();
+        PrivateBusiness farmer = new PrivateBusiness(worker, Industry.FARMER, capital);
         System.out.printf("bank: %s%n", bank.account().toString());
         System.out.printf("cbank: %s%n", cbank.account().toString());
 
@@ -59,9 +61,9 @@ public class CentralBankTest {
         assertThat(central.account().get(CentralBankAccountTitle.SALARIES_EXPENSE), is(salary));
         assertThat(central.account().get(CentralBankAccountTitle.DEPOSIT), is(salary));
         assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary));
-//        assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
-//        assertThat(worker.account().get(WorkerParsonAccountTitle.SALARIES), is(salary));
-//        assertThat(worker.account().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT), is(salary));
+        assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
+        assertThat(worker.account().get(WorkerParsonAccountTitle.SALARIES), is(salary));
+        assertThat(worker.account().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT), is(salary));
 
     }
 }

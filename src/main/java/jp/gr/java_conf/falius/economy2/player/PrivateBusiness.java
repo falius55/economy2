@@ -40,7 +40,7 @@ public class PrivateBusiness extends AbstractEntity implements Employable {
         sOwns.clear();
     }
 
-    public PrivateBusiness(Industry industry, Set<Product> products, int initialExpenses) {
+    public PrivateBusiness(Worker founder, Industry industry, Set<Product> products, int initialExpenses) {
         mIndustry = industry;
         mProducts = products;
         mStockManagers = products.stream()
@@ -50,10 +50,11 @@ public class PrivateBusiness extends AbstractEntity implements Employable {
         super.transfered(initialExpenses);
 
         sOwns.add(this);
+        employ(founder);
     }
 
-    public PrivateBusiness(Industry industry, int initialExpenses) {
-        this(industry, industry.products(), initialExpenses);
+    public PrivateBusiness(Worker founder, Industry industry, int initialExpenses) {
+        this(founder, industry, industry.products(), initialExpenses);
     }
 
     @Override

@@ -27,8 +27,8 @@ public class WorkerParsonTest {
     @Test
     public void jobTest() {
         Bank bank = new PrivateBank();
-        PrivateBusiness liblio = new PrivateBusiness(Industry.LIBLIO, Industry.LIBLIO.products(), 10000);
-        PrivateBusiness superMarket = new PrivateBusiness(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), 10000);
+        PrivateBusiness liblio = new PrivateBusiness(new WorkerParson(), Industry.LIBLIO, 10000);
+        PrivateBusiness superMarket = new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, 10000);
 
         Worker worker = new WorkerParson();
         assertThat(worker.hasJob(), is(false));
@@ -46,13 +46,13 @@ public class WorkerParsonTest {
     public void buyTest() {
         Bank bank = new PrivateBank();
         int initialExpenses = 10000;
-        PrivateBusiness farmar = new PrivateBusiness(Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
+        PrivateBusiness farmar = new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
 
-        PrivateBusiness maker = new PrivateBusiness(Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(), initialExpenses);
+        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, Industry.FOOD_MAKER.products(), initialExpenses);
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
-        PrivateBusiness coop = new Retail(Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
+        PrivateBusiness coop = new Retail(new WorkerParson(), Industry.SUPER_MARKET, Industry.SUPER_MARKET.products(), initialExpenses);
 
         WorkerParson worker = new WorkerParson();
         assertThat(worker.cash(), is(0));

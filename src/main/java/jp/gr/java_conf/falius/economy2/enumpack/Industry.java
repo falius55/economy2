@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.Retail;
+import jp.gr.java_conf.falius.economy2.player.Worker;
 import jp.gr.java_conf.falius.economy2.stockmanager.Factory;
 import jp.gr.java_conf.falius.economy2.stockmanager.Farm;
 import jp.gr.java_conf.falius.economy2.stockmanager.Repository;
@@ -96,8 +97,8 @@ public enum Industry {
         return products().contains(product);
     }
 
-    public PrivateBusiness createInstance(int initialExpenses) {
-        return type().createInstance(this, products(), initialExpenses);
+    public PrivateBusiness createInstance(Worker founder, int initialExpenses) {
+        return type().createInstance(founder, this, products(), initialExpenses);
     }
 
     public void print() {
@@ -122,10 +123,12 @@ public enum Industry {
      *
      */
     public enum Type {
-        /** 小売り */ RETAIL("小売") {
+        /** 小売り */
+        RETAIL("小売") {
             @Override
-            public PrivateBusiness createInstance(Industry industry, Set<Product> products, int initialExpenses) {
-                return new Retail(industry, products, initialExpenses);
+            public PrivateBusiness createInstance(Worker founder, Industry industry, Set<Product> products,
+                    int initialExpenses) {
+                return new Retail(founder, industry, products, initialExpenses);
             }
 
             @Override
@@ -133,38 +136,48 @@ public enum Industry {
                 return new Repository(product, MAKER);
             }
         },
-        /** メーカー */ MAKER("メーカー") {
+        /** メーカー */
+        MAKER("メーカー") {
             @Override
             public StockManager newManager(Product product) {
                 return new Factory(product);
             }
         },
-        /** 第一次産業 */ FARMER("第一次産業") {
+        /** 第一次産業 */
+        FARMER("第一次産業") {
             @Override
             public StockManager newManager(Product product) {
                 return new Farm(product);
             }
         },
-        /** 流通業 */ DISTRIBUTOR("流通業") {
+        /** 流通業 */
+        DISTRIBUTOR("流通業") {
             @Override
             public StockManager newManager(Product product) {
                 return new Repository(product, MAKER);
             }
         },
-        /** 大口小売り */ BIGMOUTHED_RETAIL("大口小売");
+        /** 大口小売り */
+        BIGMOUTHED_RETAIL("大口小売");
 
-        private final String name;
+        private final String mName;
 
         Type(String name) {
-            this.name = name;
+            mName = name;
         }
 
-        public PrivateBusiness createInstance(Industry industry, Set<Product> products, int initialExpenses) {
-            return new PrivateBusiness(industry, products, initialExpenses);
+        public PrivateBusiness createInstance(Worker founder, Industry industry, Set<Product> products,
+                int initialExpenses) {
+            return new PrivateBusiness(founder, industry, products, initialExpenses);
         }
 
         public StockManager newManager(Product product) {
             return new Repository(product, MAKER);
+        }
+
+        @Override
+        public String toString() {
+            return mName;
         }
     }
 

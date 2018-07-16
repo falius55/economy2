@@ -8,8 +8,12 @@ import jp.gr.java_conf.falius.economy2.enumpack.Product;
 
 public class Retail extends PrivateBusiness {
 
-    public Retail(Industry industry, Set<Product> products, int initialExpenses) {
-        super(industry, products, initialExpenses);
+    public Retail(Worker founder, Industry industry, Set<Product> products, int initialExpenses) {
+        super(founder, industry, products, initialExpenses);
+    }
+
+    public Retail(Worker founder, Industry industry, int initialExpenses) {
+        super(founder, industry, initialExpenses);
     }
 
     @Override
