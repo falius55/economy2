@@ -10,7 +10,7 @@ public abstract class AbstractEntity implements Entity {
     private List<DebtMediator> mDebtList; // 借金のリスト
     private List<DebtMediator> mClaimList; // 貸金のリスト
 
-    AbstractEntity() {
+    public AbstractEntity() {
         mDebtList = new ArrayList<DebtMediator>();
         mClaimList = new ArrayList<DebtMediator>();
     }
@@ -39,11 +39,6 @@ public abstract class AbstractEntity implements Entity {
         mClaimList.add(debt);
         debt.accepted(accountBook(), Market.INSTANCE.nowDate());
         return debt.amount();
-    }
-
-    @Override
-    public final void payTax(int amount) {
-        accountBook().payTax(amount);
     }
 
     /**

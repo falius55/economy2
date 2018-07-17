@@ -3,7 +3,8 @@ package jp.gr.java_conf.falius.economy2.account;
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 
-public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitle> {
+public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitle>
+        implements PrivateAccount<WorkerParsonAccountTitle> {
 
     public static WorkerParsonAccount newInstance() {
         return new WorkerParsonAccount();
@@ -11,11 +12,6 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
 
     private WorkerParsonAccount() {
         super(WorkerParsonAccountTitle.class);
-    }
-
-    @Override
-    protected WorkerParsonAccountTitle[] items() {
-        return WorkerParsonAccountTitle.values();
     }
 
     @Override
@@ -33,6 +29,12 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
     }
 
     @Override
+    public Account<WorkerParsonAccountTitle> lend(int amount) {
+        // TODO 自動生成されたメソッド・スタブ
+        return null;
+    }
+
+    @Override
     public Account<WorkerParsonAccountTitle> borrow(int amount) {
         // TODO 自動生成されたメソッド・スタブ
         return null;
@@ -40,12 +42,6 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
 
     @Override
     public Account<WorkerParsonAccountTitle> repay(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
-    @Override
-    public Account<WorkerParsonAccountTitle> lend(int amount) {
         // TODO 自動生成されたメソッド・スタブ
         return null;
     }

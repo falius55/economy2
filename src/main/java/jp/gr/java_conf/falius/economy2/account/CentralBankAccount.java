@@ -14,11 +14,6 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
     }
 
     @Override
-    protected CentralBankAccountTitle[] items() {
-        return CentralBankAccountTitle.values();
-    }
-
-    @Override
     public Account<CentralBankAccountTitle> saveMoney(int amount) {
         throw new UnsupportedOperationException();
     }
@@ -48,6 +43,20 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
         return this;
     }
 
+    @Override
+    public CentralBankAccount acceptGovernmentBond(int amount) {
+        addLeft(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
+        addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
+        return this;
+    }
+
+    @Override
+    public CentralBankAccount redeemedGovernmentBond(int amount) {
+        addLeft(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
+        addRight(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
+        return this;
+    }
+
     /**
      * 民間銀行からの返済
      */
@@ -56,12 +65,6 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
         addLeft(CentralBankAccountTitle.DEPOSIT, amount);
         addRight(CentralBankAccountTitle.LOANS_RECEIVABLE, amount);
         return this;
-    }
-
-    @Override
-    public Account<CentralBankAccountTitle> payTax(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
     }
 
     /**

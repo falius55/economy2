@@ -22,4 +22,18 @@ public interface BankAccount<T extends Enum<T> & AccountTitle> extends Employabl
     public BankAccount<T> transfered(int amount);
 
     public BankAccount<T> transfer(int amount);
+
+    /**
+     * 国債を引き受けます。
+     * @param amount
+     * @return
+     */
+    public BankAccount<T> acceptGovernmentBond(int amount);
+
+    /**
+     * 保有国債が償還されます。
+     * @param amount
+     * @return
+     */
+    public BankAccount<T> redeemedGovernmentBond(int amount);
 }

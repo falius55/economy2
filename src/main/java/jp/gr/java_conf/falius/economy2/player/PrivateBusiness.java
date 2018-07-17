@@ -16,9 +16,10 @@ import jp.gr.java_conf.falius.economy2.account.PrivateBusinessAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
+import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
-public class PrivateBusiness extends AbstractEntity implements AccountOpenable, Employable {
+public class PrivateBusiness extends AbstractEntity implements AccountOpenable, Employable, PrivateEntity {
     private static final List<PrivateBusiness> sOwns = new ArrayList<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
 
@@ -177,6 +178,12 @@ public class PrivateBusiness extends AbstractEntity implements AccountOpenable, 
     public int paySalary(Worker worker) {
         // TODO 自動生成されたメソッド・スタブ
         return 0;
+    }
+
+    @Override
+    public void payTax(int amount) {
+        // TODO 自動生成されたメソッド・スタブ
+
     }
 
     /**

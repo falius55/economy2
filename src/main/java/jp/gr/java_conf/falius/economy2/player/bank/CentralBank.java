@@ -1,6 +1,9 @@
-package jp.gr.java_conf.falius.economy2.player;
+package jp.gr.java_conf.falius.economy2.player.bank;
 
 import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
+import jp.gr.java_conf.falius.economy2.player.AbstractEntity;
+import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
+import jp.gr.java_conf.falius.economy2.player.Worker;
 
 public class CentralBank extends AbstractEntity implements Bank {
     public static final CentralBank INSTANCE;
@@ -42,25 +45,6 @@ public class CentralBank extends AbstractEntity implements Bank {
     @Override
     public  void repay(int amount) { throw new UnsupportedOperationException(); }
 
-    @Override
-    public CentralBank employ(Worker worker) {
-        mStuffManager.employ(worker);
-        return this;
-    }
-
-    @Override
-    public CentralBank fire(Worker worker) {
-        mStuffManager.fire(worker);
-        return this;
-    }
-
-    @Override
-    public int paySalary(Worker worker) {
-        mAccount.paySalary(SALARY);
-        worker.getSalary(SALARY);
-        return SALARY;
-    }
-
     /**
      * 市中銀行からの預け入れ
      */
@@ -85,6 +69,45 @@ public class CentralBank extends AbstractEntity implements Bank {
     @Override
     public void transfered(int amount) {
         mAccount.transfered(amount);
+    }
+
+    /**
+     * 国債を引き受けます。
+     * @param amount
+     * @return
+     */
+    public Bank acceptGovernmentBond(int amount) {
+        mAccount.acceptGovernmentBond(amount);
+        return this;
+    }
+
+    /**
+     * 保有国債が償還されます。
+     * @param amount
+     * @return
+     */
+    public Bank redeemedGovernmentBond(int amount) {
+        mAccount.redeemedGovernmentBond(amount);
+        return this;
+    }
+
+    @Override
+    public CentralBank employ(Worker worker) {
+        mStuffManager.employ(worker);
+        return this;
+    }
+
+    @Override
+    public CentralBank fire(Worker worker) {
+        mStuffManager.fire(worker);
+        return this;
+    }
+
+    @Override
+    public int paySalary(Worker worker) {
+        mAccount.paySalary(SALARY);
+        worker.getSalary(SALARY);
+        return SALARY;
     }
 
     public void clear() {

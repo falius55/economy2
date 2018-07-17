@@ -6,7 +6,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 
 public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle>
-        implements EmployableAccount<PrivateBusinessAccountTitle> {
+        implements EmployableAccount<PrivateBusinessAccountTitle>, PrivateAccount<PrivateBusinessAccountTitle> {
 
     private PrivateBusinessAccount() {
         super(PrivateBusinessAccountTitle.class);
@@ -14,11 +14,6 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
 
     public static PrivateBusinessAccount newInstance() {
         return new PrivateBusinessAccount();
-    }
-
-    @Override
-    protected PrivateBusinessAccountTitle[] items() {
-        return PrivateBusinessAccountTitle.values();
     }
 
     /*
@@ -137,6 +132,16 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
     }
 
     /**
+     * 貸金処理を行う
+     */
+    @Override
+    public PrivateBusinessAccount lend(int amount) {
+        addLeft(PrivateBusinessAccountTitle.LOANS_RECEIVABLE, amount);
+        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
+        return this;
+    }
+
+    /**
      * 借金処理
      */
     @Override
@@ -152,16 +157,6 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
     @Override
     public PrivateBusinessAccount repay(int amount) {
         addLeft(PrivateBusinessAccountTitle.LOANS_PAYABLE, amount);
-        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
-        return this;
-    }
-
-    /**
-     * 貸金処理を行う
-     */
-    @Override
-    public PrivateBusinessAccount lend(int amount) {
-        addLeft(PrivateBusinessAccountTitle.LOANS_RECEIVABLE, amount);
         addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }

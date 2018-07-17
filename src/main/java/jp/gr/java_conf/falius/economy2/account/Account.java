@@ -8,6 +8,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
  * @param T 科目一覧の列挙型
  */
 public interface Account<T extends Enum<T> & AccountTitle> {
+
     /**
      * 指定した科目種別の総額を集計します
      * @param type 科目種別
@@ -36,28 +37,25 @@ public interface Account<T extends Enum<T> & AccountTitle> {
      * お金をおろした時の処理を行います
      */
     public Account<T> downMoney(int amount);
-    /**
-     * 借金処理を行います
-     */
-    public Account<T> borrow(int amount);
-    /**
-     * 返済処理を行います
-     */
-    public Account<T> repay(int amount);
+
     /**
      * 貸金処理を行います
      */
     public Account<T> lend(int amount);
+
+    /**
+     * 借金処理を行います
+     */
+    public Account<T> borrow(int amount);
+
+    /**
+     * 返済処理を行います
+     */
+    public Account<T> repay(int amount);
+
     /**
      * 返済を受けた時の処理を行います
      */
     public Account<T> repaid(int amount);
-
-    /**
-     * 納税処理を行います
-     * 公的機関ではサポートされません
-     * @throws UnssuportedOperationException 公的機関の会計で実行された場合
-     */
-    public Account<T> payTax(int amount);
 
 }

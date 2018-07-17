@@ -10,8 +10,9 @@ import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
+import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
-public class WorkerParson extends AbstractEntity implements Worker, AccountOpenable {
+public class WorkerParson extends AbstractEntity implements Worker, AccountOpenable, PrivateEntity {
     private final WorkerParsonAccount mAccount = WorkerParsonAccount.newInstance();
     private final PrivateBank mMainBank;
 
@@ -136,6 +137,12 @@ public class WorkerParson extends AbstractEntity implements Worker, AccountOpena
             mJob.fire(this);
         }
         mJob = null;
+    }
+
+    @Override
+    public void payTax(int amount) {
+        // TODO 自動生成されたメソッド・スタブ
+
     }
 
     public void borrow(int amount) {

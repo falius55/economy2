@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.player;
+package jp.gr.java_conf.falius.economy2.player.bank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,14 @@ import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.player.AbstractEntity;
+import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
+import jp.gr.java_conf.falius.economy2.player.Employable;
+import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
+import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
+import jp.gr.java_conf.falius.economy2.player.Worker;
 
-public class PrivateBank extends AbstractEntity implements Bank, AccountOpenable {
+public class PrivateBank extends AbstractEntity implements Bank, AccountOpenable, PrivateEntity {
     private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
@@ -97,6 +103,28 @@ public class PrivateBank extends AbstractEntity implements Bank, AccountOpenable
         mAccount.transfered(amount);
     }
 
+    /**
+     * 国債を引き受けます。
+     * @param amount
+     * @return
+     */
+    @Override
+    public Bank acceptGovernmentBond(int amount) {
+        mAccount.acceptGovernmentBond(amount);
+        return this;
+    }
+
+    /**
+     * 保有国債が償還されます。
+     * @param amount
+     * @return
+     */
+    @Override
+    public Bank redeemedGovernmentBond(int amount) {
+        mAccount.redeemedGovernmentBond(amount);
+        return this;
+    }
+
     @Override
     public Employable employ(Worker worker) {
         mStuffManager.employ(worker);
@@ -113,6 +141,12 @@ public class PrivateBank extends AbstractEntity implements Bank, AccountOpenable
     public int paySalary(Worker worker) {
         // TODO 自動生成されたメソッド・スタブ
         return 0;
+    }
+
+    @Override
+    public void payTax(int amount) {
+        // TODO 自動生成されたメソッド・スタブ
+
     }
 
 }

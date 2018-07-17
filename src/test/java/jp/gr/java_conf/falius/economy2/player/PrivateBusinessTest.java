@@ -17,6 +17,8 @@ import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.market.Market;
+import jp.gr.java_conf.falius.economy2.player.bank.Bank;
+import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 public class PrivateBusinessTest {
 

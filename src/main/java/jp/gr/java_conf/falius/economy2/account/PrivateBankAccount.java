@@ -5,19 +5,14 @@ import java.time.LocalDate;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 
 public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAccountTitle>
-        implements BankAccount<PrivateBankAccountTitle> {
-
-    private PrivateBankAccount() {
-        super(PrivateBankAccountTitle.class);
-    }
+        implements BankAccount<PrivateBankAccountTitle>, PrivateAccount<PrivateBankAccountTitle> {
 
     public static PrivateBankAccount newInstance() {
         return new PrivateBankAccount();
     }
 
-    @Override
-    protected PrivateBankAccountTitle[] items() {
-        return PrivateBankAccountTitle.values();
+    private PrivateBankAccount() {
+        super(PrivateBankAccountTitle.class);
     }
 
     /*
@@ -89,10 +84,31 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     }
 
     /**
-     * 預金処理
+     * 貸金処理を行う
      */
     @Override
+    public PrivateBankAccount lend(int amount) {
+        addLeft(PrivateBankAccountTitle.LOANS_RECEIVABLE, amount);
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
+        return this;
+    }
+
+    @Override
     public PrivateBankAccount borrow(int amount) {
+        return this;
+    }
+
+    @Override
+    public PrivateBankAccount acceptGovernmentBond(int amount) {
+        addLeft(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
+        return this;
+    }
+
+    @Override
+    public PrivateBankAccount redeemedGovernmentBond(int amount) {
+        addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
+        addRight(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
         return this;
     }
 
@@ -101,16 +117,6 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      */
     @Override
     public PrivateBankAccount repay(int amount) {
-        return this;
-    }
-
-    /**
-     * 貸金処理を行う
-     */
-    @Override
-    public PrivateBankAccount lend(int amount) {
-        addLeft(PrivateBankAccountTitle.LOANS_RECEIVABLE, amount);
-        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
 

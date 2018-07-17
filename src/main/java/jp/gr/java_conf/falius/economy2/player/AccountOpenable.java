@@ -1,5 +1,7 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import jp.gr.java_conf.falius.economy2.player.bank.Bank;
+
 public interface AccountOpenable extends Entity {
 
     public Bank mainBank();

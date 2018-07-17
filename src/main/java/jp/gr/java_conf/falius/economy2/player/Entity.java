@@ -22,12 +22,6 @@ public interface Entity {
     public void repaid(int amount);
 
     /**
-     * 納税します
-     * 公的機関ではサポートされません
-     */
-    public void payTax(int amount);
-
-    /**
      * 月末処理を行います。
      */
     public void closeEndOfMonth();

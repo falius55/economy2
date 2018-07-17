@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.player;
+package jp.gr.java_conf.falius.economy2.player.bank;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -12,6 +12,10 @@ import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
+import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
+import jp.gr.java_conf.falius.economy2.player.WorkerParson;
+import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
+import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 public class CentralBankTest {
 

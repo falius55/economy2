@@ -3,10 +3,10 @@ package jp.gr.java_conf.falius.economy2.market;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
-import jp.gr.java_conf.falius.economy2.player.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.Employable;
-import jp.gr.java_conf.falius.economy2.player.PrivateBank;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
+import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
+import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 public class Market {
 
