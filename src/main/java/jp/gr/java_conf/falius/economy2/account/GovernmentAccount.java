@@ -25,18 +25,6 @@ public class GovernmentAccount extends AbstractDoubleEntryAccount<GovernmentAcco
     }
 
     @Override
-    public Account<GovernmentAccountTitle> lend(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
-    @Override
-    public Account<GovernmentAccountTitle> borrow(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
-    @Override
     public Account<GovernmentAccountTitle> repay(int amount) {
         // TODO 自動生成されたメソッド・スタブ
         return null;

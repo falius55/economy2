@@ -1,23 +1,27 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.player.AbstractEntity;
+import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
 import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 import jp.gr.java_conf.falius.economy2.player.Worker;
 
-public class PrivateBank extends AbstractEntity implements Bank, AccountOpenable, PrivateEntity {
+public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
     private final PrivateBankAccount mAccount = PrivateBankAccount.newInstance();
+    private final Set<Loan> mLoans = new HashSet<>();
 
     public static Stream<PrivateBank> stream() {
         return sOwns.stream();
@@ -147,6 +151,16 @@ public class PrivateBank extends AbstractEntity implements Bank, AccountOpenable
     public void payTax(int amount) {
         // TODO 自動生成されたメソッド・スタブ
 
+    }
+
+    /**
+     * 借金の申し込むを受け入れ、お金を貸します
+     * @return 貸した金額
+     */
+    public int acceptDebt(Loan debt) {
+        mLoans.add(debt);
+        debt.accepted(accountBook(), Market.INSTANCE.nowDate());
+        return debt.amount();
     }
 
 }

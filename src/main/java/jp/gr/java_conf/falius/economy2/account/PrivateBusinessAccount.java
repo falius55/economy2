@@ -6,7 +6,8 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 
 public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle>
-        implements EmployableAccount<PrivateBusinessAccountTitle>, PrivateAccount<PrivateBusinessAccountTitle> {
+        implements EmployableAccount<PrivateBusinessAccountTitle>, PrivateAccount<PrivateBusinessAccountTitle>,
+        BorrowableAccount<PrivateBusinessAccountTitle> {
 
     private PrivateBusinessAccount() {
         super(PrivateBusinessAccountTitle.class);
@@ -127,16 +128,6 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
     @Override
     public PrivateBusinessAccount downMoney(int amount) {
         addLeft(PrivateBusinessAccountTitle.CASH, amount);
-        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
-        return this;
-    }
-
-    /**
-     * 貸金処理を行う
-     */
-    @Override
-    public PrivateBusinessAccount lend(int amount) {
-        addLeft(PrivateBusinessAccountTitle.LOANS_RECEIVABLE, amount);
         addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }

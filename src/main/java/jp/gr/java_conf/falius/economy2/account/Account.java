@@ -39,16 +39,6 @@ public interface Account<T extends Enum<T> & AccountTitle> {
     public Account<T> downMoney(int amount);
 
     /**
-     * 貸金処理を行います
-     */
-    public Account<T> lend(int amount);
-
-    /**
-     * 借金処理を行います
-     */
-    public Account<T> borrow(int amount);
-
-    /**
      * 返済処理を行います
      */
     public Account<T> repay(int amount);

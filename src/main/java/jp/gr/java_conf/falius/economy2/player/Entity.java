@@ -12,16 +12,6 @@ public interface Entity {
     public Account<? extends Enum<?>> accountBook();
 
     /**
-     * 借金を返済する
-     */
-    public void repay(int amount);
-
-    /**
-     * 返済を受ける
-     */
-    public void repaid(int amount);
-
-    /**
      * 月末処理を行います。
      */
     public void closeEndOfMonth();

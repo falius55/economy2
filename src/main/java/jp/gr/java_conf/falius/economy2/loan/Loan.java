@@ -1,6 +1,11 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.loan;
 
 import java.time.LocalDate;
+import java.util.Objects;
+
+import jp.gr.java_conf.falius.economy2.account.BorrowableAccount;
+import jp.gr.java_conf.falius.economy2.account.LendableAccount;
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 /**
  *
@@ -10,7 +15,7 @@ import java.time.LocalDate;
  *
  *      class A {
  *          boolean offer(Bank another) {
- *              DebtMediator dm = new DebtMediator(this, 10000);
+ *              Loan dm = new Loan(this, 10000);
  *              return another.review(dm);
  *          }
  *      }
@@ -24,36 +29,18 @@ import java.time.LocalDate;
  * @author "ymiyauchi"
  *
  */
-public class DebtMediator {
+public class Loan {
     private LocalDate mAccrualDate; // 債権債務発生日
     private LocalDate mDeadLine; // 期限
-    private Account<?> mCreditorAccount = null; // 債権者の会計
-    private Account<?> mDebtorAccount; // 債務者の会計
-    private int mAmount = 0; // 金額
 
-    public DebtMediator(Account<?> debtorAccount, int amount) {
+    private LendableAccount<?> mCreditorAccount = null; // 債権者の会計
+    private BorrowableAccount<?> mDebtorAccount; // 債務者の会計
+
+    private final int mAmount; // 金額
+
+    public Loan(BorrowableAccount<?> debtorAccount, int amount) {
         mDebtorAccount = debtorAccount;
         mAmount = amount;
-    }
-    /**
-     * 債務が受け入れられ、債権債務関係が発生する
-     */
-    public DebtMediator accepted(Account<?> creditorAccount, LocalDate date) {
-        if (mCreditorAccount != null) throw new IllegalStateException("債権債務関係はすでに発生しています");
-        mCreditorAccount = creditorAccount;
-        mAccrualDate = date;
-        mDebtorAccount.borrow(amount());
-        creditorAccount.lend(amount());
-        return this;
-    }
-
-    /**
-     * 債権を譲渡する
-     * @param creditorAccount 新たな債権者の会計
-     */
-    public DebtMediator transfer(Account<?> creditorAccount) {
-        mCreditorAccount = creditorAccount;
-        return this;
     }
 
     /**
@@ -65,6 +52,33 @@ public class DebtMediator {
 
     public LocalDate deadLine() {
         return mDeadLine;
+    }
+
+    public Loan accepted(LendableAccount<?> creditorAccount) {
+        return accepted(creditorAccount, Market.INSTANCE.nowDate());
+    }
+
+    /**
+     * 債務が受け入れられ、債権債務関係が発生する
+     */
+    public Loan accepted(LendableAccount<?> creditorAccount, LocalDate date) {
+        if (Objects.nonNull(mCreditorAccount)) {
+            throw new IllegalStateException("債権債務関係はすでに発生しています");
+        }
+        mCreditorAccount = creditorAccount;
+        mAccrualDate = date;
+        mDebtorAccount.borrow(amount());
+        creditorAccount.lend(amount());
+        return this;
+    }
+
+    /**
+     * 債権を譲渡する
+     * @param creditorAccount 新たな債権者の会計
+     */
+    public Loan transfer(LendableAccount<?> creditorAccount) {
+        mCreditorAccount = creditorAccount;
+        return this;
     }
 
     /**

@@ -1,20 +1,23 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 
-import jp.gr.java_conf.falius.economy2.account.DebtMediator;
 import jp.gr.java_conf.falius.economy2.account.WorkerParsonAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.loan.Loan;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
-public class WorkerParson extends AbstractEntity implements Worker, AccountOpenable, PrivateEntity {
+public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Borrowable {
     private final WorkerParsonAccount mAccount = WorkerParsonAccount.newInstance();
     private final PrivateBank mMainBank;
+    private final Set<Loan> mLoans = new HashSet<>();
 
     private Employable mJob = null;
 
@@ -145,11 +148,29 @@ public class WorkerParson extends AbstractEntity implements Worker, AccountOpena
 
     }
 
+    @Override
     public void borrow(int amount) {
         Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
         PrivateBank bank = opt.get();
-        DebtMediator dm = super.offerDebt(amount);
-        bank.acceptDebt(dm);
+        Loan loan = offerDebt(amount);
+        bank.acceptDebt(loan);
+    }
+
+    /**
+     * 借金をするため、申し込むために使うDebtMediatorオブジェクトを作成する
+     * 借金が不成立の場合は想定外
+     */
+    private Loan offerDebt(int amount) {
+        Loan debt = new Loan(accountBook(), amount);
+        mLoans.add(debt);
+        return debt;
+    }
+
+    /**
+     * 借金を返済します
+     */
+    public void repay(int amount) {
+        accountBook().repay(amount);
     }
 
     public Optional<PrivateBusiness> establish(Industry industry, int initialCapital) {

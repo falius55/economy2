@@ -2,6 +2,7 @@ package jp.gr.java_conf.falius.economy2.player;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,15 +12,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jp.gr.java_conf.falius.economy2.account.DebtMediator;
 import jp.gr.java_conf.falius.economy2.account.PrivateBusinessAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
+import jp.gr.java_conf.falius.economy2.loan.Loan;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
-public class PrivateBusiness extends AbstractEntity implements AccountOpenable, Employable, PrivateEntity {
+public class PrivateBusiness implements AccountOpenable, Employable, PrivateEntity, Borrowable {
     private static final List<PrivateBusiness> sOwns = new ArrayList<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
 
@@ -29,6 +30,7 @@ public class PrivateBusiness extends AbstractEntity implements AccountOpenable, 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
     private final PrivateBusinessAccount mAccount = PrivateBusinessAccount.newInstance();
     private final PrivateBank mMainBank;
+    private final Set<Loan> mLoans = new HashSet<>();
 
     public static Stream<PrivateBusiness> stream() {
         return sOwns.stream();
@@ -42,10 +44,10 @@ public class PrivateBusiness extends AbstractEntity implements AccountOpenable, 
         sOwns.clear();
     }
 
-
     public PrivateBusiness(Worker founder, Industry industry, int initialExpenses) {
         this(founder, industry, industry.products(), initialExpenses);
     }
+
     public PrivateBusiness(Worker founder, Industry industry, Set<Product> products, int initialExpenses) {
         mIndustry = industry;
         mProducts = products;
@@ -154,12 +156,30 @@ public class PrivateBusiness extends AbstractEntity implements AccountOpenable, 
         mAccount.purchase(purchase);
     }
 
-    private void borrow(int amount) {
+    @Override
+    public void borrow(int amount) {
         Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
         PrivateBank bank = opt.get();
-        DebtMediator dm = super.offerDebt(amount);
+        Loan dm = offerDebt(amount);
         bank.acceptDebt(dm);
         mMainBank.transfered(amount);
+    }
+
+    /**
+     * 借金をするため、申し込むために使うDebtMediatorオブジェクトを作成する
+     * 借金が不成立の場合は想定外
+     */
+    private Loan offerDebt(int amount) {
+        Loan debt = new Loan(accountBook(), amount);
+        mLoans.add(debt);
+        return debt;
+    }
+
+    /**
+     * 借金を返済します
+     */
+    public void repay(int amount) {
+        accountBook().repay(amount);
     }
 
     @Override

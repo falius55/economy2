@@ -48,6 +48,7 @@ public static final Market INSTANCE;
     }
 
     public void clear() {
+        mDate = LocalDate.now();
         PrivateBusiness.clear();
         PrivateBank.clear();
         CentralBank.INSTANCE.clear();

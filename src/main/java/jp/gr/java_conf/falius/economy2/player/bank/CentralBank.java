@@ -1,11 +1,10 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
 import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
-import jp.gr.java_conf.falius.economy2.player.AbstractEntity;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
 import jp.gr.java_conf.falius.economy2.player.Worker;
 
-public class CentralBank extends AbstractEntity implements Bank {
+public class CentralBank implements Bank {
     public static final CentralBank INSTANCE;
     private static final int SALARY = 100000;
 
@@ -37,13 +36,6 @@ public class CentralBank extends AbstractEntity implements Bank {
     public void closeEndOfMonth() {
         // TODO 自動生成されたメソッド・スタブ
     }
-
-    /**
-     * 借金を返済します。
-     * 中央銀行はサポートしていません。
-     */
-    @Override
-    public  void repay(int amount) { throw new UnsupportedOperationException(); }
 
     /**
      * 市中銀行からの預け入れ

@@ -24,23 +24,8 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
     }
 
     @Override
-    public Account<CentralBankAccountTitle> borrow(int amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Account<CentralBankAccountTitle> repay(int amount) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * 民間銀行への貸付
-     */
-    @Override
-    public Account<CentralBankAccountTitle> lend(int amount) {
-        addLeft(CentralBankAccountTitle.LOANS_RECEIVABLE, amount);
-        addRight(CentralBankAccountTitle.DEPOSIT, amount);
-        return this;
     }
 
     @Override

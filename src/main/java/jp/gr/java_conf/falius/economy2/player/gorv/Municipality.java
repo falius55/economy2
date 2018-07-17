@@ -2,7 +2,6 @@ package jp.gr.java_conf.falius.economy2.player.gorv;
 
 import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.player.AbstractEntity;
 import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 
 /**
@@ -10,7 +9,7 @@ import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
  * @author "ymiyauchi"
  *
  */
-public class Municipality extends AbstractEntity implements Government {
+public class Municipality implements Government {
     private final GovernmentAccount mAccount = GovernmentAccount.newInstance();
 
     @Override

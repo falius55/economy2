@@ -5,7 +5,8 @@ import java.time.LocalDate;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 
 public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAccountTitle>
-        implements BankAccount<PrivateBankAccountTitle>, PrivateAccount<PrivateBankAccountTitle> {
+        implements BankAccount<PrivateBankAccountTitle>, PrivateAccount<PrivateBankAccountTitle>,
+        LendableAccount<PrivateBankAccountTitle> {
 
     public static PrivateBankAccount newInstance() {
         return new PrivateBankAccount();
@@ -90,11 +91,6 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     public PrivateBankAccount lend(int amount) {
         addLeft(PrivateBankAccountTitle.LOANS_RECEIVABLE, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
-        return this;
-    }
-
-    @Override
-    public PrivateBankAccount borrow(int amount) {
         return this;
     }
 

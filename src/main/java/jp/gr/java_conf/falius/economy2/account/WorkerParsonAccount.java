@@ -4,7 +4,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 
 public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitle>
-        implements PrivateAccount<WorkerParsonAccountTitle> {
+        implements PrivateAccount<WorkerParsonAccountTitle>, BorrowableAccount<WorkerParsonAccountTitle> {
 
     public static WorkerParsonAccount newInstance() {
         return new WorkerParsonAccount();
@@ -29,13 +29,7 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
     }
 
     @Override
-    public Account<WorkerParsonAccountTitle> lend(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
-    @Override
-    public Account<WorkerParsonAccountTitle> borrow(int amount) {
+    public WorkerParsonAccount borrow(int amount) {
         // TODO 自動生成されたメソッド・スタブ
         return null;
     }
