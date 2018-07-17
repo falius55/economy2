@@ -2,6 +2,7 @@ package jp.gr.java_conf.falius.economy2.account;
 
 import java.time.LocalDate;
 
+import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 
 public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle>
@@ -13,11 +14,6 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
 
     public static PrivateBusinessAccount newInstance() {
         return new PrivateBusinessAccount();
-    }
-
-    @Override
-    public PrivateBusinessAccountTitle defaultItem() {
-        return PrivateBusinessAccountTitle.defaultItem();
     }
 
     @Override
@@ -45,6 +41,9 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
      * @param receiveItem 受取科目
      */
     public PrivateBusinessAccount saleBy(PrivateBusinessAccountTitle receiveItem, int mount) {
+        if (receiveItem.type() != AccountType.ASSETS) {
+            throw new IllegalArgumentException();
+        }
         addLeft(receiveItem, mount);
         addRight(PrivateBusinessAccountTitle.SALES, mount);
         return this;

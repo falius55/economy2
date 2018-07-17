@@ -18,15 +18,16 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
-public class PrivateBusiness extends AbstractEntity implements Employable {
+public class PrivateBusiness extends AbstractEntity implements AccountOpenable, Employable {
     private static final List<PrivateBusiness> sOwns = new ArrayList<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
 
+    private final Industry mIndustry;
     private final Set<Product> mProducts;
     private final Map<Product, StockManager> mStockManagers; // 製品ごとに在庫管理
-    private final Industry mIndustry;
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
     private final PrivateBusinessAccount mAccount = PrivateBusinessAccount.newInstance();
+    private final PrivateBank mMainBank;
 
     public static Stream<PrivateBusiness> stream() {
         return sOwns.stream();
@@ -40,26 +41,77 @@ public class PrivateBusiness extends AbstractEntity implements Employable {
         sOwns.clear();
     }
 
+
+    public PrivateBusiness(Worker founder, Industry industry, int initialExpenses) {
+        this(founder, industry, industry.products(), initialExpenses);
+    }
     public PrivateBusiness(Worker founder, Industry industry, Set<Product> products, int initialExpenses) {
         mIndustry = industry;
         mProducts = products;
         mStockManagers = products.stream()
                 .collect(Collectors.toMap(Function.identity(), industry.type()::newManager, (p1, p2) -> p1,
                         () -> new EnumMap<Product, StockManager>(Product.class)));
-        mAccount.establish(initialExpenses);
-        super.transfered(initialExpenses);
+        mMainBank = searchBank();
 
+        mAccount.establish(initialExpenses);
+        mMainBank.transfered(initialExpenses);
         sOwns.add(this);
         employ(founder);
     }
 
-    public PrivateBusiness(Worker founder, Industry industry, int initialExpenses) {
-        this(founder, industry, industry.products(), initialExpenses);
+    /**
+     * 候補が見つからなければ例外を投げる
+     */
+    private PrivateBank searchBank() {
+        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
+        if (!opt.isPresent()) {
+            throw new IllegalStateException("market has no banks");
+        }
+        return opt.get();
     }
 
     @Override
-    protected final PrivateBusinessAccount account() {
+    public final PrivateBusinessAccount accountBook() {
         return mAccount;
+    }
+
+    @Override
+    public PrivateBank mainBank() {
+        return mMainBank;
+    }
+
+    @Override
+    public int cash() {
+        return mAccount.get(PrivateBusinessAccountTitle.CASH);
+    }
+
+    @Override
+    public int deposit() {
+        return mAccount.get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
+    }
+
+    @Override
+    public boolean isRecruit() {
+        return mStuffManager.isRecruit();
+    }
+
+    @Override
+    public boolean has(Worker worker) {
+        return mStuffManager.has(worker);
+    }
+
+    /**
+     * 業種が同じかどうかを判定します
+     */
+    public boolean is(Industry industry) {
+        return industry == mIndustry;
+    }
+
+    /**
+     * 業態が同じかどうかを判定します
+     */
+    public boolean is(Industry.Type type) {
+        return type == mIndustry.type();
     }
 
     /**
@@ -70,6 +122,61 @@ public class PrivateBusiness extends AbstractEntity implements Employable {
     public boolean canSale(Product product, int require) {
         // 製品を取り扱っており、在庫があればtrue
         return mProducts.contains(product) && mStockManagers.get(product).canShipOut(require);
+    }
+
+    @Override
+    public void closeEndOfMonth() {
+        calcPurchase();
+        int payable = mAccount.settlePayable();
+        mMainBank.transfer(payable);
+        int receivable = mAccount.settleReceivable();
+        mMainBank.transfered(receivable);
+
+        int cash = cash();
+        if (cash < 0) {
+            downMoney(-cash);
+        }
+        int deposit = deposit();
+        if (deposit < 0) {
+            borrow(-deposit);
+        }
+    }
+
+    /**
+     * 未計上の仕入費を計上します。
+     */
+    private void calcPurchase() {
+        int purchase = mStockManagers.entrySet().stream()
+                .map(e -> e.getValue())
+                .mapToInt(sm -> sm.calcPurchaseExpense())
+                .sum();
+        mAccount.purchase(purchase);
+    }
+
+    private void borrow(int amount) {
+        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        PrivateBank bank = opt.get();
+        DebtMediator dm = super.offerDebt(amount);
+        bank.acceptDebt(dm);
+        mMainBank.transfered(amount);
+    }
+
+    @Override
+    public Employable employ(Worker worker) {
+        mStuffManager.employ(worker);
+        return this;
+    }
+
+    @Override
+    public Employable fire(Worker worker) {
+        mStuffManager.fire(worker);
+        return this;
+    }
+
+    @Override
+    public int paySalary(Worker worker) {
+        // TODO 自動生成されたメソッド・スタブ
+        return 0;
     }
 
     /**
@@ -107,103 +214,11 @@ public class PrivateBusiness extends AbstractEntity implements Employable {
         return OptionalInt.of(price);
     }
 
-    /**
-     * 未計上の仕入費を計上します。
-     */
-    public void calcPurchase() {
-        int purchase = mStockManagers.entrySet().stream()
-                .map(e -> e.getValue())
-                .mapToInt(sm -> sm.calcPurchaseExpense())
-                .sum();
-
-        mAccount.purchase(purchase);
-    }
-
-    /**
-     * 業種が同じかどうかを判定します
-     */
-    public boolean is(Industry industry) {
-        return industry == mIndustry;
-    }
-
-    /**
-     * 業態が同じかどうかを判定します
-     */
-    public boolean is(Industry.Type type) {
-        return type == mIndustry.type();
-    }
-
-    @Override
-    public boolean isRecruit() {
-        return mStuffManager.isRecruit();
-    }
-
-    @Override
-    public Employable employ(Worker worker) {
-        mStuffManager.employ(worker);
-        return this;
-    }
-
-    @Override
-    public Employable fire(Worker worker) {
-        mStuffManager.fire(worker);
-        return this;
-    }
-
-    @Override
-    public int paySalary(Worker worker) {
-        // TODO 自動生成されたメソッド・スタブ
-        return 0;
-    }
-
-    @Override
-    public boolean has(Worker worker) {
-        return mStuffManager.has(worker);
-    }
-
-    /**
-     * 候補が見つからなければ例外を投げる
-     */
-    @Override
-    protected Optional<Bank> searchBank() {
-        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
-        if (!opt.isPresent()) {
-            throw new IllegalStateException("market has no banks");
-        }
-        return Optional.of(opt.get());
-    }
-
-    public void borrow(int amount) {
-        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
-        PrivateBank bank = opt.get();
-        DebtMediator dm = super.offerDebt(amount);
-        bank.acceptDebt(dm);
-        super.transfered(amount);
-    }
-
     public void update() {
+        // use in Market#closeEndOfMonth
         mStockManagers.entrySet().stream()
                 .map(e -> e.getValue())
                 .forEach(sm -> sm.update());
-    }
-
-    @Override
-    public void closeEndOfMonth() {
-        calcPurchase();
-        int payable = mAccount.settlePayable();
-        super.transfered(-payable);
-        int receivable = mAccount.settleReceivable();
-        super.transfered(receivable);
-
-        int cash = mAccount.get(PrivateBusinessAccountTitle.CASH);
-        if (cash < 0) {
-            downMoney(-cash);
-        }
-        int deposit = mAccount.get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
-        if (deposit < 0) {
-            borrow(-deposit);
-        }
-
     }
 
 }

@@ -32,7 +32,6 @@ public enum WorkerParsonAccountTitle implements AccountTitle {
 
     private final String mName;
     private final AccountType mType;
-    private static final WorkerParsonAccountTitle sDefaultItem = CASH;
     private static final Map<Product, WorkerParsonAccountTitle> sProductToTitle;
 
     static {
@@ -50,9 +49,6 @@ public enum WorkerParsonAccountTitle implements AccountTitle {
 
     public AccountType type() {
         return mType;
-    }
-    public static WorkerParsonAccountTitle defaultItem() {
-        return sDefaultItem;
     }
 
     @Override

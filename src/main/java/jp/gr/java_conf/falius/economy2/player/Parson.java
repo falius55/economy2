@@ -10,8 +10,4 @@ public interface Parson extends Entity {
 
     public OptionalInt buy(Product product, int require);
 
-    public int cash();
-
-    public int deposit();
-
 }

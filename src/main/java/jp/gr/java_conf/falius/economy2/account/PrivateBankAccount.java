@@ -16,11 +16,6 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     }
 
     @Override
-    public PrivateBankAccountTitle defaultItem() {
-        return PrivateBankAccountTitle.defaultItem();
-    }
-
-    @Override
     protected PrivateBankAccountTitle[] items() {
         return PrivateBankAccountTitle.values();
     }

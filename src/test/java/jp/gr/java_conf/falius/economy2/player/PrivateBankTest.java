@@ -31,8 +31,8 @@ public class PrivateBankTest {
         WorkerParson worker = new WorkerParson();
         worker.getSalary(salary);
 
-        assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary));
     }
 
     @Test
@@ -40,20 +40,18 @@ public class PrivateBankTest {
         int initialExpenses = 100000;
         PrivateBank bank = new PrivateBank();
 
-        WorkerParson worker1 = new WorkerParson();
-        WorkerParson worker2 = new WorkerParson();
-        WorkerParson worker3 = new WorkerParson();
         PrivateBusiness farmer =
                 new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
-        assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses));
-        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
-        assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 2));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 2));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses));
+        PrivateBusiness maker =
+                new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 2));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 2));
         PrivateBusiness coop =
                 new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
-        assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 3));
-        assertThat(bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 3));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 3));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 3));
 
     }
 
@@ -78,29 +76,29 @@ public class PrivateBankTest {
         int countToEndOfMonth = Market.INSTANCE.nowDate().lengthOfMonth()
                 - Market.INSTANCE.nowDate().getDayOfMonth();
         IntStream.range(0, countToEndOfMonth).forEach(n -> Market.INSTANCE.nextDay());
-        System.out.printf("worker: %s%n", worker.account().toString());
-        System.out.printf("farmer: %s%n", farmer.account().toString());
-        System.out.printf("maker: %s%n", maker.account().toString());
-        System.out.printf("coop: %s%n", coop.account().toString());
-        System.out.printf("bank : %s%n", bank.account().toString());
+        System.out.printf("worker: %s%n", worker.accountBook().toString());
+        System.out.printf("farmer: %s%n", farmer.accountBook().toString());
+        System.out.printf("maker: %s%n", maker.accountBook().toString());
+        System.out.printf("coop: %s%n", coop.accountBook().toString());
+        System.out.printf("bank : %s%n", bank.accountBook().toString());
 
         int loan = 0;
-        loan += worker.account().get(WorkerParsonAccountTitle.LOANS_PAYABLE);
-        loan += farmer.account().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
-        loan += maker.account().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
-        loan += coop.account().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
-        assertThat(bank.account().get(PrivateBankAccountTitle.LOANS_RECEIVABLE), is(loan));
+        loan += worker.accountBook().get(WorkerParsonAccountTitle.LOANS_PAYABLE);
+        loan += farmer.accountBook().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
+        loan += maker.accountBook().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
+        loan += coop.accountBook().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.LOANS_RECEIVABLE), is(loan));
 
         int deposit = 0;
-        deposit += worker.account().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
-        deposit += farmer.account().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
-        deposit += maker.account().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
-        deposit += coop.account().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
-        assertThat(bank.account().get(PrivateBankAccountTitle.DEPOSIT), is(deposit));
+        deposit += worker.accountBook().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
+        deposit += farmer.accountBook().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
+        deposit += maker.accountBook().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
+        deposit += coop.accountBook().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(deposit));
 
-        assertThat(bank.account().get(PrivateBankAccountTitle.CASH)
-                + bank.account().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS)
-                + bank.account().get(PrivateBankAccountTitle.LOANS_RECEIVABLE),
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CASH)
+                + bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS)
+                + bank.accountBook().get(PrivateBankAccountTitle.LOANS_RECEIVABLE),
                 is(deposit));
 
     }

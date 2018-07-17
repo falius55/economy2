@@ -9,6 +9,13 @@ public interface Employable extends Entity {
     public boolean isRecruit();
 
     /**
+     * 労働者が所属しているかどうか
+     * @param worker
+     * @return
+     */
+    public boolean has(Worker worker);
+
+    /**
      * 人を雇用します
      */
     public Employable employ(Worker worker);
@@ -24,12 +31,5 @@ public interface Employable extends Entity {
      * @return 計算された給与額
      */
     public int paySalary(Worker worker);
-
-    /**
-     * 労働者が所属しているかどうか
-     * @param worker
-     * @return
-     */
-    public boolean has(Worker worker);
 
 }

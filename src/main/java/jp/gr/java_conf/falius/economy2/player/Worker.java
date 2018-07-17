@@ -2,6 +2,8 @@ package jp.gr.java_conf.falius.economy2.player;
 
 public interface Worker extends Parson {
 
+    public boolean hasJob();
+
     /**
      * 給与を受け取ります。
      * @param amount
@@ -19,7 +21,4 @@ public interface Worker extends Parson {
      * @return
      */
     public void retireJob();
-
-    public boolean hasJob();
-
 }

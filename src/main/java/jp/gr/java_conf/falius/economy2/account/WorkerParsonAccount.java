@@ -19,40 +19,9 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
     }
 
     @Override
-    public WorkerParsonAccountTitle defaultItem() {
-        return WorkerParsonAccountTitle.defaultItem();
-    }
-
-    @Override
-    public void add(WorkerParsonAccountTitle item, int amount) {
-        WorkerParsonAccountTitle defaultItem = defaultItem();
-        if (!defaultItem.type().equals(AccountType.ASSETS)) {
-            throw new IllegalArgumentException("defaultItem is not Assets");
-        }
-
-        super.increase(item, amount);
-
-        switch (item.type()) {
-        case REVENUE:
-        case EQUITY:
-        case LIABILITIES:
-            super.increase(defaultItem, amount);
-            break;
-
-        case EXPENSE:
-        case ASSETS:
-            super.decrease(defaultItem, amount);
-            break;
-
-        default:
-            break;
-        }
-
-    }
-
-    @Override
     public Account<WorkerParsonAccountTitle> saveMoney(int amount) {
-        add(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
+        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
+        super.decrease(WorkerParsonAccountTitle.CASH, amount);
         return this;
     }
 
@@ -107,6 +76,15 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
     public WorkerParsonAccount establish(int initialCapital) {
         super.increase(WorkerParsonAccountTitle.ESTABLISH_EXPENSES, initialCapital);
         super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, initialCapital);
+        return this;
+    }
+
+    public WorkerParsonAccount buyOnCash(WorkerParsonAccountTitle expenseTitle, int amount) {
+        if (expenseTitle.type() != AccountType.EXPENSE) {
+            throw new IllegalArgumentException();
+        }
+        super.increase(expenseTitle, amount);
+        super.decrease(WorkerParsonAccountTitle.CASH, amount);
         return this;
     }
 

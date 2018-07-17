@@ -11,24 +11,98 @@ import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
-public class WorkerParson extends AbstractEntity implements Worker {
+public class WorkerParson extends AbstractEntity implements Worker, AccountOpenable {
     private final WorkerParsonAccount mAccount = WorkerParsonAccount.newInstance();
+    private final PrivateBank mMainBank;
 
     private Employable mJob = null;
 
     public WorkerParson() {
+        mMainBank = searchBank();
+    }
+
+    private PrivateBank searchBank() {
+        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
+        if (!opt.isPresent()) {
+            throw new IllegalStateException("market has no banks");
+        }
+        return opt.get();
     }
 
     @Override
-    protected final WorkerParsonAccount account() {
+    public final WorkerParsonAccount accountBook() {
         return mAccount;
     }
 
-    public void borrow(int amount) {
-        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
-        PrivateBank bank = opt.get();
-        DebtMediator dm = super.offerDebt(amount);
-        bank.acceptDebt(dm);
+    @Override
+    public PrivateBank mainBank() {
+        return mMainBank;
+    }
+
+    @Override
+    public int cash() {
+        return mAccount.get(WorkerParsonAccountTitle.CASH);
+    }
+
+    @Override
+    public int deposit() {
+        return mAccount.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
+    }
+
+    @Override
+    public boolean hasJob() {
+        return Objects.nonNull(mJob);
+    }
+
+    @Override
+    public void closeEndOfMonth() {
+        // TODO 自動生成されたメソッド・スタブ
+
+    }
+
+    @Override
+    public OptionalInt buy(Product product) {
+        return buy(product, 1);
+    }
+
+    @Override
+    public OptionalInt buy(Product product, int require) {
+        Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
+        if (!optTitle.isPresent()) {
+            return OptionalInt.empty();
+        } // 労働者が買うような代物じゃない
+        WorkerParsonAccountTitle title = optTitle.get();
+
+        Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.RETAIL)
+                .filter(pb -> pb.canSale(product, require)).findAny();
+        if (!optStore.isPresent()) {
+            return OptionalInt.empty();
+        }
+        PrivateBusiness store = optStore.get();
+
+        OptionalInt optPrice = store.saleByCash(product, require);
+        if (!optPrice.isPresent()) {
+            return OptionalInt.empty();
+        }
+        int price = optPrice.getAsInt();
+
+        final int cash = cash();
+        if (cash >= price) {
+            mAccount.buyOnCash(title, price);
+            return optPrice;
+        }
+
+        final int deposit = deposit();
+        if (cash + deposit >= price) {
+            downMoney(price - cash);
+            mAccount.buyOnCash(title, price);
+            return optPrice;
+        }
+
+        borrow(price - (cash + deposit));
+        downMoney(deposit());
+        mAccount.buyOnCash(title, price);
+        return optPrice;
     }
 
     /**
@@ -37,7 +111,7 @@ public class WorkerParson extends AbstractEntity implements Worker {
     @Override
     public void getSalary(int amount) {
         mAccount.getSalary(amount);
-        super.transfered(amount);
+        mMainBank.transfered(amount);
     }
 
     @Override
@@ -64,79 +138,11 @@ public class WorkerParson extends AbstractEntity implements Worker {
         mJob = null;
     }
 
-    @Override
-    public boolean hasJob() {
-        return Objects.nonNull(mJob);
-    }
-
-    @Override
-    public OptionalInt buy(Product product, int require) {
-        Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
-        if (!optTitle.isPresent()) {
-            return OptionalInt.empty();
-        } // 労働者が買うような代物じゃない
-        WorkerParsonAccountTitle title = optTitle.get();
-
-        Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.RETAIL)
-                .filter(pb -> pb.canSale(product, require)).findAny();
-        if (!optStore.isPresent()) {
-            return OptionalInt.empty();
-        }
-        PrivateBusiness store = optStore.get();
-
-        OptionalInt optPrice = store.saleByCash(product, require);
-        if (!optPrice.isPresent()) {
-            return OptionalInt.empty();
-        }
-        int price = optPrice.getAsInt();
-
-        final int cash = mAccount.get(WorkerParsonAccountTitle.CASH);
-        if (cash >= price) {
-            mAccount.add(title, price);
-            return optPrice;
-        }
-
-        final int deposit = mAccount.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
-        if (cash + deposit >= price) {
-            downMoney(price - cash);
-            mAccount.add(title, price);
-            return optPrice;
-        }
-
-        downMoney(deposit);
-        borrow(price - (cash + deposit));
-        mAccount.add(title, price);
-        return optPrice;
-    }
-
-    @Override
-    public OptionalInt buy(Product product) {
-        return buy(product, 1);
-    }
-
-    @Override
-    public int cash() {
-        return mAccount.get(WorkerParsonAccountTitle.CASH);
-    }
-
-    @Override
-    public int deposit() {
-        return mAccount.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
-    }
-
-    @Override
-    protected Optional<Bank> searchBank() {
-        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
-        if (!opt.isPresent()) {
-            throw new IllegalStateException("market has no banks");
-        }
-        return Optional.of(opt.get());
-    }
-
-    @Override
-    public void closeEndOfMonth() {
-        // TODO 自動生成されたメソッド・スタブ
-
+    public void borrow(int amount) {
+        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        PrivateBank bank = opt.get();
+        DebtMediator dm = super.offerDebt(amount);
+        bank.acceptDebt(dm);
     }
 
     public Optional<PrivateBusiness> establish(Industry industry, int initialCapital) {
@@ -148,10 +154,10 @@ public class WorkerParson extends AbstractEntity implements Worker {
 
         if (deposit < initialCapital) {
             int shortfall = initialCapital - deposit;
-            super.saveMoney(shortfall);
+            saveMoney(shortfall);
         }
         mAccount.establish(initialCapital);
-        super.transfer(initialCapital);
+        mMainBank.transfer(initialCapital);
         retireJob();
         return Optional.of(new PrivateBusiness(this, industry, initialCapital));
     }

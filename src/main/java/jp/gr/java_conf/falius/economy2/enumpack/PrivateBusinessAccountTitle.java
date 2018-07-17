@@ -38,7 +38,6 @@ public enum PrivateBusinessAccountTitle implements AccountTitle {
 
     private final AccountType mType;
     private final String mName;
-    private static final PrivateBusinessAccountTitle mDefaultItem = CHECKING_ACCOUNTS;
 
     private static final Map<String, PrivateBusinessAccountTitle> sStringToEnum = new HashMap<>(); // 日本語名から業種enumへのマップ
     static {
@@ -62,10 +61,6 @@ public enum PrivateBusinessAccountTitle implements AccountTitle {
 
     public static PrivateBusinessAccountTitle fromString(String name) {
         return sStringToEnum.get(name);
-    }
-
-    public static PrivateBusinessAccountTitle defaultItem() {
-        return mDefaultItem;
     }
 
 }

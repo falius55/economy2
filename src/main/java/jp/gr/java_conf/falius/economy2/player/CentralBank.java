@@ -1,7 +1,5 @@
 package jp.gr.java_conf.falius.economy2.player;
 
-import java.util.Optional;
-
 import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
 
 public class CentralBank extends AbstractEntity implements Bank {
@@ -15,27 +13,26 @@ public class CentralBank extends AbstractEntity implements Bank {
         INSTANCE = new CentralBank();
     }
 
-    private CentralBank() {
-    }
+    private CentralBank() {}
 
-    public void clear() {
-        mAccount.clearBook();
-    }
-
-    /**
-     * 中央銀行はサポートしていません。
-     */
     @Override
-    public CentralBank saveMoney(int amount) {
-        throw new UnsupportedOperationException();
+    public CentralBankAccount accountBook() {
+        return mAccount;
     }
 
-    /**
-     * 中央銀行はサポートしていません。
-     */
     @Override
-    public CentralBank downMoney(int amount) {
-        throw new UnsupportedOperationException();
+    public boolean isRecruit() {
+        return mStuffManager.isRecruit();
+    }
+
+    @Override
+    public boolean has(Worker worker) {
+        return mStuffManager.has(worker);
+    }
+
+    @Override
+    public void closeEndOfMonth() {
+        // TODO 自動生成されたメソッド・スタブ
     }
 
     /**
@@ -43,14 +40,7 @@ public class CentralBank extends AbstractEntity implements Bank {
      * 中央銀行はサポートしていません。
      */
     @Override
-    public  void repay(int amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isRecruit() {
-        return mStuffManager.isRecruit();
-    }
+    public  void repay(int amount) { throw new UnsupportedOperationException(); }
 
     @Override
     public CentralBank employ(Worker worker) {
@@ -71,11 +61,6 @@ public class CentralBank extends AbstractEntity implements Bank {
         return SALARY;
     }
 
-    @Override
-    public boolean has(Worker worker) {
-        return mStuffManager.has(worker);
-    }
-
     /**
      * 市中銀行からの預け入れ
      */
@@ -93,16 +78,6 @@ public class CentralBank extends AbstractEntity implements Bank {
     }
 
     @Override
-    protected CentralBankAccount account() {
-        return mAccount;
-    }
-
-    @Override
-    protected Optional<Bank> searchBank() {
-        return Optional.empty();
-    }
-
-    @Override
     public void transfer(int amount) {
         mAccount.transfer(amount);
     }
@@ -112,9 +87,8 @@ public class CentralBank extends AbstractEntity implements Bank {
         mAccount.transfered(amount);
     }
 
-    @Override
-    public void closeEndOfMonth() {
-        // TODO 自動生成されたメソッド・スタブ
+    public void clear() {
+        mAccount.clearBook();
     }
 
 }

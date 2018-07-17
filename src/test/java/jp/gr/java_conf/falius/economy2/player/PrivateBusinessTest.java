@@ -86,19 +86,19 @@ public class PrivateBusinessTest {
 
         int countToEndOfMonth = Market.INSTANCE.nowDate().lengthOfMonth() - Market.INSTANCE.nowDate().getDayOfMonth();
         IntStream.range(0, countToEndOfMonth + 10).forEach(n -> Market.INSTANCE.nextDay());
-        System.out.println(farmer.account().toString());
-        System.out.println(maker.account().toString());
-        System.out.println(coop.account().toString());
+        System.out.println(farmer.accountBook().toString());
+        System.out.println(maker.accountBook().toString());
+        System.out.println(coop.accountBook().toString());
 
-        int farmerSales = farmer.account().get(PrivateBusinessAccountTitle.SALES);
-        int makerSales = maker.account().get(PrivateBusinessAccountTitle.SALES);
-        int coopSales = coop.account().get(PrivateBusinessAccountTitle.SALES);
+        int farmerSales = farmer.accountBook().get(PrivateBusinessAccountTitle.SALES);
+        int makerSales = maker.accountBook().get(PrivateBusinessAccountTitle.SALES);
+        int coopSales = coop.accountBook().get(PrivateBusinessAccountTitle.SALES);
         assertThat(farmerSales, is(greaterThan(0)));
 
-        assertThat(farmerSales, is(maker.account().get(PrivateBusinessAccountTitle.PURCHESES)));
-        assertThat(makerSales, is(coop.account().get(PrivateBusinessAccountTitle.PURCHESES)));
+        assertThat(farmerSales, is(maker.accountBook().get(PrivateBusinessAccountTitle.PURCHESES)));
+        assertThat(makerSales, is(coop.accountBook().get(PrivateBusinessAccountTitle.PURCHESES)));
         assertThat(coopSales, is(price));
-        int coopCash = coop.account().get(PrivateBusinessAccountTitle.CASH);
+        int coopCash = coop.accountBook().get(PrivateBusinessAccountTitle.CASH);
         assertThat(coopCash, is(price));
 
         accountCheck(farmer);
@@ -107,11 +107,11 @@ public class PrivateBusinessTest {
     }
 
     private void accountCheck(PrivateBusiness pb) {
-        int expense = pb.account().get(AccountType.EXPENSE);
-        int revenue = pb.account().get(AccountType.REVENUE);
-        int liabilities = pb.account().get(AccountType.LIABILITIES);
-        int equity = pb.account().get(AccountType.EQUITY);
-        int assets = pb.account().get(AccountType.ASSETS);
+        int expense = pb.accountBook().get(AccountType.EXPENSE);
+        int revenue = pb.accountBook().get(AccountType.REVENUE);
+        int liabilities = pb.accountBook().get(AccountType.LIABILITIES);
+        int equity = pb.accountBook().get(AccountType.EQUITY);
+        int assets = pb.accountBook().get(AccountType.ASSETS);
 
         int benefit = revenue - expense;
 

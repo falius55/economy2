@@ -71,9 +71,9 @@ public class WorkerParsonTest {
 
         Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
         WorkerParsonAccountTitle title = optTitle.get();
-        int expense = worker.account().get(title);
+        int expense = worker.accountBook().get(title);
 
-        System.out.println(worker.account().toString());
+        System.out.println(worker.accountBook().toString());
         assertThat(expense, is(price));
         assertThat(worker.cash() + worker.deposit(), is(salary - expense));
         assertThat(worker.deposit(), is(lessThan(salary)));
@@ -91,7 +91,7 @@ public class WorkerParsonTest {
         assertThat(opt.isPresent(), is(true));
         PrivateBusiness farmer = opt.get();
 
-        assertThat(farmer.account().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
+        assertThat(farmer.accountBook().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
     }
 
 }

@@ -24,7 +24,6 @@ public enum PrivateBankAccountTitle implements AccountTitle {
 
     private final String mName;
     private final AccountType mType;
-    private static final PrivateBankAccountTitle mDefaultItem = CHECKING_ACCOUNTS;
 
     PrivateBankAccountTitle(String name, AccountType type) {
         mName = name;
@@ -33,10 +32,6 @@ public enum PrivateBankAccountTitle implements AccountTitle {
 
     public AccountType type() {
         return mType;
-    }
-
-    public static PrivateBankAccountTitle defaultItem() {
-        return mDefaultItem;
     }
 
     @Override

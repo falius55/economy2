@@ -11,9 +11,9 @@ import jp.gr.java_conf.falius.economy2.enumpack.Product;
 public class AbstractDoubleEntryAccountTest {
 
     @Test
-    public void addTest() {
-        Account<PrivateBusinessAccountTitle> account = PrivateBusinessAccount.newInstance();
-        account.add(PrivateBusinessAccountTitle.SALES, 2000);  // 売上が２０００円
+    public void saleTest() {
+        PrivateBusinessAccount account = PrivateBusinessAccount.newInstance();
+        account.saleBy(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, 2000);  // 売上が２０００円
 
         int sales = account.get(PrivateBusinessAccountTitle.SALES);  // 売上
         int checkingAccount = account.get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);  // 当座預金(標準資産科目)

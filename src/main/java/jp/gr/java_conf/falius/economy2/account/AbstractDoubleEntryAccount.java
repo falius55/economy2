@@ -29,20 +29,6 @@ public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitl
     }
 
     /**
-     * 標準資産科目(defaultItem()によって定義)を相手科目として、指定された科目を増加させます
-     * @param item 勘定科目
-     * @param amount 金額
-     * @throws IllegalArgumentException サブタイプで定義した標準科目が資産科目でない場合
-     */
-    @Override
-    public final void add(T item, int amount) {
-        T defaultItem = defaultItem();
-        if (!defaultItem.type().equals(AccountType.ASSETS)) { throw new IllegalArgumentException("defaultItem is not Assets"); }
-        add(item.type().rl(), item, amount);
-        add(item.type().rl().inverse(), defaultItem, amount);
-    }
-
-    /**
      * 借方に記入します
      * @param item 勘定科目
      * @param amount 金額
@@ -72,7 +58,6 @@ public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitl
      */
     protected final void addFixedAsset(LocalDate dateOfAcquisition, int acquisitionCost, int serviceLife) {
         mFixedAssetManager.add(dateOfAcquisition, acquisitionCost, serviceLife);
-        // mFixedAssets.add(new FixedAsset(dateOfAcquisition, acquisitionCost, serviceLife));
     }
 
     /**

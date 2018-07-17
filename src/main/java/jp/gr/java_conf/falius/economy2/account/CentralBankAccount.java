@@ -19,11 +19,6 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
     }
 
     @Override
-    public CentralBankAccountTitle defaultItem() {
-        return CentralBankAccountTitle.CASH;
-    }
-
-    @Override
     public Account<CentralBankAccountTitle> saveMoney(int amount) {
         throw new UnsupportedOperationException();
     }
