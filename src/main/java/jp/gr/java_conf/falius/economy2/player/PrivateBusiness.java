@@ -44,11 +44,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         sOwns.clear();
     }
 
-    public PrivateBusiness(Worker founder, Industry industry, int initialExpenses) {
-        this(founder, industry, industry.products(), initialExpenses);
-    }
-
-    public PrivateBusiness(Worker founder, Industry industry, Set<Product> products, int initialExpenses) {
+    PrivateBusiness(Worker founder, Industry industry, Set<Product> products, int initialExpenses) {
         mIndustry = industry;
         mProducts = products;
         mStockManagers = products.stream()

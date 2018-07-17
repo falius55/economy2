@@ -29,9 +29,15 @@ public class WorkerParsonTest {
 
     @Test
     public void jobTest() {
+        CentralBank cbank = CentralBank.INSTANCE;
         Bank bank = new PrivateBank();
-        PrivateBusiness liblio = new PrivateBusiness(new WorkerParson(), Industry.LIBLIO, 10000);
-        PrivateBusiness superMarket = new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, 10000);
+        WorkerParson founder = new WorkerParson();
+        WorkerParson founder2 = new WorkerParson();
+        int capital = cbank.paySalary(founder);
+        int capital2 = cbank.paySalary(founder2);
+
+        PrivateBusiness liblio = founder.establish(Industry.LIBLIO, capital).get();
+        PrivateBusiness superMarket = founder2.establish(Industry.SUPER_MARKET, capital2).get();
 
         Worker worker = new WorkerParson();
         assertThat(worker.hasJob(), is(false));
@@ -47,22 +53,28 @@ public class WorkerParsonTest {
 
     @Test
     public void buyTest() {
+        CentralBank cbank = CentralBank.INSTANCE;
         Bank bank = new PrivateBank();
-        int initialExpenses = 10000;
-        PrivateBusiness farmar = new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
+        WorkerParson founder = new WorkerParson();
+        WorkerParson founder2 = new WorkerParson();
+        WorkerParson founder3 = new WorkerParson();
+        int capital = cbank.paySalary(founder);
+        int capital2 = cbank.paySalary(founder2);
+        int capital3 = cbank.paySalary(founder3);
+
+        PrivateBusiness farmar = founder.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
 
-        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
+        PrivateBusiness maker = founder2.establish(Industry.FOOD_MAKER, capital2).get();
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
-        PrivateBusiness coop = new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
+        PrivateBusiness coop = founder3.establish(Industry.SUPER_MARKET, capital3).get();
 
         WorkerParson worker = new WorkerParson();
         assertThat(worker.cash(), is(0));
         assertThat(worker.deposit(), is(0));
 
-        int salary = 100000;
-        worker.getSalary(salary);
+        int salary = cbank.paySalary(worker);
         assertThat(worker.cash(), is(0));
         assertThat(worker.deposit(), is(salary));
 

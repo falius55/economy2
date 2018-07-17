@@ -174,6 +174,10 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     }
 
     public Optional<PrivateBusiness> establish(Industry industry, int initialCapital) {
+        return establish(industry, industry.products(), initialCapital);
+    }
+
+    public Optional<PrivateBusiness> establish(Industry industry, Set<Product> products, int initialCapital) {
         int cash = mAccount.get(WorkerParsonAccountTitle.CASH);
         int deposit = mAccount.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
         if (cash + deposit < initialCapital) {
@@ -187,7 +191,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         mAccount.establish(initialCapital);
         mMainBank.transfer(initialCapital);
         retireJob();
-        return Optional.of(new PrivateBusiness(this, industry, initialCapital));
+        return Optional.of(new PrivateBusiness(this, industry, products, initialCapital));
     }
 
 }

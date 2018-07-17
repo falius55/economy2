@@ -17,7 +17,6 @@ import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
-import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 public class PrivateBankTest {
 
@@ -40,37 +39,39 @@ public class PrivateBankTest {
 
     @Test
     public void establishBusinessTest() {
-        int initialExpenses = 100000;
+        System.out.println("--- establish business ---");
+        CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int capital = cbank.paySalary(worker);
 
-        PrivateBusiness farmer =
-                new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses));
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses));
-        PrivateBusiness maker =
-                new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 2));
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 2));
-        PrivateBusiness coop =
-                new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(initialExpenses * 3));
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(initialExpenses * 3));
+        System.out.println(bank.accountBook().toString());
 
+        PrivateBusiness pb = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(capital));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(capital));
+
+        System.out.println("--- establish business ---");
     }
 
     @Test
     public void distributionTest() {
+        CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();
-        int initialExpenses = 100000;
-        PrivateBusiness farmer = new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
-        IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
-        PrivateBusiness maker = new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
-        IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
-        PrivateBusiness coop = new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
-
         WorkerParson worker = new WorkerParson();
-        int salary = 100000;
-        worker.getSalary(salary);
+        WorkerParson worker2 = new WorkerParson();
+        WorkerParson worker3 = new WorkerParson();
+        int capital = cbank.paySalary(worker);
+        int capital2 = cbank.paySalary(worker2);
+        int capital3 = cbank.paySalary(worker3);
+        int initialExpenses = 100000;
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+        IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
+        PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
+        IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
+        PrivateBusiness coop = worker3.establish(Industry.SUPER_MARKET, capital3).get();
+
+        cbank.paySalary(worker);
 
         Product product = Product.RICE_BALL;
         int require = 3;

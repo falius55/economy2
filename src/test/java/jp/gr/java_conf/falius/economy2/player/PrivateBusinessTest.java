@@ -18,6 +18,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
+import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 public class PrivateBusinessTest {
@@ -25,7 +26,6 @@ public class PrivateBusinessTest {
     @BeforeClass
     public static void first() {
         Bank bank = new PrivateBank();
-        bank.keep(1000000);
     }
 
     @AfterClass
@@ -40,11 +40,14 @@ public class PrivateBusinessTest {
 
     @Test
     public void employerTest() {
-        PrivateBusiness liblio =
-                new PrivateBusiness(new WorkerParson(), Industry.LIBLIO, 10000);
-        PrivateBusiness superMarket =
-                new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, 10000);
+        CentralBank cbank = CentralBank.INSTANCE;
+        WorkerParson founder = new WorkerParson();
+        WorkerParson founder2 = new WorkerParson();
+        int capital = cbank.paySalary(founder);
+        int capital2 = cbank.paySalary(founder2);
 
+        PrivateBusiness liblio = founder.establish(Industry.LIBLIO, capital).get();
+        PrivateBusiness superMarket = founder2.establish(Industry.SUPER_MARKET, capital2).get();
 
         Worker worker = new WorkerParson();
         assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(false));
@@ -64,21 +67,20 @@ public class PrivateBusinessTest {
 
     @Test
     public void distributionTest() {
+        CentralBank cbank = CentralBank.INSTANCE;
         WorkerParson worker = new WorkerParson();
-        int salary = 100000;
-        worker.getSalary(salary);
-
-        int initialExpenses = 100000;
-        PrivateBusiness farmer =
-                new PrivateBusiness(new WorkerParson(), Industry.FARMER, EnumSet.of(Product.RICE), initialExpenses);
+        WorkerParson worker2 = new WorkerParson();
+        WorkerParson worker3 = new WorkerParson();
+        int capital = cbank.paySalary(worker);
+        int capital2 = cbank.paySalary(worker2);
+        int capital3 = cbank.paySalary(worker3);
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
-
-        PrivateBusiness maker =
-                new PrivateBusiness(new WorkerParson(), Industry.FOOD_MAKER, initialExpenses);
+        PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
+        PrivateBusiness coop = worker3.establish(Industry.SUPER_MARKET, capital3).get();
 
-        PrivateBusiness coop =
-                new PrivateBusiness(new WorkerParson(), Industry.SUPER_MARKET, initialExpenses);
+        cbank.paySalary(worker);
 
         Product product = Product.RICE_BALL;
         int require = 3;
