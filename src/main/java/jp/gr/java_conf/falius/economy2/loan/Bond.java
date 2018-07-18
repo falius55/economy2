@@ -5,7 +5,10 @@ import java.time.Period;
 import java.util.Objects;
 
 import jp.gr.java_conf.falius.economy2.account.BankAccount;
+import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
 import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
+import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
+import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class Bond {
@@ -52,6 +55,20 @@ public class Bond {
         return mIsPayOff;
     }
 
+    public boolean ofCentralBank() {
+        if (!isConcluded()) {
+            return false;
+        }
+        return mUnderWriterAccount instanceof CentralBankAccount;
+    }
+
+    public boolean ofPrivateBank() {
+        if (!isConcluded()) {
+            return false;
+        }
+        return mUnderWriterAccount instanceof PrivateBankAccount;
+    }
+
     /**
      * 債務が受け入れられ、債権債務関係が発生する
      */
@@ -69,32 +86,34 @@ public class Bond {
 
     /**
      * 債権を譲渡する
-     * @param underwriterAccount 新たな債権者の会計
+     * @param transferee 新たな債権者の会計
      */
-    public Bond transfer(BankAccount<?> underwriterAccount) {
+    public Bond sellTo(BankAccount<?> transferee) {
         if (!isConcluded()) {
             throw new IllegalStateException();
         }
-        mUnderWriterAccount = underwriterAccount;
+        mUnderWriterAccount.sellGovernmentBond(amount());
+        transferee.buyGorvementBond(amount());
+        mUnderWriterAccount = transferee;
         return this;
     }
 
     /**
-     * 借金を減らす
+     * 償還する
      * @return 償還されればtrue(償還済も)
      */
-    public boolean redeemed(int amount) {
+    public boolean redeemed() {
         if (!isConcluded()) {
             throw new IllegalStateException();
         }
         if (isPayOff()) {
             return true;
         }
-        if (amount < mAmount) {
+        if (mIssuerAccount.get(GovernmentAccountTitle.DEPOSIT) < amount()) {
             return false;
         }
-        mIssuerAccount.redeemBonds(amount);
-        mUnderWriterAccount.redeemedGovernmentBond(amount);
+        mIssuerAccount.redeemBonds(amount());
+        mUnderWriterAccount.redeemedGovernmentBond(amount());
         mIsPayOff = true;
         return true;
     }

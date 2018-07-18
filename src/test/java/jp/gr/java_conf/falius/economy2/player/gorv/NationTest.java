@@ -29,7 +29,7 @@ public class NationTest {
         int price = 1000;
 
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
-        nation.makeCentralBankUnderwriteBond();
+        nation.makeUnderwriteBonds(CentralBank.INSTANCE);
         System.out.println(nation.accountBook().toString());
         assertThat(nation.accountBook().get(GovernmentAccountTitle.GOVERNMENT_BOND), is(count * price));
         assertThat(nation.accountBook().get(GovernmentAccountTitle.DEPOSIT), is(count * price));

@@ -22,7 +22,7 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 public class PrivateBusinessTest {
 
     @After
-    public void clearBusiness() {
+    public void clear() {
         Market.INSTANCE.clear();
     }
 

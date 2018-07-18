@@ -57,6 +57,16 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
         return this;
     }
 
+    @Override
+    public BankAccount<CentralBankAccountTitle> buyGorvementBond(int amount) {
+        return operateBuying(amount);
+    }
+
+    @Override
+    public BankAccount<CentralBankAccountTitle> sellGovernmentBond(int amount) {
+        return operateSelling(amount);
+    }
+
     /**
      * 政府からの預け入れ
      * @param amount

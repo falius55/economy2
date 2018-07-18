@@ -164,6 +164,20 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     }
 
     @Override
+    public BankAccount<PrivateBankAccountTitle> buyGorvementBond(int amount) {
+        addLeft(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
+        return this;
+    }
+
+    @Override
+    public BankAccount<PrivateBankAccountTitle> sellGovernmentBond(int amount) {
+        addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
+        addRight(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
+        return this;
+    }
+
+    @Override
     public PrivateBankAccount paySalary(int amount) {
         // TODO 自動生成されたメソッド・スタブ
         return null;

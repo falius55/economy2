@@ -12,6 +12,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
+import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
@@ -19,14 +20,21 @@ public class Nation implements Government, AccountOpenable {
     public static final Nation INSTANCE;
 
     private final GovernmentAccount mAccount = GovernmentAccount.newInstance();
+    /**
+     * 未成約の国債
+     */
     private final Set<Bond> mBondMarket = new HashSet<>();
+    /**
+     * 成約済みの国債
+     */
     private final Set<Bond> mBonds = new HashSet<>();
 
     static {
         INSTANCE = new Nation();
     }
 
-    private Nation() {}
+    private Nation() {
+    }
 
     @Override
     public Account<GovernmentAccountTitle> accountBook() {
@@ -48,6 +56,10 @@ public class Nation implements Government, AccountOpenable {
         return mAccount.get(GovernmentAccountTitle.DEPOSIT);
     }
 
+    public Set<Bond> bonds() {
+        return mBonds;
+    }
+
     @Override
     public void closeEndOfMonth() {
         // TODO 自動生成されたメソッド・スタブ
@@ -63,40 +75,46 @@ public class Nation implements Government, AccountOpenable {
 
     @Override
     public Government redeemBonds(int amount) {
-        mBonds.stream().sorted((b1, b2) -> b1.deadLine().compareTo(b2.deadLine()))
-        .forEach(new Consumer<Bond>() {
-            private int mAmount = amount;
-            @Override
-            public void accept(Bond bond) {
-                if (bond.isPayOff()) { return; }
-                if (bond.redeemed(mAmount)) {
-                    mAmount -= bond.amount();
-                }
-            }
-        });
+        mBonds.stream()
+                .filter(bond -> !bond.isPayOff())
+                .sorted((b1, b2) -> b1.deadLine().compareTo(b2.deadLine()))
+                .forEach(new Consumer<Bond>() {
+                    private int mAmount = amount;
+
+                    @Override
+                    public void accept(Bond bond) {
+                        if (bond.amount() > mAmount) {
+                            return;
+                        }
+                        if (bond.redeemed()) {
+                            mAmount -= bond.amount();
+                        }
+                    }
+                });
         return this;
     }
 
     /**
-     * 債券市場の国債をすべて中央銀行に引き受けさせる。
+     * 債券市場の国債を引き受けさせる。
+     * 市中の銀行は財務状況に応じて引き受け、中央銀行は市場に残っているすべての国債を引き受けます。
+     * @param bank
      */
-    public void makeCentralBankUnderwriteBond() {
-        Set<Bond> successed = CentralBank.INSTANCE.searchBonds(mBondMarket);
+    public void makeUnderwriteBonds(Bank bank) {
+        Set<Bond> successed = bank.searchBonds(mBondMarket);
         mBondMarket.removeAll(successed);
         mBonds.addAll(successed);
+
+        if (bank instanceof PrivateBank) {
+            int amount = successed.stream().mapToInt(Bond::amount).sum();
+            mainBank().transfered(amount);
+        }
     }
 
     /**
      * 国債発行を公示する
      */
     public void advertiseBonds() {
-        Set<Bond> newBonds = PrivateBank.stream().map(pb -> pb.searchBonds(mBondMarket))
-        .reduce(new HashSet<Bond>(), (collector, successed) -> {collector.addAll(successed); return collector;});
-        mBondMarket.removeAll(newBonds);
-        mBonds.addAll(newBonds);
-
-        int amount = newBonds.stream().mapToInt(bond -> bond.amount()).sum();
-        mainBank().transfered(amount);
+        PrivateBank.stream().forEach(this::makeUnderwriteBonds);
     }
 
     @Override
@@ -112,7 +130,7 @@ public class Nation implements Government, AccountOpenable {
     }
 
     @Override
-    public  AccountOpenable saveMoney(int amount) {
+    public AccountOpenable saveMoney(int amount) {
         mAccount.saveMoney(amount);
         mainBank().keepByNation(amount);
         return this;
@@ -127,6 +145,8 @@ public class Nation implements Government, AccountOpenable {
 
     public void clear() {
         mAccount.clearBook();
+        mBondMarket.clear();
+        mBonds.clear();
     }
 
 }

@@ -76,7 +76,6 @@ public class CentralBankTest {
         System.out.printf("central: %s%n", central.accountBook().toString());
         System.out.printf("bank: %s%n", bank.accountBook().toString());
         System.out.printf("worker: %s%n", worker.accountBook().toString());
-        System.out.println("--- end paySalary ---");
 
         assertThat(central.accountBook().get(CentralBankAccountTitle.SALARIES_EXPENSE), is(salary));
         assertThat(central.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(salary));
@@ -84,6 +83,7 @@ public class CentralBankTest {
         assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
         assertThat(worker.accountBook().get(WorkerParsonAccountTitle.SALARIES), is(salary));
         assertThat(worker.accountBook().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT), is(salary));
+        System.out.println("--- end paySalary ---");
     }
 
     @Test
@@ -94,11 +94,58 @@ public class CentralBankTest {
         int price = 1000;
 
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
-        nation.makeCentralBankUnderwriteBond();
+        nation.makeUnderwriteBonds(cbank);
         System.out.println(cbank.accountBook().toString());
 
         assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count));
         assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(price * count));
+    }
+
+    @Test
+    public void operateSellingTest() {
+        System.out.println("operate selling");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        int count = 10;
+        int price = 1000;
+
+        IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
+        nation.makeUnderwriteBonds(cbank);
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int salary = cbank.paySalary(worker);
+        int amount = Math.min(salary, price * count);
+        cbank.operateSelling(amount);
+        System.out.println(cbank.accountBook().toString());
+
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count - amount));
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(salary - amount));
+        System.out.println("operate selling");
+    }
+
+    @Test
+    public void operateBuyingTest() {
+        System.out.println("operate buying");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int moneyStock = cbank.paySalary(worker);
+        System.out.println(cbank.accountBook().toString());
+
+        int count = 10;
+        int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
+        IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
+        nation.advertiseBonds();
+        System.out.println(cbank.accountBook().toString());
+
+        cbank.operateBuying(price * count);
+        System.out.println(cbank.accountBook().toString());
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count));
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(moneyStock));
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(price * count));
+
+        System.out.println("operate buying");
     }
 
     @Test

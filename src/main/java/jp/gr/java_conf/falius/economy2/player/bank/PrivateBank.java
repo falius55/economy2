@@ -118,21 +118,27 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     public Set<Bond> searchBonds(Set<Bond> bondMarket) {
         Set<Bond> successed = new HashSet<>();
         int budget = (int) ((cash() + deposit()) * BOND_RATIO);
-        bondMarket.stream().forEach(new Consumer<Bond>() {
-            private int mBudget = budget;
-            @Override
-            public void accept(Bond bond) {
-                if (bond.isConcluded()) {
-                    return;
-                }
-                if (bond.amount() <= mBudget) {
-                    bond.accepted(mAccount);
-                    mBudget -= bond.amount();
-                    successed.add(bond);
-                }
-            }
+        bondMarket.stream()
+                .filter(bond -> !bond.isConcluded() || bond.ofCentralBank())
+                .forEach(new Consumer<Bond>() {
+                    private int mBudget = budget;
 
-        });
+                    @Override
+                    public void accept(Bond bond) {
+                        if (bond.amount() > mBudget) {
+                            return;
+                        }
+                        if (bond.ofCentralBank()) {
+                            bond.sellTo(mAccount);
+                        }
+                        if (!bond.isConcluded()) {
+                            bond.accepted(mAccount);
+                        }
+                        mBudget -= bond.amount();
+                        successed.add(bond);
+                    }
+
+                });
         return successed;
     }
 

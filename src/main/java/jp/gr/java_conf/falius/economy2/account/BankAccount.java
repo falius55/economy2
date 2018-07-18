@@ -36,4 +36,8 @@ public interface BankAccount<T extends Enum<T> & AccountTitle> extends Employabl
      * @return
      */
     public BankAccount<T> redeemedGovernmentBond(int amount);
+
+    public BankAccount<T> buyGorvementBond(int amount);
+
+    public BankAccount<T> sellGovernmentBond(int amount);
 }
