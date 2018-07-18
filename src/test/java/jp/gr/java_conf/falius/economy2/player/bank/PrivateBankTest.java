@@ -17,6 +17,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
+import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 public class PrivateBankTest {
 
@@ -105,5 +106,28 @@ public class PrivateBankTest {
                 + bank.accountBook().get(PrivateBankAccountTitle.LOANS_RECEIVABLE),
                 is(deposit));
 
+    }
+
+    @Test
+    public void nationBondTest() {
+        System.out.println("nationBond");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        PrivateBank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int moneyStock = cbank.paySalary(worker);
+
+        int count = 10;
+        int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
+
+        IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
+        nation.advertiseBonds();
+        nation.makeCentralBankUnderwriteBond();
+        System.out.println(bank.accountBook().toString());
+        assertThat(bank.deposit(), is(moneyStock - price * count));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.GOVERNMENT_BOND), is(price * count));
+
+        System.out.println("nationBond");
     }
 }

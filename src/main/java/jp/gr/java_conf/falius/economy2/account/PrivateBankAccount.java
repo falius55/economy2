@@ -109,14 +109,6 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     }
 
     /**
-     * 預金返済処理を行う
-     */
-    @Override
-    public PrivateBankAccount repay(int amount) {
-        return this;
-    }
-
-    /**
      * 返済を受けた時の処理を行う
      */
     @Override

@@ -23,29 +23,4 @@ public interface Account<T extends Enum<T> & AccountTitle> {
      */
     public int get(T item);
 
-    /**
-     * 引数の会計を、自分の会計に吸収併合する。結婚、合併など
-     */
-    public Account<T> merge(Account<T> another);
-
-    /**
-     * お金を銀行に預けた時の処理を行います
-     */
-    public Account<T> saveMoney(int amount);
-
-    /**
-     * お金をおろした時の処理を行います
-     */
-    public Account<T> downMoney(int amount);
-
-    /**
-     * 返済処理を行います
-     */
-    public Account<T> repay(int amount);
-
-    /**
-     * 返済を受けた時の処理を行います
-     */
-    public Account<T> repaid(int amount);
-
 }

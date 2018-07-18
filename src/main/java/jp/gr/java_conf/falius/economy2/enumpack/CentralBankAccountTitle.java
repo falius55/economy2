@@ -16,7 +16,7 @@ public enum CentralBankAccountTitle implements AccountTitle {
     /** 国債(資産) */ GOVERNMENT_BOND("国債", AccountType.ASSETS),
 
     /** 借入金(負債) */ LOANS_PAYABLE("借入金", AccountType.LIABILITIES),
-    /** 日銀当座預金(負債) */ DEPOSIT("預金", AccountType.LIABILITIES),
+    /** 日銀当座預金(負債) */ DEPOSIT("日銀当座預金", AccountType.LIABILITIES),
     /** 発行銀行券(負債) */ BANK_NOTE("発行銀行券", AccountType.LIABILITIES),
     /** 政府預金(負債) */ GOVERNMENT_DEPOSIT("政府預金", AccountType.LIABILITIES),
 

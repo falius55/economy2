@@ -3,6 +3,8 @@ package jp.gr.java_conf.falius.economy2.player.bank;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+import java.util.stream.IntStream;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
+import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 public class CentralBankTest {
 
@@ -81,5 +84,42 @@ public class CentralBankTest {
         assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
         assertThat(worker.accountBook().get(WorkerParsonAccountTitle.SALARIES), is(salary));
         assertThat(worker.accountBook().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT), is(salary));
+    }
+
+    @Test
+    public void underwriteBondsTest() {
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        int count = 10;
+        int price = 1000;
+
+        IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
+        nation.makeCentralBankUnderwriteBond();
+        System.out.println(cbank.accountBook().toString());
+
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count));
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(price * count));
+    }
+
+    @Test
+    public void advertiseBondsTest() {
+        System.out.println("advertise");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int moneyStock = cbank.paySalary(worker);
+
+        int count = 10;
+        int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
+
+        IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
+        nation.advertiseBonds();
+        System.out.println(cbank.accountBook().toString());
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(count * price));
+        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(moneyStock - count * price));
+
+        System.out.println("advertise");
     }
 }

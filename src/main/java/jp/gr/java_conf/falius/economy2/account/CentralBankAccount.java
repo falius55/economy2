@@ -24,11 +24,6 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
     }
 
     @Override
-    public Account<CentralBankAccountTitle> repay(int amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public CentralBankAccount acceptGovernmentBond(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
@@ -39,16 +34,6 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
     public CentralBankAccount redeemedGovernmentBond(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
-        return this;
-    }
-
-    /**
-     * 民間銀行からの返済
-     */
-    @Override
-    public Account<CentralBankAccountTitle> repaid(int amount) {
-        addLeft(CentralBankAccountTitle.DEPOSIT, amount);
-        addRight(CentralBankAccountTitle.LOANS_RECEIVABLE, amount);
         return this;
     }
 

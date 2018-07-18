@@ -12,7 +12,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
  * 会計を表すすべてのクラスの基底クラス
  * @param T 勘定科目一覧を定義した列挙型。AccountTitleインターフェースを実装していなければならない
  */
-public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implements Account<T> {
+public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implements MutableAccount<T> {
     private final Class<T> mClass;
     private final Map<AccountType, Map<T, Integer>> mAccountsBook; // 帳簿(EnumMap) 科目種別から、勘定科目からその金額へのマップ、へのマップ
 

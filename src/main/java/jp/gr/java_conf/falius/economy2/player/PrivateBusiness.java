@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.account.PrivateBusinessAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
@@ -70,7 +71,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     }
 
     @Override
-    public final PrivateBusinessAccount accountBook() {
+    public final Account<PrivateBusinessAccountTitle> accountBook() {
         return mAccount;
     }
 
@@ -153,6 +154,20 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     }
 
     @Override
+    public AccountOpenable saveMoney(int amount) {
+        mAccount.saveMoney(amount);
+        mainBank().keep(amount);
+        return this;
+    }
+
+    @Override
+    public AccountOpenable downMoney(int amount) {
+        mAccount.downMoney(amount);
+        mainBank().paidOut(amount);
+        return this;
+    }
+
+    @Override
     public void borrow(int amount) {
         Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
         PrivateBank bank = opt.get();
@@ -166,7 +181,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      * 借金が不成立の場合は想定外
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(accountBook(), amount);
+        Loan debt = new Loan(mAccount, amount);
         mLoans.add(debt);
         return debt;
     }
@@ -175,7 +190,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      * 借金を返済します
      */
     public void repay(int amount) {
-        accountBook().repay(amount);
+        mAccount.repay(amount);
     }
 
     @Override

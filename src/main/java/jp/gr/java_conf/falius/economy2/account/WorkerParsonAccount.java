@@ -35,13 +35,7 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
     }
 
     @Override
-    public Account<WorkerParsonAccountTitle> repay(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
-    @Override
-    public Account<WorkerParsonAccountTitle> repaid(int amount) {
+    public WorkerParsonAccount repay(int amount) {
         // TODO 自動生成されたメソッド・スタブ
         return null;
     }

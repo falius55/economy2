@@ -18,7 +18,7 @@ public enum GovernmentAccountTitle implements AccountTitle {
     /** 政府預金(資産) */ DEPOSIT("当座預金", AccountType.ASSETS),
     /** 建物(資産) */ BUILDINGS("建物", AccountType.ASSETS),
 
-    /** 公債(負債) */ GOVERNMENT_BOND("国債", AccountType.ASSETS),
+    /** 公債(負債) */ GOVERNMENT_BOND("公債発行残高", AccountType.LIABILITIES),
 
     /** 資本金(資本) */ CAPITAL_STOCK("資本金", AccountType.EQUITY);
 

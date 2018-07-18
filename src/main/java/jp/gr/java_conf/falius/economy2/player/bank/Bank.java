@@ -1,5 +1,8 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
+import java.util.Set;
+
+import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 
 /**
@@ -24,17 +27,10 @@ public interface Bank extends Employable {
     public void transfered(int amount);
 
     /**
-     * 国債を引き受けます。
-     * @param amount
-     * @return
+     * 債券市場を物色します。
+     * @param bondMarket
+     * @return 成約した債権
      */
-    public Bank acceptGovernmentBond(int amount);
-
-    /**
-     * 保有国債が償還されます。
-     * @param amount
-     * @return
-     */
-    public Bank redeemedGovernmentBond(int amount);
+    public Set<Bond> searchBonds(Set<Bond> bondMarket);
 
 }

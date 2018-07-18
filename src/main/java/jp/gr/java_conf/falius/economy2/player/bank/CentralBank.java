@@ -1,6 +1,12 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
 import jp.gr.java_conf.falius.economy2.player.Worker;
 
@@ -15,10 +21,11 @@ public class CentralBank implements Bank {
         INSTANCE = new CentralBank();
     }
 
-    private CentralBank() {}
+    private CentralBank() {
+    }
 
     @Override
-    public CentralBankAccount accountBook() {
+    public Account<CentralBankAccountTitle> accountBook() {
         return mAccount;
     }
 
@@ -63,24 +70,12 @@ public class CentralBank implements Bank {
         mAccount.transfered(amount);
     }
 
-    /**
-     * 国債を引き受けます。
-     * @param amount
-     * @return
-     */
-    public Bank acceptGovernmentBond(int amount) {
-        mAccount.acceptGovernmentBond(amount);
-        return this;
-    }
-
-    /**
-     * 保有国債が償還されます。
-     * @param amount
-     * @return
-     */
-    public Bank redeemedGovernmentBond(int amount) {
-        mAccount.redeemedGovernmentBond(amount);
-        return this;
+    @Override
+    public Set<Bond> searchBonds(Set<Bond> bondMarket) {
+        Set<Bond> successed = new HashSet<>();
+        bondMarket.stream()
+                .forEach(bond -> successed.add(bond.accepted(mAccount)));
+        return successed;
     }
 
     @Override
@@ -104,6 +99,14 @@ public class CentralBank implements Bank {
 
     public void clear() {
         mAccount.clearBook();
+    }
+
+    public void keepByNation(int amount) {
+        mAccount.keepByNation(amount);
+    }
+
+    public void paidOutByNation(int amount) {
+        mAccount.paidOutByNation(amount);
     }
 
 }

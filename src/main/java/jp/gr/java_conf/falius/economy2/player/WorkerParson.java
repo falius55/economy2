@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 
+import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.account.WorkerParsonAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
@@ -34,7 +35,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     }
 
     @Override
-    public final WorkerParsonAccount accountBook() {
+    public final Account<WorkerParsonAccountTitle> accountBook() {
         return mAccount;
     }
 
@@ -143,6 +144,20 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     }
 
     @Override
+    public AccountOpenable saveMoney(int amount) {
+        mAccount.saveMoney(amount);
+        mainBank().keep(amount);
+        return this;
+    }
+
+    @Override
+    public AccountOpenable downMoney(int amount) {
+        mAccount.downMoney(amount);
+        mainBank().paidOut(amount);
+        return this;
+    }
+
+    @Override
     public void payTax(int amount) {
         // TODO 自動生成されたメソッド・スタブ
 
@@ -161,7 +176,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * 借金が不成立の場合は想定外
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(accountBook(), amount);
+        Loan debt = new Loan(mAccount, amount);
         mLoans.add(debt);
         return debt;
     }
@@ -170,7 +185,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * 借金を返済します
      */
     public void repay(int amount) {
-        accountBook().repay(amount);
+        mAccount.repay(amount);
     }
 
     public Optional<PrivateBusiness> establish(Industry industry, int initialCapital) {

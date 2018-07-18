@@ -9,4 +9,9 @@ public interface BorrowableAccount<T extends Enum<T> & AccountTitle>  extends Ac
      */
     public BorrowableAccount<T> borrow(int amount);
 
+    /**
+     * 返済処理を行います
+     */
+    public BorrowableAccount<T> repay(int amount);
+
 }

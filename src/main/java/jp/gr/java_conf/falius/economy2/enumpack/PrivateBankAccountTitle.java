@@ -14,7 +14,7 @@ public enum PrivateBankAccountTitle implements AccountTitle {
     /** 未収収益(資産) */ ACCRUED_REVENUE("未収収益", AccountType.ASSETS),
     /** 前払費用(資産) */ PREEPAID_EXPENSE("前払い費用", AccountType.ASSETS),
     /** 有形固定資産(資産) */ TANGIBLE_ASSETS("有形固定資産", AccountType.ASSETS),
-    /** 中央銀行の当座預金(資産) */ CHECKING_ACCOUNTS("当座預金", AccountType.ASSETS),
+    /** 中央銀行の当座預金(資産) */ CHECKING_ACCOUNTS("日銀当座預金", AccountType.ASSETS),
     /** 建物(資産) */ BUILDINGS("建物", AccountType.ASSETS),
     /** 国債(資産) */ GOVERNMENT_BOND("国債", AccountType.ASSETS),
 

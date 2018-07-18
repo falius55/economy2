@@ -152,16 +152,6 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         return this;
     }
 
-    /**
-     * 返済を受けた時の処理を行う
-     */
-    @Override
-    public PrivateBusinessAccount repaid(int amount) {
-        addLeft(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
-        addRight(PrivateBusinessAccountTitle.LOANS_RECEIVABLE, amount);
-        return this;
-    }
-
     @Override
     public PrivateBusinessAccount payTax(int amount) {
         return this;

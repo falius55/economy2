@@ -7,6 +7,7 @@ import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
+import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 public class Market {
 
@@ -52,5 +53,6 @@ public static final Market INSTANCE;
         PrivateBusiness.clear();
         PrivateBank.clear();
         CentralBank.INSTANCE.clear();
+        Nation.INSTANCE.clear();
     }
 }

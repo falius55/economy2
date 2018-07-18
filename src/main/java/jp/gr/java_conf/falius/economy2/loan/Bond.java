@@ -14,12 +14,13 @@ public class Bond {
 
     private LocalDate mAccrualDate; // 債権債務発生日
     private LocalDate mDeadLine; // 期限
+    private boolean mIsPayOff = false;
 
-    private BankAccount<?> mAcceptorAccount = null; // 債権者の会計
+    private BankAccount<?> mUnderWriterAccount = null; // 債権者の会計
     private GovernmentAccount mIssuerAccount; // 債務者の会計
 
-    public Bond(GovernmentAccount debtorAccount, int amount, Period period) {
-        mIssuerAccount = debtorAccount;
+    public Bond(GovernmentAccount issuerAccount, int amount, Period period) {
+        mIssuerAccount = issuerAccount;
         mAmount = amount;
         mPeriod = period;
     }
@@ -35,8 +36,12 @@ public class Bond {
         return mDeadLine;
     }
 
+    /**
+     * 締結済かどうか
+     * @return
+     */
     public boolean isConcluded() {
-        return Objects.nonNull(mAcceptorAccount);
+        return Objects.nonNull(mUnderWriterAccount);
     }
 
     public boolean isOverDeadLine() {
@@ -44,47 +49,53 @@ public class Bond {
     }
 
     public boolean isPayOff() {
-        return mAmount <= 0;
+        return mIsPayOff;
     }
 
     /**
      * 債務が受け入れられ、債権債務関係が発生する
      */
-    public Bond accepted(BankAccount<?> acceptorAccount) {
+    public Bond accepted(BankAccount<?> underwriterAccount) {
         if (isConcluded()) {
             throw new IllegalStateException("債権債務関係はすでに発生しています");
         }
-        mAcceptorAccount = acceptorAccount;
+        mUnderWriterAccount = underwriterAccount;
         mAccrualDate = Market.INSTANCE.nowDate();
         mDeadLine = mAccrualDate.plus(mPeriod);
         mIssuerAccount.issueBonds(amount());
-        acceptorAccount.acceptGovernmentBond(amount());
+        underwriterAccount.acceptGovernmentBond(amount());
         return this;
     }
 
     /**
      * 債権を譲渡する
-     * @param acceptorAccount 新たな債権者の会計
+     * @param underwriterAccount 新たな債権者の会計
      */
-    public Bond transfer(BankAccount<?> acceptorAccount) {
+    public Bond transfer(BankAccount<?> underwriterAccount) {
         if (!isConcluded()) {
             throw new IllegalStateException();
         }
-        mAcceptorAccount = acceptorAccount;
+        mUnderWriterAccount = underwriterAccount;
         return this;
     }
 
     /**
      * 借金を減らす
-     * @return 借金が完済されればtrue
+     * @return 償還されればtrue(償還済も)
      */
-    public boolean repay(int amount) {
+    public boolean redeemed(int amount) {
         if (!isConcluded()) {
             throw new IllegalStateException();
         }
-        amount = Math.min(amount, mAmount);
-        mIssuerAccount.repay(amount);
-        mAcceptorAccount.repaid(amount);
-        return mAmount == 0;
+        if (isPayOff()) {
+            return true;
+        }
+        if (amount < mAmount) {
+            return false;
+        }
+        mIssuerAccount.redeemBonds(amount);
+        mUnderWriterAccount.redeemedGovernmentBond(amount);
+        mIsPayOff = true;
+        return true;
     }
 }

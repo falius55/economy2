@@ -15,21 +15,13 @@ public interface AccountOpenable extends Entity {
      * 対象はメインバンク
      * 銀行が実行すると中央銀行に預けます
      */
-    public default AccountOpenable saveMoney(int amount) {
-        accountBook().saveMoney(amount);
-        mainBank().keep(amount);
-        return this;
-    }
+    public AccountOpenable saveMoney(int amount);
 
     /**
      * お金をおろします
      * 対象はメインバンク
      * 銀行が実行すると中央銀行からおろします
      */
-    public default AccountOpenable downMoney(int amount) {
-        accountBook().downMoney(amount);
-        mainBank().paidOut(amount);
-        return this;
-    }
+    public AccountOpenable downMoney(int amount);
 
 }

@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.loan.Loan;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
@@ -17,6 +20,11 @@ import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 import jp.gr.java_conf.falius.economy2.player.Worker;
 
 public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
+    /**
+     * 債券購入に充てられる最高割合(保有している現預金のうち何割までなら債券購入に使っていいか)
+     */
+    public static double BOND_RATIO = 0.3d;
+
     private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
@@ -36,7 +44,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     }
 
     @Override
-    public PrivateBankAccount accountBook() {
+    public Account<PrivateBankAccountTitle> accountBook() {
         return mAccount;
     }
 
@@ -107,25 +115,39 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
         mAccount.transfered(amount);
     }
 
-    /**
-     * 国債を引き受けます。
-     * @param amount
-     * @return
-     */
     @Override
-    public Bank acceptGovernmentBond(int amount) {
-        mAccount.acceptGovernmentBond(amount);
+    public Set<Bond> searchBonds(Set<Bond> bondMarket) {
+        Set<Bond> successed = new HashSet<>();
+        int budget = (int) ((cash() + deposit()) * BOND_RATIO);
+        bondMarket.stream().forEach(new Consumer<Bond>() {
+            private int mBudget = budget;
+            @Override
+            public void accept(Bond bond) {
+                if (bond.isConcluded()) {
+                    return;
+                }
+                if (bond.amount() <= mBudget) {
+                    bond.accepted(mAccount);
+                    mBudget -= bond.amount();
+                    successed.add(bond);
+                }
+            }
+
+        });
+        return successed;
+    }
+
+    @Override
+    public AccountOpenable saveMoney(int amount) {
+        mAccount.saveMoney(amount);
+        mainBank().keep(amount);
         return this;
     }
 
-    /**
-     * 保有国債が償還されます。
-     * @param amount
-     * @return
-     */
     @Override
-    public Bank redeemedGovernmentBond(int amount) {
-        mAccount.redeemedGovernmentBond(amount);
+    public AccountOpenable downMoney(int amount) {
+        mAccount.downMoney(amount);
+        mainBank().paidOut(amount);
         return this;
     }
 
@@ -159,7 +181,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
      */
     public int acceptDebt(Loan debt) {
         mLoans.add(debt);
-        debt.accepted(accountBook(), Market.INSTANCE.nowDate());
+        debt.accepted(mAccount, Market.INSTANCE.nowDate());
         return debt.amount();
     }
 

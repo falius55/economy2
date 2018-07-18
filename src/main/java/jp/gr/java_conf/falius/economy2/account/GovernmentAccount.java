@@ -24,18 +24,6 @@ public class GovernmentAccount extends AbstractDoubleEntryAccount<GovernmentAcco
         return null;
     }
 
-    @Override
-    public Account<GovernmentAccountTitle> repay(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
-    @Override
-    public Account<GovernmentAccountTitle> repaid(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
     public GovernmentAccount issueBonds(int amount) {
         addLeft(GovernmentAccountTitle.DEPOSIT, amount);
         addRight(GovernmentAccountTitle.GOVERNMENT_BOND, amount);

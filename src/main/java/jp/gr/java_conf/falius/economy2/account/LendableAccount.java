@@ -9,4 +9,9 @@ public interface LendableAccount<T extends Enum<T> & AccountTitle>  extends Acco
      */
     public LendableAccount<T> lend(int amount);
 
+    /**
+     * 返済を受けた時の処理を行います
+     */
+    public LendableAccount<T> repaid(int amount);
+
 }
