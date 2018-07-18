@@ -30,8 +30,9 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
 
     @Override
     public WorkerParsonAccount borrow(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
+        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
+        super.increase(WorkerParsonAccountTitle.LOANS_PAYABLE, amount);
+        return this;
     }
 
     @Override

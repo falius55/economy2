@@ -56,6 +56,43 @@ public class PrivateBankTest {
     }
 
     @Test
+    public void borrowToWorkerTest() {
+        System.out.println("borrow");
+        CentralBank cbank = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int capital = cbank.paySalary(worker);
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+
+        System.out.println(bank.accountBook().toString());
+        int amount = capital;
+        worker.borrow(amount);
+        System.out.println(bank.accountBook().toString());
+        assertThat(bank.deposit(), is(capital - amount + amount));  // 自分に振り込むので変化なし
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.LOANS_RECEIVABLE), is(amount));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(capital + amount));
+
+        System.out.println(cbank.accountBook().toString());
+
+        System.out.println("borrow");
+    }
+
+    @Test
+    public void borrowToBusinessTest() {
+        CentralBank cbank = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int capital = cbank.paySalary(worker);
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+
+        int amount = capital;
+        farmer.borrow(amount);
+        assertThat(bank.deposit(), is(capital - amount + amount));  // 自分に振り込むので変化なし
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.LOANS_RECEIVABLE), is(amount));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(capital + amount));
+    }
+
+    @Test
     public void distributionTest() {
         CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();

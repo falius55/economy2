@@ -101,12 +101,32 @@ public class WorkerParsonTest {
         WorkerParson worker = new WorkerParson();
         int salary = centralBank.paySalary(worker);
         int initial = salary / 2;
+        assertThat(worker.deposit(), is(salary));
 
-        Optional<PrivateBusiness> opt = worker.establish(Industry.FARMER, initial);
-        assertThat(opt.isPresent(), is(true));
-        PrivateBusiness farmer = opt.get();
-
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, initial).get();
         assertThat(farmer.accountBook().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
+
+        assertThat(worker.deposit(), is(salary - initial));
+        assertThat(worker.accountBook().get(WorkerParsonAccountTitle.ESTABLISH_EXPENSES), is(initial));
+
+    }
+
+    @Test
+    public void borrowTest() {
+        System.out.println("borrow");
+        CentralBank cbank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int capital = cbank.paySalary(worker);
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+        assertThat(worker.cash() + worker.deposit(), is(0));
+
+        worker.borrow(capital);
+        System.out.println(worker.accountBook().toString());
+        assertThat(worker.deposit(), is(capital));
+        assertThat(worker.accountBook().get(WorkerParsonAccountTitle.LOANS_PAYABLE), is(capital));
+
+        System.out.println("borrow");
     }
 
 }

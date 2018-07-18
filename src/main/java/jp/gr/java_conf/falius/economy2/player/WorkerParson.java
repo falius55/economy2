@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import java.time.Period;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -164,11 +165,14 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     }
 
     @Override
-    public void borrow(int amount) {
+    public boolean borrow(int amount) {
         Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        if (!opt.isPresent()) { return false; }
         PrivateBank bank = opt.get();
         Loan loan = offerDebt(amount);
         bank.acceptDebt(loan);
+        mainBank().transfered(amount);
+        return true;
     }
 
     /**
@@ -176,7 +180,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * 借金が不成立の場合は想定外
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(mAccount, amount);
+        Loan debt = new Loan(mAccount, amount, Period.ofYears(1));
         mLoans.add(debt);
         return debt;
     }

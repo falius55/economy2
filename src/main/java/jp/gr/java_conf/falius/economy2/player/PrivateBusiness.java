@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -45,7 +46,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         sOwns.clear();
     }
 
-    PrivateBusiness(Worker founder, Industry industry, Set<Product> products, int initialExpenses) {
+    PrivateBusiness(Worker founder, Industry industry, Set<Product> products, int initialCapital) {
         mIndustry = industry;
         mProducts = products;
         mStockManagers = products.stream()
@@ -53,8 +54,8 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
                         () -> new EnumMap<Product, StockManager>(Product.class)));
         mMainBank = searchBank();
 
-        mAccount.establish(initialExpenses);
-        mMainBank.transfered(initialExpenses);
+        mAccount.establish(initialCapital);
+        mMainBank.transfered(initialCapital);
         sOwns.add(this);
         employ(founder);
     }
@@ -168,12 +169,14 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     }
 
     @Override
-    public void borrow(int amount) {
+    public boolean borrow(int amount) {
         Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        if (!opt.isPresent()) { return false; }
         PrivateBank bank = opt.get();
         Loan dm = offerDebt(amount);
         bank.acceptDebt(dm);
         mMainBank.transfered(amount);
+        return true;
     }
 
     /**
@@ -181,7 +184,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      * 借金が不成立の場合は想定外
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(mAccount, amount);
+        Loan debt = new Loan(mAccount, amount, Period.ofYears(1));
         mLoans.add(debt);
         return debt;
     }

@@ -8,8 +8,6 @@ import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
@@ -23,24 +21,15 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 public class PrivateBusinessTest {
 
-    @BeforeClass
-    public static void first() {
-        Bank bank = new PrivateBank();
-    }
-
-    @AfterClass
-    public static void end() {
-        Market.INSTANCE.clear();
-    }
-
     @After
     public void clearBusiness() {
-        PrivateBusiness.clear();
+        Market.INSTANCE.clear();
     }
 
     @Test
     public void employerTest() {
         CentralBank cbank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
         WorkerParson founder = new WorkerParson();
         WorkerParson founder2 = new WorkerParson();
         int capital = cbank.paySalary(founder);
@@ -51,23 +40,47 @@ public class PrivateBusinessTest {
 
         Worker worker = new WorkerParson();
         assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(false));
-
         worker.seekJob();
         assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(true));
-
         worker.retireJob();
         assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(false));
-
         worker.seekJob();
         assertThat(Market.INSTANCE.employables().anyMatch(ep -> ep.has(worker)), is(true));
-
         worker.seekJob();
         assertThat(Market.INSTANCE.employables().anyMatch(pb -> pb.has(worker)), is(true));
     }
 
     @Test
+    public void establishTest() {
+        CentralBank centralBank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int salary = centralBank.paySalary(worker);
+        int initial = salary / 2;
+
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, initial).get();
+        assertThat(farmer.accountBook().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
+        assertThat(farmer.deposit(), is(initial));
+    }
+
+    @Test
+    public void borrowTest() {
+        CentralBank cbank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int capital = cbank.paySalary(worker);
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+
+        farmer.borrow(capital);
+        assertThat(farmer.deposit(), is(capital * 2));
+        assertThat(farmer.accountBook().get(PrivateBusinessAccountTitle.LOANS_PAYABLE), is(capital));
+        assertThat(farmer.accountBook().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(capital));
+    }
+
+    @Test
     public void distributionTest() {
         CentralBank cbank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
         WorkerParson worker2 = new WorkerParson();
         WorkerParson worker3 = new WorkerParson();
