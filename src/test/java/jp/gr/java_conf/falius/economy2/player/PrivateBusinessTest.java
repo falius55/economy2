@@ -125,18 +125,15 @@ public class PrivateBusinessTest {
         System.out.println(coop.accountBook().toString());
 
         int farmerSales = farmer.accountBook().get(PrivateBusinessAccountTitle.SALES);
-        int farmerAccruedConsumptionTax = farmer.accountBook().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
         int makerSales = maker.accountBook().get(PrivateBusinessAccountTitle.SALES);
-        int makerAccruedConsumptionTax = maker.accountBook().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
         int coopSales = coop.accountBook().get(PrivateBusinessAccountTitle.SALES);
-        int coopAccruedConsumptionTax = coop.accountBook().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
         assertThat(farmerSales, is(greaterThan(0)));
 
-        assertThat(farmerSales + farmerAccruedConsumptionTax,
+        assertThat(farmerSales,
                 is(maker.accountBook().get(PrivateBusinessAccountTitle.PURCHESES)));
-        assertThat(makerSales + makerAccruedConsumptionTax,
+        assertThat(makerSales,
                 is(coop.accountBook().get(PrivateBusinessAccountTitle.PURCHESES)));
-        assertThat(coopSales + coopAccruedConsumptionTax, is(price));
+        assertThat(coopSales, is(price));
         int coopCash = coop.accountBook().get(PrivateBusinessAccountTitle.CASH);
         assertThat(coopCash, is(price));
 
@@ -177,7 +174,8 @@ public class PrivateBusinessTest {
         int coTax = Taxes.computeIncomeTaxFromManthly(coSalary);
         assertThat(company.accountBook().get(PrivateBusinessAccountTitle.SALARIES_EXPENSE), is(coSalary));
         assertThat(company.accountBook().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED), is(coTax));
-        assertThat(company.accountBook().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS), is(capital - (coSalary - coTax)));
+        assertThat(company.accountBook().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS),
+                is(capital - (coSalary - coTax)));
 
         System.out.println("--- end paySalary ---");
     }

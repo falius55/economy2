@@ -21,6 +21,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
@@ -61,6 +62,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         mAccount.establish(initialCapital);
         mMainBank.transfered(initialCapital);
         sOwns.add(this);
+        Market.INSTANCE.aggregater().add(this);
         employ(founder);
     }
 
@@ -119,6 +121,13 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return type == mIndustry.type();
     }
 
+    public int stockCost() {
+        return mStockManagers.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .mapToInt(StockManager::stockCost)
+                .sum();
+    }
+
     /**
      * 製品が売っているのかどうかを判断します
      * @param product 製品
@@ -131,7 +140,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     @Override
     public void closeEndOfMonth() {
-        calcPurchase();
+        recodePurchase();
         int payable = mAccount.settlePayable();
         mMainBank.transfer(payable);
         int receivable = mAccount.settleReceivable();
@@ -150,7 +159,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     /**
      * 未計上の仕入費を計上します。
      */
-    private void calcPurchase() {
+    public void recodePurchase() {
         int purchase = mStockManagers.entrySet().stream()
                 .map(e -> e.getValue())
                 .mapToInt(sm -> sm.calcPurchaseExpense())
@@ -257,19 +266,19 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         int cost = optCost.getAsInt();
 
         int price = (int) (cost * (1 + MARGIN)); // 原価にマージンを上乗せして売値を決める
-        int accruedConsumptionTax = Taxes.computeAccruedConsumptionTax(price, cost);  // 未払消費税
-
         switch (title) {
         case CASH:
-            mAccount.saleByCash(price - accruedConsumptionTax, accruedConsumptionTax);
+            mAccount.saleByCash(price);
             break;
         case RECEIVABLE:
-            mAccount.saleByReceivable(price - accruedConsumptionTax, accruedConsumptionTax);
+            mAccount.saleByReceivable(price);
             break;
         default:
             throw new IllegalArgumentException(); // no reach
         }
 
+        int accruedConsumptionTax = Taxes.computeConsumptionTax(price) - Taxes.computeConsumptionTax(cost);
+        mAccount.settleConsumptionTax(accruedConsumptionTax);
         return OptionalInt.of(price);
     }
 

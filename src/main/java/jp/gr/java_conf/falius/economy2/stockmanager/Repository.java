@@ -14,7 +14,7 @@ public class Repository implements StockManager {
     private final Product mProduct; // 製造する製品
     private int mStock = 0; // 在庫
     private int mPurchaseExpense = 0; // 未計上の仕入費用総額
-    private int mTotalCost = 0; // 原価総額
+    private int mStockCost = 0; // 原価総額
     private Industry.Type mProductSource; // 仕入先の業態(小売なら流通業者、流通業者ならメーカー)
 
     public Repository(Product product, Industry.Type productSource) {
@@ -53,16 +53,16 @@ public class Repository implements StockManager {
             OptionalInt optPurchaseExpence = purchase(require - mStock);
             if (optPurchaseExpence.isPresent()) {
                 int purchaseExpence = optPurchaseExpence.getAsInt();
-                mTotalCost += purchaseExpence;
+                mStockCost += purchaseExpence;
                 mPurchaseExpense += purchaseExpence;
             } else {
                 return OptionalInt.empty();  // 仕入失敗による出荷不可
             }
         }
 
-        int cost = (mTotalCost / mStock) * require;
+        int cost = (mStockCost / mStock) * require;
         mStock -= require;
-        mTotalCost -= cost;
+        mStockCost -= cost;
         return OptionalInt.of(cost);
     }
 
@@ -78,8 +78,8 @@ public class Repository implements StockManager {
     }
 
     @Override
-    public int calcMerchandiseCost() {
-       return mTotalCost;
+    public int stockCost() {
+       return mStockCost;
     }
 
     /**

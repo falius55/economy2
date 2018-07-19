@@ -14,6 +14,7 @@ public enum PrivateBusinessAccountTitle implements AccountTitle {
     /**  給料費用(費用) */ SALARIES_EXPENSE("給料費", AccountType.EXPENSE),
     /** 消耗品費(費用) */ SUPPLIES_EXPENSE("消耗品費", AccountType.EXPENSE),
     /** 支払利息(費用) */ INTEREST_EXPENSE("支払利息", AccountType.EXPENSE),
+    /** 租税公課(費用) */ TAX("租税公課", AccountType.EXPENSE),
 
     /** 売上高(収益) */ SALES("売上高", AccountType.REVENUE),
     /** 未収収益(収益) */ ACCRUED_REVENUE("未収収益", AccountType.REVENUE),

@@ -23,4 +23,10 @@ public interface Account<T extends Enum<T> & AccountTitle> {
      */
     public int get(T item);
 
+    /**
+     * 剰余金を計算する
+     * @return
+     */
+    public int benefit();
+
 }

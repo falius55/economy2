@@ -27,7 +27,7 @@ public class Factory implements StockManager {
     *  原価総額
     *  あくまで現在の在庫にかかった費用であり、出荷することで平均から算出された分だけ減少する
     */
-    private int mTotalCost = 0;
+    private int mStockCost = 0;
     /** 最終製造日 */
     private LocalDate mLastManufacture;
     /** 製造期間 */
@@ -79,8 +79,8 @@ public class Factory implements StockManager {
         }
 
         // 原価計算(単純に総費用を在庫で割って平均を求める)
-        int cost = (mTotalCost / mStock) * require;
-        mTotalCost -= cost;
+        int cost = (mStockCost / mStock) * require;
+        mStockCost -= cost;
         // 在庫の減少
         mStock -= require;
         return OptionalInt.of(cost);
@@ -100,9 +100,9 @@ public class Factory implements StockManager {
     }
 
     @Override
-    public int calcMerchandiseCost() {
+    public int stockCost() {
         update();
-        return mTotalCost;
+        return mStockCost;
     }
 
     /**
@@ -186,7 +186,7 @@ public class Factory implements StockManager {
         }
         int amount = optAmount.getAsInt();
 
-        mTotalCost += amount;
+        mStockCost += amount;
         mPurchaseExpense += amount;
         mMaterials.compute(product, (k, v) -> v + require);
         return OptionalInt.of(amount);

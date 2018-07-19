@@ -25,7 +25,7 @@ public interface StockManager {
      * 現在の商品原価総額を返します。
      * @return
      */
-    public int calcMerchandiseCost();
+    public int stockCost();
 
     public void update();
 }

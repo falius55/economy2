@@ -37,24 +37,29 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
      * 売り上げます
      * @param receiveItem 受取科目
      */
-    public PrivateBusinessAccount saleBy(PrivateBusinessAccountTitle receiveItem, int amount, int accruedConsumptionTax) {
+    public PrivateBusinessAccount saleBy(PrivateBusinessAccountTitle receiveItem, int amount) {
         if (receiveItem.type() != AccountType.ASSETS) {
             throw new IllegalArgumentException();
         }
-        addLeft(receiveItem, amount + accruedConsumptionTax);
+        addLeft(receiveItem, amount);
         addRight(PrivateBusinessAccountTitle.SALES, amount);
-        addRight(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX, accruedConsumptionTax);
         return this;
     }
 
     // 現金受け取り
-    public PrivateBusinessAccount saleByCash(int amount, int accruedConsumptionTax) {
-        return saleBy(PrivateBusinessAccountTitle.CASH, amount, accruedConsumptionTax);
+    public PrivateBusinessAccount saleByCash(int amount) {
+        return saleBy(PrivateBusinessAccountTitle.CASH, amount);
     }
 
     // 売掛金
-    public PrivateBusinessAccount saleByReceivable(int amount, int accruedConsumptionTax) {
-        return saleBy(PrivateBusinessAccountTitle.RECEIVABLE, amount, accruedConsumptionTax);
+    public PrivateBusinessAccount saleByReceivable(int amount) {
+        return saleBy(PrivateBusinessAccountTitle.RECEIVABLE, amount);
+    }
+
+    public PrivateBusinessAccount settleConsumptionTax(int amount) {
+        addLeft(PrivateBusinessAccountTitle.TAX, amount);
+        addRight(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX, amount);
+        return this;
     }
 
     /**

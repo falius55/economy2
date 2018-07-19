@@ -88,6 +88,12 @@ public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implemen
         return itemMap.get(item).intValue();
     }
 
+    @Override
+    public final int benefit() {
+        return get(AccountType.REVENUE)
+                - get(AccountType.EXPENSE);
+    }
+
     /**
      * 帳簿内容の文字列表現を返します
      */

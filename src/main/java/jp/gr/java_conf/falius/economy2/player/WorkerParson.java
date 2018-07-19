@@ -26,6 +26,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
 
     public WorkerParson() {
         mMainBank = searchBank();
+        Market.INSTANCE.aggregater().add(this);
     }
 
     private PrivateBank searchBank() {

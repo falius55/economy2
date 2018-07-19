@@ -60,7 +60,7 @@ public class Farm implements StockManager {
     }
 
     @Override
-    public int calcMerchandiseCost() {
+    public int stockCost() {
         return 0;
     }
 
