@@ -234,4 +234,28 @@ public class PrivateBankTest {
 
         System.out.println("operate buying");
     }
+
+    @Test
+    public void paySalaryTest() {
+        System.out.println("paySalary");
+        CentralBank central = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int salary = central.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary - tax));
+
+        int beforeChecking = salary - tax;
+        int beforeDeposit = salary - tax;
+        int bankSalary = bank.paySalary(worker);
+        int bankTax = Taxes.computeIncomeTaxFromManthly(bankSalary);
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.SALARIES_EXPENSE), is(bankSalary));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSITS_RECEIVED), is(bankTax));
+        // 自分に振り込まれるので変わらず ↓
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(beforeChecking));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(beforeDeposit + bankSalary - bankTax));
+
+        System.out.println("--- end paySalary ---");
+    }
 }

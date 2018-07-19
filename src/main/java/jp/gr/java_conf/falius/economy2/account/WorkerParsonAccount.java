@@ -5,7 +5,8 @@ import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitle>
-        implements PrivateAccount<WorkerParsonAccountTitle>, BorrowableAccount<WorkerParsonAccountTitle> {
+        implements PrivateAccount<WorkerParsonAccountTitle>, BorrowableAccount<WorkerParsonAccountTitle>,
+        AccountOpenableAccount<WorkerParsonAccountTitle> {
 
     public static WorkerParsonAccount newInstance() {
         return new WorkerParsonAccount();
@@ -16,14 +17,14 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
     }
 
     @Override
-    public Account<WorkerParsonAccountTitle> saveMoney(int amount) {
+    public WorkerParsonAccount saveMoney(int amount) {
         super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
         super.decrease(WorkerParsonAccountTitle.CASH, amount);
         return this;
     }
 
     @Override
-    public Account<WorkerParsonAccountTitle> downMoney(int amount) {
+    public WorkerParsonAccount downMoney(int amount) {
         super.increase(WorkerParsonAccountTitle.CASH, amount);
         super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
         return this;

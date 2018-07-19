@@ -28,6 +28,7 @@ import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 public class PrivateBusiness implements AccountOpenable, Employable, PrivateEntity, Borrowable {
     private static final List<PrivateBusiness> sOwns = new ArrayList<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
+    private static final int SALARY = 50000;
 
     private final Industry mIndustry;
     private final Set<Product> mProducts;
@@ -213,8 +214,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     @Override
     public int paySalary(Worker worker) {
-        // TODO 自動生成されたメソッド・スタブ
-        return 0;
+        mAccount.paySalary(SALARY);
+        worker.getSalary(SALARY);
+        return SALARY;
     }
 
     @Override

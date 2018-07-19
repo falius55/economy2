@@ -2,7 +2,8 @@ package jp.gr.java_conf.falius.economy2.account;
 
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
 
-public class GovernmentAccount extends AbstractDoubleEntryAccount<GovernmentAccountTitle> {
+public class GovernmentAccount extends AbstractDoubleEntryAccount<GovernmentAccountTitle>
+        implements AccountOpenableAccount<GovernmentAccountTitle> {
 
     public static GovernmentAccount newInstance() {
         return new GovernmentAccount();

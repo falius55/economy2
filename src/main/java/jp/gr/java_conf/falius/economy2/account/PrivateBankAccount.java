@@ -7,7 +7,7 @@ import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAccountTitle>
         implements BankAccount<PrivateBankAccountTitle>, PrivateAccount<PrivateBankAccountTitle>,
-        LendableAccount<PrivateBankAccountTitle> {
+        LendableAccount<PrivateBankAccountTitle>, AccountOpenableAccount<PrivateBankAccountTitle> {
 
     public static PrivateBankAccount newInstance() {
         return new PrivateBankAccount();

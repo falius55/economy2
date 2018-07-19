@@ -23,8 +23,9 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     /**
      * 債券購入に充てられる最高割合(保有している現預金のうち何割までなら債券購入に使っていいか)
      */
-    public static double BOND_RATIO = 0.3d;
+    public static final double BOND_RATIO = 0.3d;
 
+    private static final int SALARY = 50000;
     private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
@@ -171,8 +172,9 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
 
     @Override
     public int paySalary(Worker worker) {
-        // TODO 自動生成されたメソッド・スタブ
-        return 0;
+        mAccount.paySalary(SALARY);
+        worker.getSalary(SALARY);
+        return SALARY;
     }
 
     @Override

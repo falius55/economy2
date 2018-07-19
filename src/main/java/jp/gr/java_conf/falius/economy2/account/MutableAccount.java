@@ -9,13 +9,4 @@ public interface MutableAccount<T extends Enum<T> & AccountTitle>  extends Accou
      */
     public Account<T> merge(Account<T> another);
 
-    /**
-     * お金を銀行に預けた時の処理を行います
-     */
-    public Account<T> saveMoney(int amount);
-
-    /**
-     * お金をおろした時の処理を行います
-     */
-    public Account<T> downMoney(int amount);
 }

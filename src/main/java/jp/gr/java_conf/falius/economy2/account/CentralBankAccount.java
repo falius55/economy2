@@ -15,16 +15,6 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
     }
 
     @Override
-    public Account<CentralBankAccountTitle> saveMoney(int amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Account<CentralBankAccountTitle> downMoney(int amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public CentralBankAccount acceptGovernmentBond(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);

@@ -8,7 +8,7 @@ import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle>
         implements EmployableAccount<PrivateBusinessAccountTitle>, PrivateAccount<PrivateBusinessAccountTitle>,
-        BorrowableAccount<PrivateBusinessAccountTitle> {
+        BorrowableAccount<PrivateBusinessAccountTitle>, AccountOpenableAccount<PrivateBusinessAccountTitle> {
 
     private PrivateBusinessAccount() {
         super(PrivateBusinessAccountTitle.class);

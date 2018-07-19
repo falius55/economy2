@@ -11,7 +11,9 @@ import org.junit.After;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
@@ -154,6 +156,30 @@ public class PrivateBusinessTest {
 
         assertThat(expense + benefit, is(revenue));
         assertThat(assets, is(liabilities + equity + benefit));
+    }
+
+    @Test
+    public void paySalaryTest() {
+        System.out.println("paySalary");
+        CentralBank central = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int salary = central.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        assertThat(central.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(salary - tax));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary - tax));
+
+        int capital = salary - tax;
+        PrivateBusiness company = worker.establish(Industry.FARMER, capital).get();
+        assertThat(company.accountBook().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS), is(capital));
+        int coSalary = company.paySalary(worker);
+        int coTax = Taxes.computeIncomeTaxFromManthly(coSalary);
+        assertThat(company.accountBook().get(PrivateBusinessAccountTitle.SALARIES_EXPENSE), is(coSalary));
+        assertThat(company.accountBook().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED), is(coTax));
+        assertThat(company.accountBook().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS), is(capital - (coSalary - coTax)));
+
+        System.out.println("--- end paySalary ---");
     }
 
 }
