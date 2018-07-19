@@ -23,13 +23,13 @@ public enum Product {
             return ret;
         }
     },
-    WOOD("木材", 600, Type.CONSUMER, 1000 /* g */, Period.ofYears(1), 100000 /* g */) {
+    WOOD("木材", 600, Type.CONSUMER, 1000 /* g */, Period.ofDays(364), 100000 /* g */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
             return ret;
         }
     },
-    RICE("米", 800, Type.CONSUMER, 1000 /* g */, Period.ofYears(1), 1000000 /* g */) {
+    RICE("米", 800, Type.CONSUMER, 1000 /* g */, Period.ofDays(364), 1000000 /* g */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
             return ret;
@@ -42,7 +42,7 @@ public enum Product {
             return ret;
         }
     },
-    BUILDINGS("建物", 5000000, Type.FIXED_ASSET, 45 /* 年 */, 1 /* 棟 */, Period.ofYears(1), 1 /* 棟 */) {
+    BUILDINGS("建物", 5000000, Type.FIXED_ASSET, 45 /* 年 */, 1 /* 棟 */, Period.ofDays(364), 1 /* 棟 */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
             ret.put(WOOD, 100000 /* g */);
@@ -59,41 +59,45 @@ public enum Product {
     RICE_BALL("おにぎり", 120, Type.CONSUMER, 1 /* 個 */, Period.ofDays(1), 100 /* 個 */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
-            ret.put(RICE, 200 /* g */);
+            ret.put(RICE, 100 /* g */);
             return ret;
         }
     };
 
-    private final String name; // 日本語名
-    private final int price; // 値段(ロットあたり)
-    private final Type type; // 資産としての種類
-    private final int serviceLife; // 耐用年数
-    private final int numOfLot; // 購入単位あたり数量
-    private final Period manufacturePeriod; // 製造期間
-    private final int productionVolume; // 一度の製造数
-    private static final Map<String, Product> stringToEnum = new HashMap<String, Product>(); // 日本語名から商品enumへのマップ
-    private static final Map<Product, Map<Product, Integer>> materials = new EnumMap<Product, Map<Product, Integer>>(
-            Product.class); // 原材料から必要数量へのマップ
-    static {
-        for (Product product : values())
-            stringToEnum.put(product.toString(), product);
+    private final String mName; // 日本語名
+    private final int mPrice; // 値段(ロットあたり)
+    private final Type mType; // 資産としての種類
+    private final int mServiceLife; // 耐用年数
+    private final int mNumOfLot; // 購入単位あたり数量
+    private final Period mManufacturePeriod; // 製造期間
+    private final int mProductionVolume; // 一度の製造数
 
-        for (Product product : values())
-            materials.put(product, product.createMaterialMap());
+    private static final Map<String, Product> sStringToEnum = new HashMap<String, Product>(); // 日本語名から商品enumへのマップ
+    private static final Map<Product, Map<Product, Integer>> sMaterials = new EnumMap<Product, Map<Product, Integer>>(
+            Product.class); // 原材料から必要数量へのマップ
+
+    static {
+        for (Product product : values()) {
+            sStringToEnum.put(product.toString(), product);
+        }
+
+        for (Product product : values()) {
+            sMaterials.put(product, product.createMaterialMap());
+        }
     }
 
     /**
-     * @param name 日本語名
-     * @param price 値段(１単位あたり)
-     * @param type 資産としての種類(消費財、固定資産など)
-     * @param numOfLot １単位あたり数量
+     * @param mName 日本語名
+     * @param mPrice 値段(１単位あたり)
+     * @param mType 資産としての種類(消費財、固定資産など)
+     * @param mNumOfLot １単位あたり数量
      * @param 製造期間
-     * @param manufacturePeriod 一度の製造数
+     * @param mManufacturePeriod 一度の製造数
      */
     Product(String name, int price, Type type, int numOfLot, Period manufacturePeriod, int productionVolume) {
         this(name, price, type, 0, numOfLot, manufacturePeriod, productionVolume);
         if (type == Type.FIXED_ASSET)
-            throw new IllegalArgumentException("arguments has no serviceLife");
+            throw new IllegalArgumentException("arguments has no mServiceLife");
     }
 
     /**
@@ -101,21 +105,21 @@ public enum Product {
      * @param name 日本語名
      * @param price 値段(１単位あたり)
      * @param type 資産としての種類(消費財、固定資産など)
-     * @param servicelife 耐用年数
+     * @param serviceLife 耐用年数
      * @param numOfLot １単位あたり数量
-     * @param 製造期間
-     * @param manufacturePeriod 一度の製造数
+     * @param manufacturePeriod 製造期間
+     * @param productionVolume 一度の製造数
      * @throws IllegalArgumentException typeが固定資産ではない場合
      */
     Product(String name, int price, Type type, int serviceLife, int numOfLot, Period manufacturePeriod,
             int productionVolume) {
-        this.name = name;
-        this.price = price;
-        this.type = type;
-        this.serviceLife = serviceLife;
-        this.numOfLot = numOfLot;
-        this.manufacturePeriod = manufacturePeriod;
-        this.productionVolume = productionVolume;
+        mName = name;
+        mPrice = price;
+        mType = type;
+        mServiceLife = serviceLife;
+        mNumOfLot = numOfLot;
+        mManufacturePeriod = manufacturePeriod;
+        mProductionVolume = productionVolume;
 
         if (type == Type.FIXED_ASSET && serviceLife == 0)
             throw new IllegalArgumentException();
@@ -127,7 +131,7 @@ public enum Product {
      * @return 対象のenum
      */
     public static Product fromString(String name) {
-        return stringToEnum.get(name);
+        return sStringToEnum.get(name);
     }
 
     /**
@@ -135,26 +139,26 @@ public enum Product {
      */
     @Override
     public String toString() {
-        return name;
+        return mName;
     }
 
     /**
      * @return この商品の値段
      */
     public int price() {
-        return price;
+        return mPrice;
     }
 
     public int serviceLife() {
-        return serviceLife;
+        return mServiceLife;
     }
 
     public Period manufacturePeriod() {
-        return manufacturePeriod;
+        return mManufacturePeriod;
     }
 
     public int productionVolume() {
-        return productionVolume;
+        return mProductionVolume;
     }
 
     /**
@@ -168,27 +172,28 @@ public enum Product {
      * 原材料の集合を返します
      */
     public Set<Product> materialSet() {
-        Map<Product, Integer> materials = Product.materials.get(this);
+        Map<Product, Integer> materials = Product.sMaterials.get(this);
         return materials.keySet();
     }
 
     public Map<Product, Integer> materials() {
         // ないとは思うが、もしオーバーライドしたcreateMaterialMap()でEnumMap以外を返すようにした場合にもHashMapで対応する
-        Map<Product, Integer> materials = Product.materials.get(this);
-        if (materials instanceof EnumMap)
+        Map<Product, Integer> materials = Product.sMaterials.get(this);
+        if (materials instanceof EnumMap) {
             return new EnumMap<Product, Integer>((EnumMap<Product, Integer>) materials);
-        else
+        } else {
             return new HashMap<Product, Integer>(materials);
+        }
     }
 
     abstract protected Map<Product, Integer> createMaterialMap();
 
     public Type type() {
-        return type;
+        return mType;
     }
 
     public int numOfLot() {
-        return numOfLot;
+        return mNumOfLot;
     }
 
     public void print() {
