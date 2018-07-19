@@ -6,4 +6,9 @@ public interface EmployableAccount<T extends Enum<T> & AccountTitle> extends Acc
 
     public EmployableAccount<T> paySalary(int amount);
 
+    /**
+     * 預かり金を納税します。
+     */
+    public EmployableAccount<T> payIncomeTax(int amount);
+
 }

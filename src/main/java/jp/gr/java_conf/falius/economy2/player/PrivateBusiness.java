@@ -14,11 +14,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateBusinessAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
+import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
@@ -192,8 +195,8 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     /**
      * 借金を返済します
      */
+    @Override
     public void repay(int amount) {
-        mAccount.repay(amount);
     }
 
     @Override
@@ -215,9 +218,20 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     }
 
     @Override
-    public void payTax(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
+    public Employable payIncomeTax(GovernmentAccount nationAccount) {
+        int amount = mAccount.get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
+        nationAccount.collectIncomeTaxes(amount);
+        mAccount.payIncomeTax(amount);
+        CentralBank.INSTANCE.transfered(amount);
+        return this;
+    }
 
+    public PrivateBusiness payConsumptionTax(GovernmentAccount nationAccount) {
+        int amount = mAccount.get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
+        nationAccount.collectConsumptionTax(amount);
+        mAccount.payConsumptionTax(amount);
+        CentralBank.INSTANCE.transfered(amount);
+        return this;
     }
 
     /**
@@ -241,12 +255,14 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         int cost = optCost.getAsInt();
 
         int price = (int) (cost * (1 + MARGIN)); // 原価にマージンを上乗せして売値を決める
+        int accruedConsumptionTax = Taxes.computeAccruedConsumptionTax(price, cost);  // 未払消費税
+
         switch (title) {
         case CASH:
-            mAccount.saleByCash(price);
+            mAccount.saleByCash(price - accruedConsumptionTax, accruedConsumptionTax);
             break;
         case RECEIVABLE:
-            mAccount.saleByReceivable(price);
+            mAccount.saleByReceivable(price - accruedConsumptionTax, accruedConsumptionTax);
             break;
         default:
             throw new IllegalArgumentException(); // no reach

@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 
 import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
+import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.loan.Bond;
+import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
 import jp.gr.java_conf.falius.economy2.player.Worker;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
@@ -94,11 +96,22 @@ public class CentralBank implements Bank {
         return this;
     }
 
+    /**
+     * @return 給与の額面金額
+     */
     @Override
     public int paySalary(Worker worker) {
         mAccount.paySalary(SALARY);
         worker.getSalary(SALARY);
         return SALARY;
+    }
+
+    @Override
+    public Employable payIncomeTax(GovernmentAccount nationAccount) {
+        int amount = mAccount.get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
+        nationAccount.collectIncomeTaxes(amount);
+        mAccount.payIncomeTax(amount);
+        return this;
     }
 
     public void clear() {

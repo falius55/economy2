@@ -2,6 +2,7 @@ package jp.gr.java_conf.falius.economy2.account;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitle>
         implements PrivateAccount<WorkerParsonAccountTitle>, BorrowableAccount<WorkerParsonAccountTitle> {
@@ -41,20 +42,16 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
         return null;
     }
 
-    @Override
-    public Account<WorkerParsonAccountTitle> payTax(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
-    }
-
     /**
      * 給与を銀行振り込みで受け取ります。
      * @param amount
      * @return
      */
     public Account<WorkerParsonAccountTitle> getSalary(int amount) {
+        int tax = Taxes.computeIncomeTaxFromManthly(amount);
         super.increase(WorkerParsonAccountTitle.SALARIES, amount);
-        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
+        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount - tax);
+        super.increase(WorkerParsonAccountTitle.TAX, tax);
         return this;
     }
 

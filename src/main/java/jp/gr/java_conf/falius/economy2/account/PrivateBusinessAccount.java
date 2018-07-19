@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
+import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBusinessAccountTitle>
         implements EmployableAccount<PrivateBusinessAccountTitle>, PrivateAccount<PrivateBusinessAccountTitle>,
@@ -36,27 +37,24 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
      * 売り上げます
      * @param receiveItem 受取科目
      */
-    public PrivateBusinessAccount saleBy(PrivateBusinessAccountTitle receiveItem, int mount) {
+    public PrivateBusinessAccount saleBy(PrivateBusinessAccountTitle receiveItem, int amount, int accruedConsumptionTax) {
         if (receiveItem.type() != AccountType.ASSETS) {
             throw new IllegalArgumentException();
         }
-        addLeft(receiveItem, mount);
-        addRight(PrivateBusinessAccountTitle.SALES, mount);
+        addLeft(receiveItem, amount + accruedConsumptionTax);
+        addRight(PrivateBusinessAccountTitle.SALES, amount);
+        addRight(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX, accruedConsumptionTax);
         return this;
     }
 
     // 現金受け取り
-    public PrivateBusinessAccount saleByCash(int mount) {
-        addLeft(PrivateBusinessAccountTitle.CASH, mount);
-        addRight(PrivateBusinessAccountTitle.SALES, mount);
-        return this;
+    public PrivateBusinessAccount saleByCash(int amount, int accruedConsumptionTax) {
+        return saleBy(PrivateBusinessAccountTitle.CASH, amount, accruedConsumptionTax);
     }
 
     // 売掛金
-    public PrivateBusinessAccount saleByReceivable(int mount) {
-        addLeft(PrivateBusinessAccountTitle.RECEIVABLE, mount);
-        addRight(PrivateBusinessAccountTitle.SALES, mount);
-        return this;
+    public PrivateBusinessAccount saleByReceivable(int amount, int accruedConsumptionTax) {
+        return saleBy(PrivateBusinessAccountTitle.RECEIVABLE, amount, accruedConsumptionTax);
     }
 
     /**
@@ -152,11 +150,6 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
         return this;
     }
 
-    @Override
-    public PrivateBusinessAccount payTax(int amount) {
-        return this;
-    }
-
     public PrivateBusinessAccount purchase(int amount) {
         addLeft(PrivateBusinessAccountTitle.PURCHESES, amount);
         addRight(PrivateBusinessAccountTitle.PAYABLE, amount);
@@ -187,7 +180,24 @@ public class PrivateBusinessAccount extends AbstractDoubleEntryAccount<PrivateBu
 
     @Override
     public PrivateBusinessAccount paySalary(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
+        int tax = Taxes.computeIncomeTax(amount * 12) / 12;
+        addLeft(PrivateBusinessAccountTitle.SALARIES_EXPENSE, amount);
+        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount - tax);
+        addRight(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED, tax);
+        return this;
     }
+
+    @Override
+    public PrivateBusinessAccount payIncomeTax(int amount) {
+        addLeft(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED, amount);
+        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
+        return this;
+    }
+
+    public PrivateBusinessAccount payConsumptionTax(int amount) {
+        addLeft(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX, amount);
+        addRight(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS, amount);
+        return this;
+    }
+
 }

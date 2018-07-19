@@ -13,15 +13,17 @@ public class GovernmentAccount extends AbstractDoubleEntryAccount<GovernmentAcco
     }
 
     @Override
-    public Account<GovernmentAccountTitle> saveMoney(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
+    public GovernmentAccount saveMoney(int amount) {
+        addLeft(GovernmentAccountTitle.DEPOSIT, amount);
+        addRight(GovernmentAccountTitle.CASH, amount);
+        return this;
     }
 
     @Override
-    public Account<GovernmentAccountTitle> downMoney(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
+    public GovernmentAccount downMoney(int amount) {
+        addLeft(GovernmentAccountTitle.CASH, amount);
+        addRight(GovernmentAccountTitle.DEPOSIT, amount);
+        return this;
     }
 
     public GovernmentAccount issueBonds(int amount) {
@@ -33,6 +35,18 @@ public class GovernmentAccount extends AbstractDoubleEntryAccount<GovernmentAcco
     public GovernmentAccount redeemBonds(int amount) {
         addLeft(GovernmentAccountTitle.GOVERNMENT_BOND, amount);
         addRight(GovernmentAccountTitle.DEPOSIT, amount);
+        return this;
+    }
+
+    public GovernmentAccount collectIncomeTaxes(int amount) {
+        addLeft(GovernmentAccountTitle.DEPOSIT, amount);
+        addRight(GovernmentAccountTitle.INCOME_TAX, amount);
+        return this;
+    }
+
+    public GovernmentAccount collectConsumptionTax(int amount) {
+        addLeft(GovernmentAccountTitle.DEPOSIT, amount);
+        addRight(GovernmentAccountTitle.CONSUMPTION_TAX, amount);
         return this;
     }
 

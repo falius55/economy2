@@ -2,7 +2,6 @@ package jp.gr.java_conf.falius.economy2.player.gorv;
 
 import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 
 /**
  * 地方自治体
@@ -36,7 +35,7 @@ public class Municipality implements Government {
     }
 
     @Override
-    public Government collectTaxes(PrivateEntity entity) {
+    public Government collectTaxes() {
         // TODO 自動生成されたメソッド・スタブ
         return null;
     }

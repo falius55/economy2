@@ -33,6 +33,8 @@ public enum PrivateBusinessAccountTitle implements AccountTitle {
     /** 買掛金(負債) */ PAYABLE("買掛金", AccountType.LIABILITIES),
     /** 未払費用(負債) */ ACCRUED_EXPENSE("未払費用", AccountType.LIABILITIES),
     /** 借入金(負債) */ LOANS_PAYABLE("借入金", AccountType.LIABILITIES),
+    /** 預かり金(負債) */ DEPOSITS_RECEIVED("預かり金", AccountType.LIABILITIES),
+    /** 未払消費税(負債) */ ACCRUED_CONSUMPTION_TAX("未払消費税", AccountType.LIABILITIES),
 
     /** 資本金(資本) */ CAPITAL_STOCK("資本金", AccountType.EQUITY);
 

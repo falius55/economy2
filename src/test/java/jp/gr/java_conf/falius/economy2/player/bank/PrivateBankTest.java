@@ -14,6 +14,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
@@ -30,12 +31,13 @@ public class PrivateBankTest {
     public void workerSalaryTest() {
         PrivateBank bank = new PrivateBank();
         int salary = 100000;
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
 
         WorkerParson worker = new WorkerParson();
         worker.getSalary(salary);
 
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary));
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary - tax));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax));
     }
 
     @Test
@@ -44,7 +46,9 @@ public class PrivateBankTest {
         CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
-        int capital = cbank.paySalary(worker);
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
 
         System.out.println(bank.accountBook().toString());
 
@@ -61,7 +65,9 @@ public class PrivateBankTest {
         CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
-        int capital = cbank.paySalary(worker);
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
 
         System.out.println(bank.accountBook().toString());
@@ -82,7 +88,9 @@ public class PrivateBankTest {
         CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
-        int capital = cbank.paySalary(worker);
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
 
         int amount = capital;
@@ -99,10 +107,15 @@ public class PrivateBankTest {
         WorkerParson worker = new WorkerParson();
         WorkerParson worker2 = new WorkerParson();
         WorkerParson worker3 = new WorkerParson();
-        int capital = cbank.paySalary(worker);
-        int capital2 = cbank.paySalary(worker2);
-        int capital3 = cbank.paySalary(worker3);
-        int initialExpenses = 100000;
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+        int salary2 = cbank.paySalary(worker2);
+        int tax2 = Taxes.computeIncomeTaxFromManthly(salary2);
+        int capital2 = salary2 - tax2;
+        int salary3 = cbank.paySalary(worker3);
+        int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
+        int capital3 = salary3 - tax3;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
@@ -153,14 +166,19 @@ public class PrivateBankTest {
 
         PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
-        int moneyStock = cbank.paySalary(worker);
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int moneyStock = salary - tax;
 
         int count = 10;
         int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
 
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.advertiseBonds();
-        System.out.println(bank.accountBook().toString());
+        System.out.printf("worker: %s%n", worker.accountBook().toString());
+        System.out.printf("bank: %s%n", bank.accountBook().toString());
+        System.out.printf("cbank: %s%n", cbank.accountBook().toString());
+        System.out.printf("nation: %s%n", nation.accountBook().toString());
         assertThat(bank.deposit(), is(moneyStock - price * count));
         assertThat(bank.accountBook().get(PrivateBankAccountTitle.GOVERNMENT_BOND), is(price * count));
 
@@ -180,12 +198,13 @@ public class PrivateBankTest {
         PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
         int salary = cbank.paySalary(worker);
-        int amount = Math.min(salary, price * count);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int amount = Math.min(salary - tax, price * count);
         cbank.operateSelling(amount);
         System.out.println(bank.accountBook().toString());
 
         assertThat(bank.accountBook().get(PrivateBankAccountTitle.GOVERNMENT_BOND), is(amount));
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - amount));
+        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax - amount));
         System.out.println("operate selling");
     }
 
@@ -196,7 +215,9 @@ public class PrivateBankTest {
         CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
-        int moneyStock = cbank.paySalary(worker);
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int moneyStock = salary - tax;
         System.out.println(bank.accountBook().toString());
 
         int count = 10;

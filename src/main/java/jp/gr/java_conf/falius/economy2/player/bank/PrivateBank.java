@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.loan.Bond;
@@ -175,9 +176,12 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     }
 
     @Override
-    public void payTax(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-
+    public Employable payIncomeTax(GovernmentAccount nationAccount) {
+        int amount = mAccount.get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
+        nationAccount.collectIncomeTaxes(amount);
+        mAccount.payIncomeTax(amount);
+        CentralBank.INSTANCE.transfered(amount);
+        return this;
     }
 
     /**

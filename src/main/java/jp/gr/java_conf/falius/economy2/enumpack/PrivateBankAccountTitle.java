@@ -20,6 +20,7 @@ public enum PrivateBankAccountTitle implements AccountTitle {
 
     /** 借入金(負債) */ LOANS_PAYABLE("借入金", AccountType.LIABILITIES),
     /** 預金(負債) */ DEPOSIT("預金", AccountType.LIABILITIES),
+    /** 預かり金(負債) */ DEPOSITS_RECEIVED("預かり金", AccountType.LIABILITIES),
 
     /** 資本金(資本) */ CAPITAL_STOCK("資本金", AccountType.EQUITY);
 

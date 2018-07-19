@@ -2,7 +2,6 @@ package jp.gr.java_conf.falius.economy2.player.gorv;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.player.Entity;
-import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 
 public interface Government extends Entity {
 
@@ -25,7 +24,7 @@ public interface Government extends Entity {
      * @param entity
      * @return
      */
-    public Government collectTaxes(PrivateEntity entity);
+    public Government collectTaxes();
 
     /**
      * 公共事業を発注する。

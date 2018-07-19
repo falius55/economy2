@@ -3,6 +3,7 @@ package jp.gr.java_conf.falius.economy2.account;
 import java.time.LocalDate;
 
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAccountTitle>
         implements BankAccount<PrivateBankAccountTitle>, PrivateAccount<PrivateBankAccountTitle>,
@@ -118,11 +119,6 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
         return this;
     }
 
-    @Override
-    public PrivateBankAccount payTax(int amount) {
-        return this;
-    }
-
     /**
      * お金を預かる
      */
@@ -179,7 +175,17 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
 
     @Override
     public PrivateBankAccount paySalary(int amount) {
-        // TODO 自動生成されたメソッド・スタブ
-        return null;
+        int tax = Taxes.computeIncomeTaxFromManthly(amount);
+        addLeft(PrivateBankAccountTitle.SALARIES_EXPENSE, amount);
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount - tax);
+        addRight(PrivateBankAccountTitle.DEPOSITS_RECEIVED, tax);
+        return this;
+    }
+
+    @Override
+    public PrivateBankAccount payIncomeTax(int amount) {
+        addLeft(PrivateBankAccountTitle.DEPOSITS_RECEIVED, amount);
+        addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
+        return this;
     }
 }

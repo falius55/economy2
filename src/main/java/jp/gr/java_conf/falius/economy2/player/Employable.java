@@ -1,5 +1,7 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
+
 public interface Employable extends Entity {
 
     /**
@@ -31,5 +33,7 @@ public interface Employable extends Entity {
      * @return 計算された給与額
      */
     public int paySalary(Worker worker);
+
+    public Employable payIncomeTax(GovernmentAccount nationAccount);
 
 }

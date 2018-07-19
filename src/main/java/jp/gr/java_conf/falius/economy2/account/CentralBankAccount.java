@@ -1,6 +1,7 @@
 package jp.gr.java_conf.falius.economy2.account;
 
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAccountTitle>
         implements BankAccount<CentralBankAccountTitle> {
@@ -133,8 +134,17 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
 
     @Override
     public CentralBankAccount paySalary(int amount) {
+        int tax = Taxes.computeIncomeTaxFromManthly(amount);
         addLeft(CentralBankAccountTitle.SALARIES_EXPENSE, amount);
-        addRight(CentralBankAccountTitle.DEPOSIT, amount);
+        addRight(CentralBankAccountTitle.DEPOSIT, amount - tax);
+        addRight(CentralBankAccountTitle.DEPOSITS_RECEIVED, tax);
+        return this;
+    }
+
+    @Override
+    public EmployableAccount<CentralBankAccountTitle> payIncomeTax(int amount) {
+        addLeft(CentralBankAccountTitle.DEPOSITS_RECEIVED, amount);
+        addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         return this;
     }
 }
