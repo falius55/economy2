@@ -43,7 +43,8 @@ public class PrivateBusinessAggregater {
      */
     public int depreciation() {
         return mPrivateBusinesses.stream()
-                .mapToInt(pb -> pb.accountBook().get(PrivateBusinessAccountTitle.ACCUMULATED_DEPRECIATION))
+                .map(PrivateBusiness::accountBook)
+                .mapToInt(book -> book.get(PrivateBusinessAccountTitle.ACCUMULATED_DEPRECIATION))
                 .sum();
     }
 
@@ -61,7 +62,7 @@ public class PrivateBusinessAggregater {
                 .map(PrivateBusiness::accountBook)
                 .mapToInt(Account::benefit)
                 .sum();
-        return benefitOfAccount + stock;  // 在庫は企業が買ったとみなすので、収益に含まれる。
+        return benefitOfAccount + stock; // 在庫は企業が買ったとみなすので、収益に含まれる。
     }
 
     /**
@@ -72,6 +73,12 @@ public class PrivateBusinessAggregater {
         return mPrivateBusinesses.stream()
                 .map(PrivateBusiness::accountBook)
                 .mapToInt(book -> book.get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX))
+                .sum();
+    }
+
+    public int cashAndDeposits() {
+        return mPrivateBusinesses.stream()
+                .mapToInt(pb -> pb.cash() + pb.deposit())
                 .sum();
     }
 

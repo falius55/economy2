@@ -46,7 +46,7 @@ final class FixedAssetManager {
     }
 
     void printAll() {
-        for (FixedAsset asset : mFixedAssets) { asset.print(); }
+        mFixedAssets.stream().forEach(FixedAsset::print);
     }
 
     int depreciatedBalance() {

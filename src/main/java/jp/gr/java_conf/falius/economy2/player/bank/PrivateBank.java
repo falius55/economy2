@@ -13,6 +13,7 @@ import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
@@ -42,6 +43,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
 
     public PrivateBank() {
         sOwns.add(this);
+        Market.INSTANCE.aggregater().add(this);
     }
 
     @Override

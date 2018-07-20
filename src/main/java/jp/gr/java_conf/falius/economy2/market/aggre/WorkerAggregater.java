@@ -38,6 +38,12 @@ public class WorkerAggregater {
                 .sum();
     }
 
+    public int cashAndDeposits() {
+        return mWorkers.stream()
+                .mapToInt(worker -> worker.cash() + worker.deposit())
+                .sum();
+    }
+
     public void clear() {
         mWorkers.clear();
     }

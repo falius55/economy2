@@ -2,12 +2,14 @@ package jp.gr.java_conf.falius.economy2.market.aggre;
 
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
+import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 public class MarketAggregater {
     private final NationAggregater mNationAggregater = new NationAggregater();
     private final CentralBankAggregater mCentralBankAggregater = new CentralBankAggregater();
     private final PrivateBusinessAggregater mPrivateBusinessAggregater = new PrivateBusinessAggregater();
     private final WorkerAggregater mWorkerAggregater = new WorkerAggregater();
+    private final PrivateBankAggregater mPrivateBankAggregater = new PrivateBankAggregater();
 
     public MarketAggregater() {
 
@@ -19,6 +21,10 @@ public class MarketAggregater {
 
     public void add(WorkerParson worker) {
         mWorkerAggregater.add(worker);
+    }
+
+    public void add(PrivateBank privateBank) {
+        mPrivateBankAggregater.add(privateBank);
     }
 
     /**
@@ -39,7 +45,7 @@ public class MarketAggregater {
         return mWorkerAggregater.salary()
                 + mPrivateBusinessAggregater.benefits()
                 + mPrivateBusinessAggregater.depreciation()
-                + mNationAggregater.pureIncomeOfNation()
+                + mNationAggregater.pureIncome()
                 + mPrivateBusinessAggregater.accruedConsumptionTax(); // 消費税の徴税がまだの場合、政府の会計に反映されていない
     }
 
@@ -48,9 +54,7 @@ public class MarketAggregater {
      * @return
      */
     public int GDE() {
-        return C()
-                + mPrivateBusinessAggregater.I()
-                + mNationAggregater.G();
+        return C() + I() + G();
     }
 
     /**
@@ -68,7 +72,7 @@ public class MarketAggregater {
      */
     public int DI() {
         return NDP()
-                - (mNationAggregater.pureIncomeOfNation() + mPrivateBusinessAggregater.accruedConsumptionTax());
+                - (mNationAggregater.pureIncome() + mPrivateBusinessAggregater.accruedConsumptionTax());
     }
 
     public int C() {
@@ -76,9 +80,36 @@ public class MarketAggregater {
                 + mCentralBankAggregater.salaries();
     }
 
+    public int I() {
+        return mPrivateBusinessAggregater.I();
+    }
+
+    public int G() {
+        return mNationAggregater.G();
+    }
+
+    public int M() {
+        return mWorkerAggregater.cashAndDeposits()
+                + mPrivateBusinessAggregater.cashAndDeposits();
+    }
+
+    public int NationCashAndDeposits() {
+        return mNationAggregater.cashAndDeposits();
+    }
+
+    public int GovernmentBonds() {
+        return mNationAggregater.bonds();
+    }
+
+    public int NationPureIncome() {
+        return mNationAggregater.pureIncome()
+                + mPrivateBusinessAggregater.accruedConsumptionTax();
+    }
+
     public void clear() {
         mPrivateBusinessAggregater.clear();
         mWorkerAggregater.clear();
+        mPrivateBankAggregater.clear();
     }
 
 }

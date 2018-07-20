@@ -13,6 +13,7 @@ import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
+import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
@@ -105,7 +106,7 @@ public class Nation implements Government, AccountOpenable {
         mBondMarket.removeAll(successed);
         mBonds.addAll(successed);
 
-        if (bank instanceof PrivateBank) {
+        if (bank instanceof PrivateEntity) {
             int amount = successed.stream().mapToInt(Bond::amount).sum();
             mainBank().transfered(amount);
         }

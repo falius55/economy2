@@ -15,13 +15,25 @@ public class NationAggregater {
      * 政府所得(純間接税) = 間接税 - 補助金
      * @return
      */
-    public int pureIncomeOfNation() {
+    public int pureIncome() {
         return mAccount.get(GovernmentAccountTitle.CONSUMPTION_TAX)
                 - mAccount.get(GovernmentAccountTitle.SUBSIDY);
     }
 
     public int salaries() {
-        return mNation.accountBook().get(GovernmentAccountTitle.SALARIES_EXPENSE);
+        return mAccount.get(GovernmentAccountTitle.SALARIES_EXPENSE);
+    }
+
+    public int cashAndDeposits() {
+        return mNation.cash() + mNation.deposit();
+    }
+
+    /**
+     * 国債残高
+     * @return
+     */
+    public int bonds() {
+        return mAccount.get(GovernmentAccountTitle.GOVERNMENT_BOND);
     }
 
     public int G() {
