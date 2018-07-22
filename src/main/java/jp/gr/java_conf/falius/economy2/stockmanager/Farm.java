@@ -3,10 +3,13 @@ package jp.gr.java_conf.falius.economy2.stockmanager;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
+import jp.gr.java_conf.falius.economy2.loan.Deferment;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 /**
@@ -55,8 +58,8 @@ public class Farm implements StockManager {
     }
 
     @Override
-    public int calcPurchaseExpense() {
-        return 0;
+    public Set<Deferment> purchasePayable() {
+        return new HashSet<>();
     }
 
     @Override

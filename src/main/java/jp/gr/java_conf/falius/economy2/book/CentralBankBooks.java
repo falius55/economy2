@@ -1,28 +1,40 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
+import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 
-public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAccountTitle>
-        implements BankAccount<CentralBankAccountTitle> {
+public class CentralBankBooks extends AbstractDoubleEntryBooks<CentralBankAccountTitle>
+        implements BankBooks<CentralBankAccountTitle> {
+    private final Map<AccountOpenable, Integer> mDeposits;
 
-    public static CentralBankAccount newInstance() {
-        return new CentralBankAccount();
+    public static CentralBankBooks newInstance() {
+        return new CentralBankBooks();
     }
 
-    public CentralBankAccount() {
+    public CentralBankBooks() {
         super(CentralBankAccountTitle.class);
+        mDeposits = new HashMap<>();
     }
 
     @Override
-    public CentralBankAccount acceptGovernmentBond(int amount) {
+    public BankBooks<CentralBankAccountTitle> createAccount(AccountOpenable accountOpenable) {
+        mDeposits.put(accountOpenable, 0);
+        return this;
+    }
+
+    @Override
+    public CentralBankBooks acceptGovernmentBond(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         return this;
     }
 
     @Override
-    public CentralBankAccount redeemedGovernmentBond(int amount) {
+    public CentralBankBooks redeemedGovernmentBond(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
         return this;
@@ -32,7 +44,7 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * 民間銀行からの預け入れ
      */
     @Override
-    public BankAccount<CentralBankAccountTitle> keep(int amount) {
+    public BankBooks<CentralBankAccountTitle> keep(int amount) {
         addLeft(CentralBankAccountTitle.BANK_NOTE, amount);
         addRight(CentralBankAccountTitle.DEPOSIT, amount);
         return this;
@@ -42,19 +54,19 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * 民間銀行への払い出し
      */
     @Override
-    public BankAccount<CentralBankAccountTitle> paidOut(int amount) {
+    public BankBooks<CentralBankAccountTitle> paidOut(int amount) {
         addLeft(CentralBankAccountTitle.DEPOSIT, amount);
         addRight(CentralBankAccountTitle.BANK_NOTE, amount);
         return this;
     }
 
     @Override
-    public BankAccount<CentralBankAccountTitle> buyGorvementBond(int amount) {
+    public BankBooks<CentralBankAccountTitle> buyGorvementBond(int amount) {
         return operateBuying(amount);
     }
 
     @Override
-    public BankAccount<CentralBankAccountTitle> sellGovernmentBond(int amount) {
+    public BankBooks<CentralBankAccountTitle> sellGovernmentBond(int amount) {
         return operateSelling(amount);
     }
 
@@ -63,7 +75,7 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * @param amount
      * @return
      */
-    public CentralBankAccount keepByNation(int amount) {
+    public CentralBankBooks keepByNation(int amount) {
         addLeft(CentralBankAccountTitle.BANK_NOTE, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         return this;
@@ -74,7 +86,7 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * @param amount
      * @return
      */
-    public CentralBankAccount paidOutByNation(int amount) {
+    public CentralBankBooks paidOutByNation(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         addRight(CentralBankAccountTitle.BANK_NOTE, amount);
         return this;
@@ -85,7 +97,7 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * @param amount
      * @return
      */
-    public CentralBankAccount operateBuying(int amount) {
+    public CentralBankBooks operateBuying(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
         addRight(CentralBankAccountTitle.DEPOSIT, amount);
         return this;
@@ -96,34 +108,26 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
      * @param amount
      * @return
      */
-    public CentralBankAccount operateSelling(int amount) {
+    public CentralBankBooks operateSelling(int amount) {
         addLeft(CentralBankAccountTitle.DEPOSIT, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_BOND, amount);
         return this;
     }
 
-    /**
-     * 政府から民間預金への振り込み
-     */
-    @Override
-    public CentralBankAccount transfer(int amount) {
+    public CentralBankBooks transferToPrivateBankFromNation(int amount) {
         addLeft(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         addRight(CentralBankAccountTitle.DEPOSIT, amount);
-        return null;
+        return this;
     }
 
-    /**
-     * 民間預金からの政府への支払(税金)処理
-     */
-    @Override
-    public CentralBankAccount transfered(int amount) {
+    public CentralBankBooks transferToNationFromPrivateBank(int amount) {
         addLeft(CentralBankAccountTitle.DEPOSIT, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         return this;
     }
 
     @Override
-    public CentralBankAccount paySalary(int amount) {
+    public CentralBankBooks paySalary(int amount) {
         int tax = Taxes.computeIncomeTaxFromManthly(amount);
         addLeft(CentralBankAccountTitle.SALARIES_EXPENSE, amount);
         addRight(CentralBankAccountTitle.DEPOSIT, amount - tax);
@@ -132,7 +136,7 @@ public class CentralBankAccount extends AbstractDoubleEntryAccount<CentralBankAc
     }
 
     @Override
-    public EmployableAccount<CentralBankAccountTitle> payIncomeTax(int amount) {
+    public EmployableBooks<CentralBankAccountTitle> payIncomeTax(int amount) {
         addLeft(CentralBankAccountTitle.DEPOSITS_RECEIVED, amount);
         addRight(CentralBankAccountTitle.GOVERNMENT_DEPOSIT, amount);
         return this;

@@ -22,7 +22,7 @@ public class PrivateBankAggregater {
      */
     public int deposits() {
         return mBanks.stream()
-                .mapToInt(pb -> pb.accountBook().get(PrivateBankAccountTitle.DEPOSIT))
+                .mapToInt(pb -> pb.books().get(PrivateBankAccountTitle.DEPOSIT))
                 .sum();
     }
 
@@ -38,7 +38,7 @@ public class PrivateBankAggregater {
      */
     public int governmentBonds() {
         return mBanks.stream()
-                .map(PrivateBank::accountBook)
+                .map(PrivateBank::books)
                 .mapToInt(book -> book.get(PrivateBankAccountTitle.GOVERNMENT_BOND))
                 .sum();
     }

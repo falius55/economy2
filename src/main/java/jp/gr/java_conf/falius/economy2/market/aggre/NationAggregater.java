@@ -1,13 +1,13 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
-import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.book.Books;
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 public class NationAggregater {
     final Nation mNation = Nation.INSTANCE;
-    private final Account<GovernmentAccountTitle> mAccount = Nation.INSTANCE.accountBook();
+    private final Books<GovernmentAccountTitle> mBooks = Nation.INSTANCE.books();
 
     NationAggregater() {}
 
@@ -16,12 +16,12 @@ public class NationAggregater {
      * @return
      */
     public int pureIncome() {
-        return mAccount.get(GovernmentAccountTitle.CONSUMPTION_TAX)
-                - mAccount.get(GovernmentAccountTitle.SUBSIDY);
+        return mBooks.get(GovernmentAccountTitle.CONSUMPTION_TAX)
+                - mBooks.get(GovernmentAccountTitle.SUBSIDY);
     }
 
     public int salaries() {
-        return mAccount.get(GovernmentAccountTitle.SALARIES_EXPENSE);
+        return mBooks.get(GovernmentAccountTitle.SALARIES_EXPENSE);
     }
 
     public int cashAndDeposits() {
@@ -33,10 +33,10 @@ public class NationAggregater {
      * @return
      */
     public int bonds() {
-        return mAccount.get(GovernmentAccountTitle.GOVERNMENT_BOND);
+        return mBooks.get(GovernmentAccountTitle.GOVERNMENT_BOND);
     }
 
     public int G() {
-        return mAccount.get(AccountType.EXPENSE);
+        return mBooks.get(AccountType.EXPENSE);
     }
 }

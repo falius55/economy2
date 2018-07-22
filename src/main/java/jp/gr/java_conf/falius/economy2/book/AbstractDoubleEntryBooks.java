@@ -1,15 +1,15 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 
-public abstract class AbstractDoubleEntryAccount<T extends Enum<T> & AccountTitle>
-        extends AbstractAccount<T> implements DoubleEntryAccount<T> {
+public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
+        extends AbstractBooks<T> implements DoubleEntryBooks<T> {
     private final FixedAssetManager mFixedAssetManager;
 
-    protected AbstractDoubleEntryAccount(Class<T> clazz) {
+    protected AbstractDoubleEntryBooks(Class<T> clazz) {
         super(clazz);
         mFixedAssetManager = new FixedAssetManager();
     }

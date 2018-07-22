@@ -5,15 +5,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import jp.gr.java_conf.falius.economy2.account.Account;
-import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
+import jp.gr.java_conf.falius.economy2.book.Books;
+import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
-import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
@@ -21,7 +20,7 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 public class Nation implements Government, AccountOpenable {
     public static final Nation INSTANCE;
 
-    private final GovernmentAccount mAccount = GovernmentAccount.newInstance();
+    private final GovernmentBooks mBooks = GovernmentBooks.newInstance();
     /**
      * 未成約の国債
      */
@@ -39,8 +38,8 @@ public class Nation implements Government, AccountOpenable {
     }
 
     @Override
-    public Account<GovernmentAccountTitle> accountBook() {
-        return mAccount;
+    public Books<GovernmentAccountTitle> books() {
+        return mBooks;
     }
 
     @Override
@@ -50,12 +49,12 @@ public class Nation implements Government, AccountOpenable {
 
     @Override
     public int cash() {
-        return mAccount.get(GovernmentAccountTitle.CASH);
+        return mBooks.get(GovernmentAccountTitle.CASH);
     }
 
     @Override
     public int deposit() {
-        return mAccount.get(GovernmentAccountTitle.DEPOSIT);
+        return mBooks.get(GovernmentAccountTitle.DEPOSIT);
     }
 
     public Set<Bond> bonds() {
@@ -70,7 +69,7 @@ public class Nation implements Government, AccountOpenable {
 
     @Override
     public Government issueBonds(int amount) {
-        Bond bond = new Bond(mAccount, amount, Period.ofYears(1));
+        Bond bond = new Bond(mBooks, amount, Period.ofYears(1));
         mBondMarket.add(bond);
         return this;
     }
@@ -105,11 +104,8 @@ public class Nation implements Government, AccountOpenable {
         Set<Bond> successed = bank.searchBonds(mBondMarket);
         mBondMarket.removeAll(successed);
         mBonds.addAll(successed);
-
-        if (bank instanceof PrivateEntity) {
-            int amount = successed.stream().mapToInt(Bond::amount).sum();
-            mainBank().transfered(amount);
-        }
+        int amount = successed.stream().mapToInt(Bond::amount).sum();
+        bank.transfer(mainBank().nationAccount(), amount);
     }
 
     /**
@@ -121,8 +117,8 @@ public class Nation implements Government, AccountOpenable {
 
     @Override
     public Government collectTaxes() {
-        Market.INSTANCE.employables().forEach(ep -> ep.payIncomeTax(mAccount));
-        PrivateBusiness.stream().forEach(pb -> pb.payConsumptionTax(mAccount));
+        Market.INSTANCE.employables().forEach(ep -> ep.payIncomeTax(mBooks));
+        PrivateBusiness.stream().forEach(pb -> pb.payConsumptionTax(mBooks));
         return this;
     }
 
@@ -134,20 +130,20 @@ public class Nation implements Government, AccountOpenable {
 
     @Override
     public AccountOpenable saveMoney(int amount) {
-        mAccount.saveMoney(amount);
+        mBooks.saveMoney(amount);
         mainBank().keepByNation(amount);
         return this;
     }
 
     @Override
     public AccountOpenable downMoney(int amount) {
-        mAccount.downMoney(amount);
+        mBooks.downMoney(amount);
         mainBank().paidOutByNation(amount);
         return this;
     }
 
     public void clear() {
-        mAccount.clearBook();
+        mBooks.clearBook();
         mBondMarket.clear();
         mBonds.clear();
     }

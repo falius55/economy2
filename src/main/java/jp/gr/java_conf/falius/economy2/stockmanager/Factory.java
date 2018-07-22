@@ -4,15 +4,18 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
+import jp.gr.java_conf.falius.economy2.loan.Deferment;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
@@ -21,10 +24,14 @@ public class Factory implements StockManager {
     private final Product mProduct;
     /** 在庫 */
     private int mStock = 0;
-    /** 未計上の仕入費用総額 */
-    private int mPurchaseExpense = 0;
+
     /**
-    *  原価総額
+     * 未計上の仕入れの買掛金
+     */
+    private Set<Deferment> mPurchasePayable = new HashSet<>();
+
+    /**
+    *  原価総額(在庫評価額)
     *  あくまで現在の在庫にかかった費用であり、出荷することで平均から算出された分だけ減少する
     */
     private int mStockCost = 0;
@@ -88,14 +95,13 @@ public class Factory implements StockManager {
 
     /**
      * 仕入費用を集計します
-     * このメソッドを実行しなければ在庫が補充されませんので注意してください
      * @return 仕入に要した費用
      */
     @Override
-    public int calcPurchaseExpense() {
+    public Set<Deferment> purchasePayable() {
         update();
-        int ret = mPurchaseExpense;
-        mPurchaseExpense = 0;
+        Set<Deferment> ret = new HashSet<>(mPurchasePayable);
+        mPurchasePayable.clear();
         return ret;
     }
 
@@ -109,12 +115,12 @@ public class Factory implements StockManager {
      * 一度製造します。
      * @return 仕入費用の増加分(計上済)
      */
-    private OptionalInt manufacture() {
+    private void manufacture() {
         mLastManufacture = mLastManufacture.plus(mManufacturePeriod);
 
         OptionalInt dCost = restock();
         if (!dCost.isPresent()) {
-            return OptionalInt.empty();
+            return;
         }
 
         mProduct.materials()
@@ -122,8 +128,6 @@ public class Factory implements StockManager {
                     mMaterials.compute(material, (m, stock) -> stock - require * mProductionVolume);
                 });
         mStock += mProductionVolume;
-
-        return dCost;
     }
 
     /**
@@ -179,15 +183,17 @@ public class Factory implements StockManager {
             return OptionalInt.empty();
         }
         PrivateBusiness store = optStore.get();
+        store.update();
 
-        OptionalInt optAmount = store.saleByReceivable(product, require);
-        if (!optAmount.isPresent()) {
+        Optional<Deferment> optDeferment = store.saleByReceivable(product, require);
+        if (!optDeferment.isPresent()) {
             return OptionalInt.empty();
         }
-        int amount = optAmount.getAsInt();
+        Deferment deferment = optDeferment.get();
+        mPurchasePayable.add(deferment);
+        int amount = deferment.amount();
 
         mStockCost += amount;
-        mPurchaseExpense += amount;
         mMaterials.compute(product, (k, v) -> v + require);
         return OptionalInt.of(amount);
     }

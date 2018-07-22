@@ -22,7 +22,7 @@ public class WorkerAggregater {
      */
     public int salary() {
         return mWorkers.stream()
-                .map(WorkerParson::accountBook)
+                .map(WorkerParson::books)
                 .mapToInt(book -> book.get(WorkerParsonAccountTitle.SALARIES))
                 .sum();
     }
@@ -33,7 +33,7 @@ public class WorkerAggregater {
      */
     public int consumption() {
         return mWorkers.stream()
-                .map(WorkerParson::accountBook)
+                .map(WorkerParson::books)
                 .mapToInt(book -> book.get(WorkerParsonAccountTitle.CONSUMPTION))
                 .sum();
     }

@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Objects;
 
-import jp.gr.java_conf.falius.economy2.account.BankAccount;
-import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
-import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
-import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
+import jp.gr.java_conf.falius.economy2.book.BankBooks;
+import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
+import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
+import jp.gr.java_conf.falius.economy2.book.PrivateBankBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
@@ -19,11 +19,11 @@ public class Bond {
     private LocalDate mDeadLine; // 期限
     private boolean mIsPayOff = false;
 
-    private BankAccount<?> mUnderWriterAccount = null; // 債権者の会計
-    private GovernmentAccount mIssuerAccount; // 債務者の会計
+    private BankBooks<?> mUnderWriterBooks = null; // 債権者の会計
+    private GovernmentBooks mIssuerBooks; // 債務者の会計
 
-    public Bond(GovernmentAccount issuerAccount, int amount, Period period) {
-        mIssuerAccount = issuerAccount;
+    public Bond(GovernmentBooks issuerBook, int amount, Period period) {
+        mIssuerBooks = issuerBook;
         mAmount = amount;
         mPeriod = period;
     }
@@ -44,7 +44,7 @@ public class Bond {
      * @return
      */
     public boolean isConcluded() {
-        return Objects.nonNull(mUnderWriterAccount);
+        return Objects.nonNull(mUnderWriterBooks);
     }
 
     public boolean isOverDeadLine() {
@@ -59,28 +59,28 @@ public class Bond {
         if (!isConcluded()) {
             return false;
         }
-        return mUnderWriterAccount instanceof CentralBankAccount;
+        return mUnderWriterBooks instanceof CentralBankBooks;
     }
 
     public boolean ofPrivateBank() {
         if (!isConcluded()) {
             return false;
         }
-        return mUnderWriterAccount instanceof PrivateBankAccount;
+        return mUnderWriterBooks instanceof PrivateBankBooks;
     }
 
     /**
      * 債務が受け入れられ、債権債務関係が発生する
      */
-    public Bond accepted(BankAccount<?> underwriterAccount) {
+    public Bond accepted(BankBooks<?> underwriterBook) {
         if (isConcluded()) {
             throw new IllegalStateException("債権債務関係はすでに発生しています");
         }
-        mUnderWriterAccount = underwriterAccount;
+        mUnderWriterBooks = underwriterBook;
         mAccrualDate = Market.INSTANCE.nowDate();
         mDeadLine = mAccrualDate.plus(mPeriod);
-        mIssuerAccount.issueBonds(amount());
-        underwriterAccount.acceptGovernmentBond(amount());
+        mIssuerBooks.issueBonds(amount());
+        underwriterBook.acceptGovernmentBond(amount());
         return this;
     }
 
@@ -88,13 +88,13 @@ public class Bond {
      * 債権を譲渡する
      * @param transferee 新たな債権者の会計
      */
-    public Bond sellTo(BankAccount<?> transferee) {
+    public Bond sellTo(BankBooks<?> transferee) {
         if (!isConcluded()) {
             throw new IllegalStateException();
         }
-        mUnderWriterAccount.sellGovernmentBond(amount());
+        mUnderWriterBooks.sellGovernmentBond(amount());
         transferee.buyGorvementBond(amount());
-        mUnderWriterAccount = transferee;
+        mUnderWriterBooks = transferee;
         return this;
     }
 
@@ -109,11 +109,11 @@ public class Bond {
         if (isPayOff()) {
             return true;
         }
-        if (mIssuerAccount.get(GovernmentAccountTitle.DEPOSIT) < amount()) {
+        if (mIssuerBooks.get(GovernmentAccountTitle.DEPOSIT) < amount()) {
             return false;
         }
-        mIssuerAccount.redeemBonds(amount());
-        mUnderWriterAccount.redeemedGovernmentBond(amount());
+        mIssuerBooks.redeemBonds(amount());
+        mUnderWriterBooks.redeemedGovernmentBond(amount());
         mIsPayOff = true;
         return true;
     }

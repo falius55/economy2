@@ -43,7 +43,7 @@ public class MarketAggregater {
      */
     public int sGDP() {
         return mWorkerAggregater.salary()
-                + mPrivateBusinessAggregater.benefits()
+                + mPrivateBusinessAggregater.benefits() // 在庫投資額含む
                 + mPrivateBusinessAggregater.depreciation()
                 + mNationAggregater.pureIncome()
                 + mPrivateBusinessAggregater.accruedConsumptionTax(); // 消費税の徴税がまだの場合、政府の会計に反映されていない

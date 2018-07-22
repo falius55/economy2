@@ -9,7 +9,7 @@ public class CentralBankAggregater {
     CentralBankAggregater() {}
 
     public int salaries() {
-        return mBank.accountBook().get(CentralBankAccountTitle.SALARIES_EXPENSE);
+        return mBank.books().get(CentralBankAccountTitle.SALARIES_EXPENSE);
     }
 
     /**
@@ -17,7 +17,7 @@ public class CentralBankAggregater {
      * @return
      */
     public int governmentBonds() {
-        return mBank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND);
+        return mBank.books().get(CentralBankAccountTitle.GOVERNMENT_BOND);
     }
 
     /**
@@ -25,7 +25,7 @@ public class CentralBankAggregater {
      * @return
      */
     public int bankNotes() {
-        return mBank.accountBook().get(CentralBankAccountTitle.BANK_NOTE);
+        return mBank.books().get(CentralBankAccountTitle.BANK_NOTE);
     }
 
 }

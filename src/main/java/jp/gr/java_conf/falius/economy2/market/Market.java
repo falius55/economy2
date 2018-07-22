@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import jp.gr.java_conf.falius.economy2.market.aggre.MarketAggregater;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
+import jp.gr.java_conf.falius.economy2.player.WorkerParson;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
@@ -57,6 +58,7 @@ public class Market {
 
     public void clear() {
         mDate = LocalDate.now();
+        WorkerParson.clear();
         PrivateBusiness.clear();
         PrivateBank.clear();
         CentralBank.INSTANCE.clear();

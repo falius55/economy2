@@ -1,16 +1,21 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import jp.gr.java_conf.falius.economy2.account.Account;
-import jp.gr.java_conf.falius.economy2.account.CentralBankAccount;
-import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
+import jp.gr.java_conf.falius.economy2.account.CentralAccount;
+import jp.gr.java_conf.falius.economy2.account.NationAccount;
+import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
+import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.loan.Bond;
+import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
 import jp.gr.java_conf.falius.economy2.player.Worker;
@@ -20,8 +25,10 @@ public class CentralBank implements Bank {
     public static final CentralBank INSTANCE;
     private static final int SALARY = 100000;
 
-    private final CentralBankAccount mAccount = CentralBankAccount.newInstance();
+    private final CentralBankBooks mBooks = CentralBankBooks.newInstance();
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
+    private final Map<AccountOpenable, CentralAccount> mAccounts = new HashMap<>();
+    private final NationAccount mNationAccount = new NationAccount(this);
 
     static {
         INSTANCE = new CentralBank();
@@ -31,8 +38,21 @@ public class CentralBank implements Bank {
     }
 
     @Override
-    public Account<CentralBankAccountTitle> accountBook() {
-        return mAccount;
+    public CentralBankBooks books() {
+        return mBooks;
+    }
+
+    public CentralAccount account(PrivateBank owner) {
+        return mAccounts.get(owner);
+    }
+
+    public NationAccount nationAccount() {
+        return mNationAccount;
+    }
+
+    public void createAccount(PrivateBank privateBank) {
+        CentralAccount account = new CentralAccount(this, privateBank);
+        mAccounts.put(privateBank, account);
     }
 
     @Override
@@ -54,33 +74,25 @@ public class CentralBank implements Bank {
      * 市中銀行からの預け入れ
      */
     @Override
-    public void keep(int amount) {
-        mAccount.keep(amount);
+    public void keep(AccountOpenable openable, int amount) {
+        mBooks.keep(amount);
+        mAccounts.get(openable).increase(amount);
     }
 
     /**
      * 市中銀行への払い出し
      */
     @Override
-    public void paidOut(int amount) {
-        mAccount.paidOut(amount);
-    }
-
-    @Override
-    public void transfer(int amount) {
-        mAccount.transfer(amount);
-    }
-
-    @Override
-    public void transfered(int amount) {
-        mAccount.transfered(amount);
+    public void paidOut(AccountOpenable openable, int amount) {
+        mBooks.paidOut(amount);
+        mAccounts.get(openable).decrease(amount);
     }
 
     @Override
     public Set<Bond> searchBonds(Set<Bond> bondMarket) {
         Set<Bond> successed = new HashSet<>();
         bondMarket.stream()
-                .forEach(bond -> successed.add(bond.accepted(mAccount)));
+                .forEach(bond -> successed.add(bond.accepted(mBooks)));
         return successed;
     }
 
@@ -101,29 +113,34 @@ public class CentralBank implements Bank {
      */
     @Override
     public int paySalary(Worker worker) {
-        mAccount.paySalary(SALARY);
-        worker.getSalary(SALARY);
+        mBooks.paySalary(SALARY);
+        worker.getSalary(this, SALARY);
         return SALARY;
     }
 
     @Override
-    public Employable payIncomeTax(GovernmentAccount nationAccount) {
-        int amount = mAccount.get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
-        nationAccount.collectIncomeTaxes(amount);
-        mAccount.payIncomeTax(amount);
+    public Employable payIncomeTax(GovernmentBooks nationBooks) {
+        int amount = mBooks.get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
+        nationBooks.collectIncomeTaxes(amount);
+        mBooks.payIncomeTax(amount);
+        transfer(mNationAccount, amount);
         return this;
     }
 
     public void clear() {
-        mAccount.clearBook();
+        mBooks.clearBook();
+        mAccounts.clear();
+        mNationAccount.clear();
     }
 
     public void keepByNation(int amount) {
-        mAccount.keepByNation(amount);
+        mBooks.keepByNation(amount);
+        mNationAccount.increase(amount);
     }
 
     public void paidOutByNation(int amount) {
-        mAccount.paidOutByNation(amount);
+        mBooks.paidOutByNation(amount);
+        mNationAccount.decrease(amount);
     }
 
     public void operateBuying(int maxBudget) {
@@ -138,14 +155,14 @@ public class CentralBank implements Bank {
                         if (bond.amount() > mBudget) {
                             return;
                         }
-                        bond.sellTo(mAccount);
+                        bond.sellTo(mBooks);
                         mBudget -= bond.amount();
                     }
                 });
     }
 
     public void operateSelling(int maxAmount) {
-        int amount = Math.min(mAccount.get(CentralBankAccountTitle.GOVERNMENT_BOND), maxAmount);
+        int amount = Math.min(mBooks.get(CentralBankAccountTitle.GOVERNMENT_BOND), maxAmount);
         Set<Bond> sells = Nation.INSTANCE.bonds().stream()
                 .filter(bond -> !bond.isPayOff())
                 .filter(Bond::ofCentralBank)
@@ -162,6 +179,31 @@ public class CentralBank implements Bank {
                     }
                 }).collect(Collectors.toSet());
         PrivateBank.stream().forEach(pb -> pb.searchBonds(sells));
+    }
+
+    public int transfer(CentralAccount target, int amount) {
+        return target.increase(amount);
+    }
+
+    @Override
+    public int transfer(PrivateAccount target, int amount) {
+        target.bank().books().transfered(amount);
+        PrivateBank targetBank = target.bank();
+        CentralBank.INSTANCE.account(targetBank).increase(amount);
+        return target.increase(amount);
+    }
+
+    @Override
+    public int transfer(NationAccount target, int amount) {
+        return target.increase(amount);
+    }
+
+    // テスト用集計メソッド
+    public int realDeposits() {
+        return mAccounts.entrySet().stream()
+        .map(Map.Entry::getValue)
+        .mapToInt(CentralAccount::amount)
+        .sum();
     }
 
 }

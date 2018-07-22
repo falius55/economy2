@@ -4,9 +4,10 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Objects;
 
-import jp.gr.java_conf.falius.economy2.account.BorrowableAccount;
-import jp.gr.java_conf.falius.economy2.account.LendableAccount;
+import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.market.Market;
+import jp.gr.java_conf.falius.economy2.player.Borrowable;
+import jp.gr.java_conf.falius.economy2.player.Lendable;
 
 /**
  *
@@ -20,12 +21,15 @@ public class Loan {
     private LocalDate mAccrualDate; // 債権債務発生日
     private LocalDate mDeadLine; // 期限
 
-    private LendableAccount<?> mCreditorAccount = null; // 債権者の会計
-    private BorrowableAccount<?> mDebtorAccount; // 債務者の会計
+    private Lendable mCreditor = null; // 債権者
+    private final Borrowable mDebtor; // 債務者
+    private Account mCreditorAccount = null;
+    private final Account mDebtorAccount;
 
 
-    public Loan(BorrowableAccount<?> debtorAccount, int amount, Period period) {
-        mDebtorAccount = debtorAccount;
+    public Loan(Borrowable debtor, Account account, int amount, Period period) {
+        mDebtor = debtor;
+        mDebtorAccount = account;
         mAmount = amount;
         mPeriod = period;
     }
@@ -46,7 +50,7 @@ public class Loan {
      * @return
      */
     public boolean isConcluded() {
-        return Objects.nonNull(mCreditorAccount);
+        return Objects.nonNull(mCreditor);
     }
 
     public boolean isOverDeadLine() {
@@ -63,15 +67,17 @@ public class Loan {
     /**
      * 債務が受け入れられ、債権債務関係が発生する
      */
-    public Loan accepted(LendableAccount<?> creditorAccount) {
+    public Loan accepted(Lendable creditor, Account account) {
         if (isConcluded()) {
             throw new IllegalStateException("債権債務関係はすでに発生しています");
         }
-        mCreditorAccount = creditorAccount;
+        mCreditor = creditor;
+        mCreditorAccount = account;
         mAccrualDate = Market.INSTANCE.nowDate();
         mDeadLine = mAccrualDate.plus(mPeriod);
-        mDebtorAccount.borrow(amount());
-        creditorAccount.lend(amount());
+        mDebtor.books().borrow(amount());
+        creditor.books().lend(amount());
+        mCreditorAccount.transfer(mDebtorAccount, mAmount);
         return this;
     }
 
@@ -81,8 +87,9 @@ public class Loan {
      */
     public boolean repay(int amount) {
         amount = amount <= mAmount ? amount : mAmount;
-        mDebtorAccount.repay(amount);
-        mCreditorAccount.repaid(amount);
+        mDebtor.books().repay(amount);
+        mCreditor.books().repaid(amount);
+        mDebtorAccount.transfer(mCreditorAccount, amount);
         return mAmount == 0;
     }
 }

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
 import java.util.Set;

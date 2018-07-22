@@ -3,7 +3,7 @@ package jp.gr.java_conf.falius.economy2.market.aggre;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.book.Books;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
@@ -23,12 +23,12 @@ public class PrivateBusinessAggregater {
      */
     public int addedValue() {
         mPrivateBusinesses.stream()
-                .forEach(PrivateBusiness::recodePurchase); // 仕入れ費をすべて計上しなければ付加価値が水増しされてしまう
+                .forEach(PrivateBusiness::update); // 仕入れ費をすべて計上しなければ付加価値が水増しされてしまう
         int allSales = mPrivateBusinesses.stream()
-                .mapToInt(pb -> pb.accountBook().get(PrivateBusinessAccountTitle.SALES))
+                .mapToInt(pb -> pb.books().get(PrivateBusinessAccountTitle.SALES))
                 .sum();
         int allPurchase = mPrivateBusinesses.stream()
-                .mapToInt(pb -> pb.accountBook().get(PrivateBusinessAccountTitle.PURCHESES))
+                .mapToInt(pb -> pb.books().get(PrivateBusinessAccountTitle.PURCHESES))
                 .sum();
         int stock = mPrivateBusinesses.stream()
                 .mapToInt(PrivateBusiness::stockCost)
@@ -43,7 +43,7 @@ public class PrivateBusinessAggregater {
      */
     public int depreciation() {
         return mPrivateBusinesses.stream()
-                .map(PrivateBusiness::accountBook)
+                .map(PrivateBusiness::books)
                 .mapToInt(book -> book.get(PrivateBusinessAccountTitle.ACCUMULATED_DEPRECIATION))
                 .sum();
     }
@@ -54,15 +54,15 @@ public class PrivateBusinessAggregater {
      */
     public int benefits() {
         mPrivateBusinesses.stream()
-                .forEach(PrivateBusiness::recodePurchase); // 仕入れ費をすべて計上しなければ利益が水増しされてしまう
+                .forEach(PrivateBusiness::update); // 仕入れ費をすべて計上しなければ利益が水増しされてしまう
         int stock = mPrivateBusinesses.stream()
                 .mapToInt(PrivateBusiness::stockCost)
                 .sum();
-        int benefitOfAccount = mPrivateBusinesses.stream()
-                .map(PrivateBusiness::accountBook)
-                .mapToInt(Account::benefit)
+        int benefitOfBooks = mPrivateBusinesses.stream()
+                .map(PrivateBusiness::books)
+                .mapToInt(Books::benefit)
                 .sum();
-        return benefitOfAccount + stock; // 在庫は企業が買ったとみなすので、収益に含まれる。
+        return benefitOfBooks + stock; // 在庫は企業が買ったとみなすので、収益に含まれる。
     }
 
     /**
@@ -71,7 +71,7 @@ public class PrivateBusinessAggregater {
      */
     public int accruedConsumptionTax() {
         return mPrivateBusinesses.stream()
-                .map(PrivateBusiness::accountBook)
+                .map(PrivateBusiness::books)
                 .mapToInt(book -> book.get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX))
                 .sum();
     }

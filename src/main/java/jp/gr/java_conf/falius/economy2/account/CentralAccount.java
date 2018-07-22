@@ -1,27 +1,25 @@
 package jp.gr.java_conf.falius.economy2.account;
 
-import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 /**
- * 民間銀行の預金口座
- * WorkerParsonとPrivateBusinessが持てる
+ * 日銀当座預金
  * @author "ymiyauchi"
  *
  */
-public class PrivateAccount implements Account {
-    private final PrivateBank mBank;
-    private final AccountOpenable mOwner;
+public class CentralAccount implements Account {
+    private final CentralBank mBank;
+    private final PrivateBank mOwner;
     private int mAmount = 0;
 
-    public PrivateAccount(PrivateBank bank, AccountOpenable owner) {
+    public CentralAccount(CentralBank bank, PrivateBank owner) {
         mBank = bank;
         mOwner = owner;
     }
 
     @Override
-    public PrivateBank bank() {
+    public CentralBank bank() {
         return mBank;
     }
 
@@ -44,18 +42,14 @@ public class PrivateAccount implements Account {
 
     @Override
     public int transfer(Account target, int amount) {
-        if (target instanceof PrivateAccount) {
-            return transfer((PrivateAccount) target, amount);
-        } else if (target instanceof NationAccount) {
+        if (target instanceof NationAccount) {
             return transfer((NationAccount) target, amount);
+        } else if (target instanceof PrivateAccount) {
+            return transfer((PrivateAccount) target, amount);
+        } else if (target instanceof CentralAccount) {
+            return transfer((CentralAccount) target, amount);
         }
         throw new IllegalArgumentException();
-    }
-
-    @Override
-    public int transfer(CentralBank target, int amount) {
-        mBank.books().transfer(amount);
-        return decrease(amount);
     }
 
 
@@ -64,21 +58,27 @@ public class PrivateAccount implements Account {
     // PrivateBusiness(PrivateBankAccount) -> Nation(CentralBankAccount)
     // PrivateBank(CentralBankAccount) -> Nation(CentralBankAccount)
     // Nation(CentralBankAccount) -> PrivateBank(CentralBankAccount)
-    private int transfer(PrivateAccount target, int amount) {
-        mBank.books().transfer(amount);
-        target.bank().books().transfered(amount);
-        CentralAccount bankAccount = mBank.mainBank().account(mBank);
-        CentralAccount targetBankAccount = target.bank().mainBank().account(target.bank());
-        bankAccount.transfer(targetBankAccount, amount);
+    private int transfer(NationAccount target, int amount) {
+        target.bank().books().transferToNationFromPrivateBank(amount);
         target.increase(amount);
         return decrease(amount);
     }
 
-    private int transfer(NationAccount target, int amount) {
-        mBank.mainBank().books().transferToNationFromPrivateBank(amount);
-        mBank.books().transfer(amount);
-        CentralAccount bankAccount = mBank.mainBank().account(mBank);
-        bankAccount.decrease(amount);
+    // lend - borrow
+    private int transfer(PrivateAccount target, int amount) {
+        target.bank().books().transfered(amount);
+        target.increase(amount);
+        PrivateBank targetBank = target.bank();
+        CentralBank.INSTANCE.account(targetBank).increase(amount);
+        return decrease(amount);
+    }
+
+    @Override
+    public int transfer(CentralBank central, int amount) {
+        return decrease(amount);
+    }
+
+    private int transfer(CentralAccount target, int amount) {
         target.increase(amount);
         return decrease(amount);
     }
@@ -86,7 +86,7 @@ public class PrivateAccount implements Account {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("PrivateAccount").append(System.lineSeparator())
+        sb.append("CentralAccount").append(System.lineSeparator())
         .append("Bank: ").append(mBank).append(System.lineSeparator())
         .append("Owner: ").append(mOwner).append(System.lineSeparator())
         .append("Amount: ").append(mAmount).append(System.lineSeparator());

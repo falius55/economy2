@@ -10,7 +10,9 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Test;
 
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
@@ -19,6 +21,7 @@ import jp.gr.java_conf.falius.economy2.player.WorkerParson;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
+import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 public class MarketAggregaterTest {
 
@@ -27,7 +30,27 @@ public class MarketAggregaterTest {
         Market.INSTANCE.clear();
     }
 
-    private void checkGDP() {
+    private void check() {
+        int realDepositsOfCentralBank = CentralBank.INSTANCE.realDeposits();
+        int depositsOfCentralBankOfBooks = CentralBank.INSTANCE.books().get(CentralBankAccountTitle.DEPOSIT);
+        assertThat(realDepositsOfCentralBank, is(depositsOfCentralBankOfBooks));
+        int checkingAccountsOfPrivateBanksOfBooks =
+                PrivateBank.stream().mapToInt(pb -> pb.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS)).sum();
+        assertThat(checkingAccountsOfPrivateBanksOfBooks, is(realDepositsOfCentralBank));
+        int realDepositsOfPrivateBank = PrivateBank.stream().mapToInt(PrivateBank::realDeposits).sum();
+        int depositsOfPrivateBankOfBooks =
+                PrivateBank.stream().map(PrivateBank::books).mapToInt(book -> book.get(PrivateBankAccountTitle.DEPOSIT)).sum();
+        assertThat(realDepositsOfPrivateBank, is(depositsOfPrivateBankOfBooks));
+        int workerDeposits = WorkerParson.stream().mapToInt(WorkerParson::deposit).sum();
+        int businessDeposits = PrivateBusiness.stream().mapToInt(PrivateBusiness::deposit).sum();
+        assertThat(workerDeposits + businessDeposits, is(realDepositsOfPrivateBank));
+        WorkerParson.stream().forEach(worker -> assertThat(worker.mainBank().account(worker).amount(), is(worker.deposit())));
+        PrivateBusiness.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
+        PrivateBank.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
+        int nationDepositOfCentralOfBooks = CentralBank.INSTANCE.books().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT);
+        assertThat(CentralBank.INSTANCE.nationAccount().amount(), is(nationDepositOfCentralOfBooks));
+        assertThat(Nation.INSTANCE.deposit(), is(nationDepositOfCentralOfBooks));
+
         MarketAggregater aggregater = Market.INSTANCE.aggregater();
         System.out.printf("GDP: %d%n", aggregater.GDP());
         System.out.printf("sGDP: %d%n", aggregater.sGDP());
@@ -48,7 +71,7 @@ public class MarketAggregaterTest {
         int moneyStock = salary - tax;
         int initial = moneyStock / 2;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, initial).get();
-        checkGDP();
+        check();
         System.out.println("--- GDP test ---");
     }
 
@@ -63,7 +86,7 @@ public class MarketAggregaterTest {
         int salary = cbank.paySalary(worker);
         int salary2 = cbank.paySalary(worker2);
         int salary3 = cbank.paySalary(worker3);
-        checkGDP();
+        check();
         System.out.println("--- pay salary ---");
     }
 
@@ -75,6 +98,7 @@ public class MarketAggregaterTest {
         WorkerParson worker = new WorkerParson();
         WorkerParson worker2 = new WorkerParson();
         WorkerParson worker3 = new WorkerParson();
+        System.out.printf("central account: %d%n", CentralBank.INSTANCE.realDeposits());
         int salary = cbank.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int capital = salary - tax;
@@ -91,8 +115,41 @@ public class MarketAggregaterTest {
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness coop = worker3.establish(Industry.SUPER_MARKET, capital3).get();
 
-        checkGDP();
+        check();
         System.out.println("--- establish ---");
+    }
+
+    @Test
+    public void paySalaryFromBusiness() {
+        System.out.println("--- pay salary from business ---");
+        CentralBank cbank = CentralBank.INSTANCE;
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        WorkerParson worker2 = new WorkerParson();
+        WorkerParson worker3 = new WorkerParson();
+        System.out.printf("central account: %d%n", CentralBank.INSTANCE.realDeposits());
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+        int salary2 = cbank.paySalary(worker2);
+        int tax2 = Taxes.computeIncomeTaxFromManthly(salary2);
+        int capital2 = salary2 - tax2;
+        int salary3 = cbank.paySalary(worker3);
+        int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
+        int capital3 = salary3 - tax3;
+
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+        IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
+        PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
+        IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
+        PrivateBusiness coop = worker3.establish(Industry.SUPER_MARKET, capital3).get();
+
+        farmer.paySalary(worker);
+        maker.paySalary(worker2);
+        coop.paySalary(worker3);
+
+        check();
+        System.out.println("--- pay salary from business ---");
     }
 
     @Test
@@ -124,7 +181,8 @@ public class MarketAggregaterTest {
         int require = 3;
         OptionalInt optPrice = worker.buy(product, require);
         int price = optPrice.getAsInt();
-        checkGDP();
+
+        check();
         System.out.println("--- buy ---");
     }
 
@@ -161,7 +219,7 @@ public class MarketAggregaterTest {
         int countToEndOfMonth = Market.INSTANCE.nowDate().lengthOfMonth() - Market.INSTANCE.nowDate().getDayOfMonth();
         IntStream.range(0, countToEndOfMonth + 10).forEach(n -> Market.INSTANCE.nextDay());
 
-        checkGDP();
+        check();
         System.out.println("--- end of month ---");
     }
 
@@ -178,9 +236,9 @@ public class MarketAggregaterTest {
         int capital = salary - tax;
         PrivateBusiness company = worker.establish(Industry.FARMER, capital).get();
         int coSalary = company.paySalary(worker);
-        System.out.println(worker.accountBook().toString());
+        System.out.println(worker.books().toString());
         int coTax = Taxes.computeIncomeTaxFromManthly(coSalary);
-        checkGDP();
+        check();
         assertThat(Market.INSTANCE.aggregater().GDP(), is(salary));
         assertThat(Market.INSTANCE.aggregater().M(), is(salary - tax));
         System.out.println("--- business paySalary GDP ---");
@@ -199,7 +257,7 @@ public class MarketAggregaterTest {
         assertThat(Market.INSTANCE.aggregater().M(), is(capital));
 
         worker.borrow(capital);
-        System.out.println(bank.accountBook().toString());
+        System.out.println(bank.books().toString());
         System.out.printf("M: %d%n", Market.INSTANCE.aggregater().M());
         assertThat(Market.INSTANCE.aggregater().M(), is(capital + capital));
 
@@ -221,5 +279,76 @@ public class MarketAggregaterTest {
         farmer.borrow(capital);
         assertThat(Market.INSTANCE.aggregater().M(), is(capital + capital));
         System.out.println("--- business borrow money stock ---");
+    }
+
+    @Test
+    public void centralBankBondsTest() {
+        Nation nation = Nation.INSTANCE;
+        int count = 10;
+        int price = 1000;
+
+        IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
+        nation.makeUnderwriteBonds(CentralBank.INSTANCE);
+        check();
+    }
+
+    @Test
+    public void advertiseBondsTest() {
+        System.out.println("advertise");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        Bank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int moneyStock = salary - tax;
+
+        int count = 10;
+        int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
+
+        IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
+        nation.advertiseBonds();
+
+        check();
+        System.out.println("advertise");
+    }
+
+    @Test
+    public void collectTaxesTest() {
+        System.out.println("--- collect taxes ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson worker = new WorkerParson();
+        WorkerParson worker2 = new WorkerParson();
+        WorkerParson worker3 = new WorkerParson();
+        int salary = cbank.paySalary(worker);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+        int salary2 = cbank.paySalary(worker2);
+        int tax2 = Taxes.computeIncomeTaxFromManthly(salary2);
+        int capital2 = salary2 - tax2;
+        int salary3 = cbank.paySalary(worker3);
+        int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
+        int capital3 = salary3 - tax3;
+        PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
+        IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
+        PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
+        IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
+        PrivateBusiness coop = worker3.establish(Industry.SUPER_MARKET, capital3).get();
+
+        cbank.paySalary(worker);
+        farmer.paySalary(worker);
+        maker.paySalary(worker2);
+        coop.paySalary(worker3);
+
+        Product product = Product.RICE_BALL;
+        int require = 3;
+        worker.buy(product, require);
+
+        nation.collectTaxes();
+        check();
+        System.out.println("--- collect taxes ---");
     }
 }
