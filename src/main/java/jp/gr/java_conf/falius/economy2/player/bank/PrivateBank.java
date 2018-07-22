@@ -213,8 +213,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
 
     // テスト用集計メソッド
     public int realDeposits() {
-        return mAccounts.entrySet().stream()
-                .map(Map.Entry::getValue)
+        return mAccounts.values().stream()
                 .mapToInt(PrivateAccount::amount)
                 .sum();
     }

@@ -121,8 +121,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     }
 
     public int stockCost() {
-        return mStockManagers.entrySet().stream()
-                .map(Map.Entry::getValue)
+        return mStockManagers.values().stream()
                 .mapToInt(StockManager::stockCost)
                 .sum();
     }
@@ -283,9 +282,8 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     public void update() {
         // use in Market#closeEndOfMonth
-        mStockManagers.entrySet().stream()
-                .map(e -> e.getValue())
-                .forEach(sm -> sm.update());
+        mStockManagers.values().stream()
+                .forEach(StockManager::update);
         recodePurchase();
     }
 
@@ -293,8 +291,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      * 未計上の仕入費を計上します。
      */
     private void recodePurchase() {
-        Set<Deferment> payables = mStockManagers.entrySet().stream()
-                .map(e -> e.getValue())
+        Set<Deferment> payables = mStockManagers.values().stream()
                 .map(StockManager::purchasePayable)
                 .reduce(new HashSet<>(), (collect, payable) -> {collect.addAll(payable); return collect;});
         mPayables.addAll(payables);

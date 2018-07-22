@@ -200,8 +200,7 @@ public class CentralBank implements Bank {
 
     // テスト用集計メソッド
     public int realDeposits() {
-        return mAccounts.entrySet().stream()
-        .map(Map.Entry::getValue)
+        return mAccounts.values().stream()
         .mapToInt(CentralAccount::amount)
         .sum();
     }

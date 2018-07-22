@@ -51,7 +51,7 @@ public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements
     }
 
     public void clearBook() {
-        mAccountsBook.entrySet().stream().map(e -> e.getValue())
+        mAccountsBook.values().stream()
                 .forEach(m -> m.forEach((k, v) -> m.compute(k, (t, i) -> 0)));
     }
 
