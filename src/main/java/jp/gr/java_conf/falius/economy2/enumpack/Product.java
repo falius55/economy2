@@ -293,7 +293,7 @@ public enum Product {
                     .add("耐用年数", pd.serviceLife())
                     .add("原材料", pd.materials())
                     .add("取扱業者", pd.industries());
-        tb.print();
+        tb.println();
     }
 
     /**
