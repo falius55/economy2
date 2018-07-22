@@ -12,6 +12,7 @@ import jp.gr.java_conf.falius.economy2.player.Lendable;
 /**
  *
  * @author "ymiyauchi"
+ * @since 1.0
  *
  */
 public class Loan {
@@ -27,6 +28,14 @@ public class Loan {
     private final Account mDebtorAccount;
 
 
+    /**
+     *
+     * @param debtor
+     * @param account
+     * @param amount
+     * @param period
+     * @since 1.0
+     */
     public Loan(Borrowable debtor, Account account, int amount, Period period) {
         mDebtor = debtor;
         mDebtorAccount = account;
@@ -36,11 +45,17 @@ public class Loan {
 
     /**
      * 残高
+     * @since 1.0
      */
     public int amount() {
         return mAmount;
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public LocalDate deadLine() {
         return mDeadLine;
     }
@@ -48,11 +63,17 @@ public class Loan {
     /**
      * 締結済かどうか
      * @return
+     * @since 1.0
      */
     public boolean isConcluded() {
         return Objects.nonNull(mCreditor);
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public boolean isOverDeadLine() {
         if (!isConcluded()) {
             throw new IllegalStateException("まだ契約が成立していません。");
@@ -60,12 +81,18 @@ public class Loan {
        return Market.INSTANCE.nowDate().isAfter(mDeadLine);
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public boolean isPayOff() {
         return mAmount > 0;
     }
 
     /**
      * 債務が受け入れられ、債権債務関係が発生する
+     * @since 1.0
      */
     public Loan accepted(Lendable creditor, Account account) {
         if (isConcluded()) {
@@ -84,6 +111,7 @@ public class Loan {
     /**
      * 借金を減らす
      * @return 借金が完済されればtrue
+     * @since 1.0
      */
     public boolean repay(int amount) {
         amount = amount <= mAmount ? amount : mAmount;

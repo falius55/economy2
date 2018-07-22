@@ -11,6 +11,11 @@ import jp.gr.java_conf.falius.economy2.book.PrivateBankBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ */
 public class Bond {
     private final int mAmount; // 金額
     private final Period mPeriod; // 返済期間
@@ -30,11 +35,17 @@ public class Bond {
 
     /**
      * 残高
+     * @since 1.0
      */
     public int amount() {
         return mAmount;
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public LocalDate deadLine() {
         return mDeadLine;
     }
@@ -42,19 +53,35 @@ public class Bond {
     /**
      * 締結済かどうか
      * @return
+     * @since 1.0
      */
     public boolean isConcluded() {
         return Objects.nonNull(mUnderWriterBooks);
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public boolean isOverDeadLine() {
        return Market.INSTANCE.nowDate().isAfter(mDeadLine);
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public boolean isPayOff() {
         return mIsPayOff;
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public boolean ofCentralBank() {
         if (!isConcluded()) {
             return false;
@@ -62,6 +89,11 @@ public class Bond {
         return mUnderWriterBooks instanceof CentralBankBooks;
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public boolean ofPrivateBank() {
         if (!isConcluded()) {
             return false;
@@ -71,6 +103,7 @@ public class Bond {
 
     /**
      * 債務が受け入れられ、債権債務関係が発生する
+     * @since 1.0
      */
     public Bond accepted(BankBooks<?> underwriterBook) {
         if (isConcluded()) {
@@ -87,6 +120,7 @@ public class Bond {
     /**
      * 債権を譲渡する
      * @param transferee 新たな債権者の会計
+     * @since 1.0
      */
     public Bond sellTo(BankBooks<?> transferee) {
         if (!isConcluded()) {
@@ -101,6 +135,7 @@ public class Bond {
     /**
      * 償還する
      * @return 償還されればtrue(償還済も)
+     * @since 1.0
      */
     public boolean redeemed() {
         if (!isConcluded()) {

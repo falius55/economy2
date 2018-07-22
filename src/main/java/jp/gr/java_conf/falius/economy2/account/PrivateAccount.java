@@ -8,6 +8,7 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
  * 民間銀行の預金口座
  * WorkerParsonとPrivateBusinessが持てる
  * @author "ymiyauchi"
+ * @since 1.0
  *
  */
 public class PrivateAccount implements Account {
@@ -15,33 +16,54 @@ public class PrivateAccount implements Account {
     private final AccountOpenable mOwner;
     private int mAmount = 0;
 
+    /**
+     *
+     * @param bank
+     * @param owner
+     * @since 1.0
+     */
     public PrivateAccount(PrivateBank bank, AccountOpenable owner) {
         mBank = bank;
         mOwner = owner;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public PrivateBank bank() {
         return mBank;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int amount() {
         return mAmount;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int increase(int amount) {
         mAmount += amount;
         return mAmount;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int decrease(int amount) {
         mAmount -= amount;
         return mAmount;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int transfer(Account target, int amount) {
         if (target instanceof PrivateAccount) {
@@ -52,6 +74,9 @@ public class PrivateAccount implements Account {
         throw new IllegalArgumentException();
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int transfer(CentralBank target, int amount) {
         mBank.books().transfer(amount);
@@ -83,6 +108,9 @@ public class PrivateAccount implements Account {
         return decrease(amount);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

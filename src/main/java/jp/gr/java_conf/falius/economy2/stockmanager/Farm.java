@@ -15,6 +15,7 @@ import jp.gr.java_conf.falius.economy2.market.Market;
 /**
  * 田畑
  * @author "ymiyauchi"
+ * @since 1.0
  *
  */
 public class Farm implements StockManager {
@@ -31,6 +32,11 @@ public class Farm implements StockManager {
     /** 単位あたり原価 */
     private final int mCost;
 
+    /**
+     *
+     * @param product
+     * @since 1.0
+     */
     public Farm(Product product) {
         mProduct = product;
         mManufacturePeriod = product.manufacturePeriod();
@@ -41,12 +47,18 @@ public class Farm implements StockManager {
 
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean canShipOut(int repuire) {
         update();
         return mStock >= repuire;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public OptionalInt shipOut(int require) {
         if (!canShipOut(require)) {
@@ -57,11 +69,17 @@ public class Farm implements StockManager {
         return OptionalInt.of(cost);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public Set<Deferment> purchasePayable() {
         return new HashSet<>();
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int stockCost() {
         return 0;
@@ -69,6 +87,7 @@ public class Farm implements StockManager {
 
     /**
      * 在庫や仕入れ情報を更新します。
+     * @since 1.0
      */
     @Override
     public void update() {
@@ -81,6 +100,7 @@ public class Farm implements StockManager {
     /**
      * 一度製造します。
      * @return 仕入費用の増加分(計上済)
+     * @since 1.0
      */
     private void manufacture() {
         mLastManufacture = mLastManufacture.plus(mManufacturePeriod);

@@ -12,6 +12,7 @@ import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
 /**
  * 倉庫
+ * @since 1.0
  */
 public class Repository implements StockManager {
     private final Product mProduct; // 製造する製品
@@ -30,6 +31,7 @@ public class Repository implements StockManager {
 
     /**
      * 在庫があるかどうか。あるいは、在庫補充のめどが立つかどうか
+     * @since 1.0
      */
     @Override
     public boolean canShipOut(int require) {
@@ -48,6 +50,7 @@ public class Repository implements StockManager {
     /**
      * 出荷します
      * @return 原価。出荷に失敗すると空のOptionalInt
+     * @since 1.0
      */
     @Override
     public OptionalInt shipOut(int require) {
@@ -72,6 +75,7 @@ public class Repository implements StockManager {
     /**
      * 仕入費用を集計します
      * @return 仕入に要した費用
+     * @since 1.0
      */
     @Override
     public Set<Deferment> purchasePayable() {
@@ -80,6 +84,9 @@ public class Repository implements StockManager {
         return ret;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int stockCost() {
         return mStockCost;
@@ -88,6 +95,7 @@ public class Repository implements StockManager {
     /**
      * 仕入れます
      * @return 仕入に要した費用。仕入に失敗すると空
+     * @since 1.0
      */
     private OptionalInt purchase(int require) {
         int sourceRequireLot = require % mProduct.numOfLot() == 0 ? require / mProduct.numOfLot()
@@ -118,6 +126,9 @@ public class Repository implements StockManager {
         return OptionalInt.of(cost);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public void update() {
         // TODO 自動生成されたメソッド・スタブ

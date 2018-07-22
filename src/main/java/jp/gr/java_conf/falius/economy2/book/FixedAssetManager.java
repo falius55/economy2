@@ -8,6 +8,12 @@ import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
 final class FixedAssetManager {
     private final Set<FixedAsset> mFixedAssets; // TODO:建物は科目が別なので、別に保持する
 
@@ -20,6 +26,7 @@ final class FixedAssetManager {
      * @param mDateOfAcquisition 取得日
      * @param mAcquisitionCost 取得原価
      * @param mServiceLife 耐用年数
+     * @since 1.0
      */
     void add(LocalDate dateOfAcquisition, int acquisitionCost, int serviceLife) {
         mFixedAssets.add(new FixedAsset(dateOfAcquisition, acquisitionCost, serviceLife));
@@ -31,6 +38,7 @@ final class FixedAssetManager {
      * ただし、帳簿への記帳処理は行いません
      * @param date 記入日
      * @return その日の償却額
+     * @since 1.0
      */
     int record(LocalDate date) {
         return mFixedAssets.stream()
@@ -39,21 +47,31 @@ final class FixedAssetManager {
 
     /**
      * 保有している固定資産の現在価値の総額を計算します
+     * @since 1.0
      */
     int presentValue() {
         return mFixedAssets.stream()
                 .collect(Collectors.summingInt(FixedAsset::presentValue));
     }
 
+    /**
+     * @since 1.0
+     */
     void printAll() {
         mFixedAssets.stream().forEach(FixedAsset::print);
     }
 
+    /**
+     * @since 1.0
+     */
     int depreciatedBalance() {
         return mFixedAssets.stream()
                 .collect(Collectors.summingInt(FixedAsset::depreciatedBalance));
     }
 
+    /**
+     * @since 1.0
+     */
     int unDepreciatedBalance() {
         return mFixedAssets.stream()
                 .collect(Collectors.summingInt(FixedAsset::unDepreciatedBalance));
@@ -62,6 +80,7 @@ final class FixedAssetManager {
     /**
      * 固定資産の減価償却の計算を行うクラス
      * 土地は減価償却しないので土地以外
+     * @since 1.0
      */
     static class FixedAsset implements Comparable<FixedAsset> {
         static final int RESIDUAL_PERCENT = 10; // 取得原価に対する残存価額の割合(%)
@@ -78,6 +97,7 @@ final class FixedAssetManager {
          * @param dateOfAcquisition 取得日
          * @param acquisitionCost 取得原価
          * @param serviceLife 耐用年数
+         * @since 1.0
          */
         private FixedAsset(LocalDate dateOfAcquisition, int acquisitionCost, int serviceLife) {
             mDateOfAcquisition = dateOfAcquisition;
@@ -93,6 +113,7 @@ final class FixedAssetManager {
 
         /**
          * この固定資産の現在の価値を返します
+         * @since 1.0
          */
         private int presentValue() {
             return mResidualValue + mUndepreciatedBalance;
@@ -101,6 +122,7 @@ final class FixedAssetManager {
         /**
          * この固定資産の償却額を返します。
          * @return
+         * @since 1.0
          */
         private int depreciatedBalance() {
             // 取得原価　ー　未償却額　ー　残存価額
@@ -110,6 +132,7 @@ final class FixedAssetManager {
         /**
          * この固定資産の未償却額を返します。
          * @return
+         * @since 1.0
          */
         private int unDepreciatedBalance() {
             return mUndepreciatedBalance;
@@ -117,6 +140,7 @@ final class FixedAssetManager {
 
         /**
          * その日が計上日であるかを返します(毎月。営業日無視)
+         * @since 1.0
          */
         private boolean isRecordedDate(LocalDate date) {
             if (date.isBefore(mDateOfAcquisition)) { return false; }  // 取得日より前
@@ -135,6 +159,7 @@ final class FixedAssetManager {
          * 減価償却を計上します。引数で渡された日付が計上日でない場合、あるいは未償却残高がすでにない場合は何もせず０を返します
          * @param date 計上日
          * @return 計上月額
+         * @since 1.0
          */
         private int record(LocalDate date) {
             if (!isRecordedDate(date)) { return 0; }
@@ -145,6 +170,11 @@ final class FixedAssetManager {
             return amount;
         }
 
+        /**
+         *
+         * @return
+         * @since 1.0
+         */
         private LocalDate dateOfAcquisition() {
             return mDateOfAcquisition;
         }
@@ -152,6 +182,7 @@ final class FixedAssetManager {
         /**
          * 状態を表形式で表示します
          * @return 最終計上日
+         * @since 1.0
          */
         void print() {
             System.out.printf("get:%s, all-amount:%d円, per-amount:%d, life:%d年%n", mDateOfAcquisition, mAcquisitionCost,
@@ -166,6 +197,9 @@ final class FixedAssetManager {
             });
         }
 
+        /**
+         * @since 1.0
+         */
         @Override
         public int compareTo(FixedAsset another) {
             return this.dateOfAcquisition().compareTo(another.dateOfAcquisition());

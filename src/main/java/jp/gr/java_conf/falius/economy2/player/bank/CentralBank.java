@@ -21,6 +21,12 @@ import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
 import jp.gr.java_conf.falius.economy2.player.Worker;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
 public class CentralBank implements Bank {
     public static final CentralBank INSTANCE;
     private static final int SALARY = 100000;
@@ -34,37 +40,68 @@ public class CentralBank implements Bank {
         INSTANCE = new CentralBank();
     }
 
+    /**
+     * @since 1.0
+     */
     private CentralBank() {
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public CentralBankBooks books() {
         return mBooks;
     }
 
+    /**
+     *
+     * @param owner
+     * @return
+     * @since 1.0
+     */
     public CentralAccount account(PrivateBank owner) {
         return mAccounts.get(owner);
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public NationAccount nationAccount() {
         return mNationAccount;
     }
 
+    /**
+     *
+     * @param privateBank
+     * @since 1.0
+     */
     public void createAccount(PrivateBank privateBank) {
         CentralAccount account = new CentralAccount(this, privateBank);
         mAccounts.put(privateBank, account);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean isRecruit() {
         return mStuffManager.isRecruit();
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean has(Worker worker) {
         return mStuffManager.has(worker);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public void closeEndOfMonth() {
         // TODO 自動生成されたメソッド・スタブ
@@ -72,6 +109,7 @@ public class CentralBank implements Bank {
 
     /**
      * 市中銀行からの預け入れ
+     * @since 1.0
      */
     @Override
     public void keep(AccountOpenable openable, int amount) {
@@ -81,6 +119,7 @@ public class CentralBank implements Bank {
 
     /**
      * 市中銀行への払い出し
+     * @since 1.0
      */
     @Override
     public void paidOut(AccountOpenable openable, int amount) {
@@ -88,6 +127,9 @@ public class CentralBank implements Bank {
         mAccounts.get(openable).decrease(amount);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public Set<Bond> searchBonds(Set<Bond> bondMarket) {
         Set<Bond> successed = new HashSet<>();
@@ -96,12 +138,18 @@ public class CentralBank implements Bank {
         return successed;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public CentralBank employ(Worker worker) {
         mStuffManager.employ(worker);
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public CentralBank fire(Worker worker) {
         mStuffManager.fire(worker);
@@ -110,6 +158,7 @@ public class CentralBank implements Bank {
 
     /**
      * @return 給与の額面金額
+     * @since 1.0
      */
     @Override
     public int paySalary(Worker worker) {
@@ -118,6 +167,9 @@ public class CentralBank implements Bank {
         return SALARY;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public Employable payIncomeTax(GovernmentBooks nationBooks) {
         int amount = mBooks.get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
@@ -127,22 +179,40 @@ public class CentralBank implements Bank {
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     public void clear() {
         mBooks.clearBook();
         mAccounts.clear();
         mNationAccount.clear();
     }
 
+    /**
+     *
+     * @param amount
+     * @since 1.0
+     */
     public void keepByNation(int amount) {
         mBooks.keepByNation(amount);
         mNationAccount.increase(amount);
     }
 
+    /**
+     *
+     * @param amount
+     * @since 1.0
+     */
     public void paidOutByNation(int amount) {
         mBooks.paidOutByNation(amount);
         mNationAccount.decrease(amount);
     }
 
+    /**
+     *
+     * @param maxBudget
+     * @since 1.0
+     */
     public void operateBuying(int maxBudget) {
         Nation.INSTANCE.bonds().stream()
                 .filter(bond -> !bond.isPayOff())
@@ -161,6 +231,11 @@ public class CentralBank implements Bank {
                 });
     }
 
+    /**
+     *
+     * @param maxAmount
+     * @since 1.0
+     */
     public void operateSelling(int maxAmount) {
         int amount = Math.min(mBooks.get(CentralBankAccountTitle.GOVERNMENT_BOND), maxAmount);
         Set<Bond> sells = Nation.INSTANCE.bonds().stream()
@@ -181,10 +256,20 @@ public class CentralBank implements Bank {
         PrivateBank.stream().forEach(pb -> pb.searchBonds(sells));
     }
 
+    /**
+     *
+     * @param target
+     * @param amount
+     * @return
+     * @since 1.0
+     */
     public int transfer(CentralAccount target, int amount) {
         return target.increase(amount);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int transfer(PrivateAccount target, int amount) {
         target.bank().books().transfered(amount);
@@ -193,12 +278,20 @@ public class CentralBank implements Bank {
         return target.increase(amount);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int transfer(NationAccount target, int amount) {
         return target.increase(amount);
     }
 
     // テスト用集計メソッド
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public int realDeposits() {
         return mAccounts.values().stream()
         .mapToInt(CentralAccount::amount)

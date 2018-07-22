@@ -19,6 +19,12 @@ import jp.gr.java_conf.falius.economy2.loan.Deferment;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
 public class Factory implements StockManager {
     /** 製造する製品 */
     private final Product mProduct;
@@ -44,6 +50,11 @@ public class Factory implements StockManager {
     /** 保有している原材料 */
     private final Map<Product, Integer> mMaterials;
 
+    /**
+     *
+     * @param product
+     * @since 1.0
+     */
     public Factory(Product product) {
         mProduct = product;
         mManufacturePeriod = product.manufacturePeriod();
@@ -57,6 +68,7 @@ public class Factory implements StockManager {
 
     /**
      * 在庫があるかどうか
+     * @since 1.0
      */
     @Override
     public boolean canShipOut(int require) {
@@ -66,6 +78,7 @@ public class Factory implements StockManager {
 
     /**
      * 在庫や仕入れ情報を更新します。
+     * @since 1.0
      */
     @Override
     public void update() {
@@ -78,6 +91,7 @@ public class Factory implements StockManager {
     /**
      * 出荷します
      * @return 原価。出荷に失敗すると空のOptionalInt
+     * @since 1.0
      */
     @Override
     public OptionalInt shipOut(int require) {
@@ -96,6 +110,7 @@ public class Factory implements StockManager {
     /**
      * 仕入費用を集計します
      * @return 仕入に要した費用
+     * @since 1.0
      */
     @Override
     public Set<Deferment> purchasePayable() {
@@ -105,6 +120,9 @@ public class Factory implements StockManager {
         return ret;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int stockCost() {
         update();
@@ -114,6 +132,7 @@ public class Factory implements StockManager {
     /**
      * 一度製造します。
      * @return 仕入費用の増加分(計上済)
+     * @since 1.0
      */
     private void manufacture() {
         mLastManufacture = mLastManufacture.plus(mManufacturePeriod);
@@ -133,6 +152,7 @@ public class Factory implements StockManager {
     /**
      * １回の製造に必要な原材料をすべてそろえます
      * @return 仕入に要した費用
+     * @since 1.0
      */
     private OptionalInt restock() {
         int cost = 0;
@@ -159,6 +179,7 @@ public class Factory implements StockManager {
     /**
      * 指定された原材料の保有量がrequireになるのに必要なロット数を計算します
      * @return 新たに必要なロット数。必要なければ０
+     * @since 1.0
      */
     private int computeRequireLot(Product material, int require) {
         int stock = mMaterials.get(material);
@@ -173,6 +194,7 @@ public class Factory implements StockManager {
     /**
      * 仕入れます
      * @return 仕入に要した費用。仕入に失敗すると空
+     * @since 1.0
      */
     private OptionalInt purchase(Product product, int require) {
         // 特定の原材料を指定された分の補充
