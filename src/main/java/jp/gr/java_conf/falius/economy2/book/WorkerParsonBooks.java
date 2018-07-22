@@ -1,44 +1,44 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
 
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
-public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitle>
-        implements PrivateAccount<WorkerParsonAccountTitle>, BorrowableAccount<WorkerParsonAccountTitle>,
-        AccountOpenableAccount<WorkerParsonAccountTitle> {
+public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
+        implements PrivateBooks<WorkerParsonAccountTitle>, BorrowableBooks<WorkerParsonAccountTitle>,
+        AccountOpenableBooks<WorkerParsonAccountTitle> {
 
-    public static WorkerParsonAccount newInstance() {
-        return new WorkerParsonAccount();
+    public static WorkerParsonBooks newInstance() {
+        return new WorkerParsonBooks();
     }
 
-    private WorkerParsonAccount() {
+    private WorkerParsonBooks() {
         super(WorkerParsonAccountTitle.class);
     }
 
     @Override
-    public WorkerParsonAccount saveMoney(int amount) {
+    public WorkerParsonBooks saveMoney(int amount) {
         super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
         super.decrease(WorkerParsonAccountTitle.CASH, amount);
         return this;
     }
 
     @Override
-    public WorkerParsonAccount downMoney(int amount) {
+    public WorkerParsonBooks downMoney(int amount) {
         super.increase(WorkerParsonAccountTitle.CASH, amount);
         super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
         return this;
     }
 
     @Override
-    public WorkerParsonAccount borrow(int amount) {
+    public WorkerParsonBooks borrow(int amount) {
         super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
         super.increase(WorkerParsonAccountTitle.LOANS_PAYABLE, amount);
         return this;
     }
 
     @Override
-    public WorkerParsonAccount repay(int amount) {
+    public WorkerParsonBooks repay(int amount) {
         // TODO 自動生成されたメソッド・スタブ
         return null;
     }
@@ -48,7 +48,7 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
      * @param amount
      * @return
      */
-    public Account<WorkerParsonAccountTitle> getSalary(int amount) {
+    public Books<WorkerParsonAccountTitle> getSalary(int amount) {
         int tax = Taxes.computeIncomeTaxFromManthly(amount);
         super.increase(WorkerParsonAccountTitle.SALARIES, amount);
         super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount - tax);
@@ -56,13 +56,13 @@ public class WorkerParsonAccount extends AbstractAccount<WorkerParsonAccountTitl
         return this;
     }
 
-    public WorkerParsonAccount establish(int initialCapital) {
+    public WorkerParsonBooks establish(int initialCapital) {
         super.increase(WorkerParsonAccountTitle.ESTABLISH_EXPENSES, initialCapital);
         super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, initialCapital);
         return this;
     }
 
-    public WorkerParsonAccount buyOnCash(WorkerParsonAccountTitle expenseTitle, int amount) {
+    public WorkerParsonBooks buyOnCash(WorkerParsonAccountTitle expenseTitle, int amount) {
         if (expenseTitle.type() != AccountType.EXPENSE) {
             throw new IllegalArgumentException();
         }

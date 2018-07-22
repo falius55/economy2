@@ -1,6 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player;
 
-import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.book.Books;
 
 /**
  * 経済主体を表すインターフェースです。
@@ -9,7 +9,7 @@ import jp.gr.java_conf.falius.economy2.account.Account;
  */
 public interface Entity {
 
-    public Account<? extends Enum<?>> accountBook();
+    public Books<? extends Enum<?>> books();
 
     /**
      * 月末処理を行います。

@@ -1,25 +1,30 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import jp.gr.java_conf.falius.economy2.account.Account;
-import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
-import jp.gr.java_conf.falius.economy2.account.PrivateBankAccount;
+import jp.gr.java_conf.falius.economy2.account.NationAccount;
+import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
+import jp.gr.java_conf.falius.economy2.book.PrivateBankBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
+import jp.gr.java_conf.falius.economy2.player.Lendable;
 import jp.gr.java_conf.falius.economy2.player.PrivateEntity;
 import jp.gr.java_conf.falius.economy2.player.Worker;
 
-public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
+public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendable {
     /**
      * 債券購入に充てられる最高割合(保有している現預金のうち何割までなら債券購入に使っていいか)
      */
@@ -29,8 +34,9 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
-    private final PrivateBankAccount mAccount = PrivateBankAccount.newInstance();
+    private final PrivateBankBooks mBooks = PrivateBankBooks.newInstance();
     private final Set<Loan> mLoans = new HashSet<>();
+    private final Map<AccountOpenable, PrivateAccount> mAccounts = new HashMap<>();
 
     public static Stream<PrivateBank> stream() {
         return sOwns.stream();
@@ -42,26 +48,37 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
 
     public PrivateBank() {
         sOwns.add(this);
+        Market.INSTANCE.aggregater().add(this);
+        mainBank().createAccount(this);
     }
 
     @Override
-    public Account<PrivateBankAccountTitle> accountBook() {
-        return mAccount;
+    public PrivateBankBooks books() {
+        return mBooks;
     }
 
     @Override
-    public Bank mainBank() {
+    public CentralBank mainBank() {
         return CentralBank.INSTANCE;
+    }
+
+    public PrivateAccount account(AccountOpenable accountOpenable) {
+        return mAccounts.get(accountOpenable);
+    }
+
+    public void createAccount(AccountOpenable accountOpenable) {
+        PrivateAccount account = new PrivateAccount(this, accountOpenable);
+        mAccounts.put(accountOpenable, account);
     }
 
     @Override
     public int cash() {
-        return mAccount.get(PrivateBankAccountTitle.CASH);
+        return mBooks.get(PrivateBankAccountTitle.CASH);
     }
 
     @Override
     public int deposit() {
-        return mAccount.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
+        return mBooks.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
     }
 
     @Override
@@ -74,9 +91,10 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
         return mStuffManager.has(worker);
     }
 
+    @Override
     public boolean canLend(int amount) {
-        int cash = mAccount.get(PrivateBankAccountTitle.CASH);
-        int checking = mAccount.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
+        int cash = mBooks.get(PrivateBankAccountTitle.CASH);
+        int checking = mBooks.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
         return cash + checking >= amount;
     }
 
@@ -87,33 +105,19 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     }
 
     @Override
-    public void keep(int amount) {
-        mAccount.keep(amount);
+    public void keep(AccountOpenable openable, int amount) {
+        mBooks.keep(amount);
+        mAccounts.get(openable).increase(amount);
     }
 
     @Override
-    public void paidOut(int amount) {
-        int cash = mAccount.get(PrivateBankAccountTitle.CASH);
+    public void paidOut(AccountOpenable openable, int amount) {
+        int cash = mBooks.get(PrivateBankAccountTitle.CASH);
         if (cash < amount) {
             downMoney(amount - cash);
         }
-        mAccount.paidOut(amount);
-    }
-
-    /**
-     * 民間預金への送金処理
-     */
-    @Override
-    public void transfer(int amount) {
-        mAccount.transfer(amount);
-    }
-
-    /**
-     * 振り込みを受ける
-     */
-    @Override
-    public void transfered(int amount) {
-        mAccount.transfered(amount);
+        mBooks.paidOut(amount);
+        mAccounts.get(openable).decrease(amount);
     }
 
     @Override
@@ -131,10 +135,10 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
                             return;
                         }
                         if (bond.ofCentralBank()) {
-                            bond.sellTo(mAccount);
+                            bond.sellTo(mBooks);
                         }
                         if (!bond.isConcluded()) {
-                            bond.accepted(mAccount);
+                            bond.accepted(mBooks);
                         }
                         mBudget -= bond.amount();
                         successed.add(bond);
@@ -145,16 +149,21 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
     }
 
     @Override
+    public int transfer(NationAccount target, int amount) {
+        return mainBank().account(this).transfer(target, amount);
+    }
+
+    @Override
     public AccountOpenable saveMoney(int amount) {
-        mAccount.saveMoney(amount);
-        mainBank().keep(amount);
+        mBooks.saveMoney(amount);
+        mainBank().keep(this, amount);
         return this;
     }
 
     @Override
     public AccountOpenable downMoney(int amount) {
-        mAccount.downMoney(amount);
-        mainBank().paidOut(amount);
+        mBooks.downMoney(amount);
+        mainBank().paidOut(this, amount);
         return this;
     }
 
@@ -172,17 +181,23 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
 
     @Override
     public int paySalary(Worker worker) {
-        mAccount.paySalary(SALARY);
-        worker.getSalary(SALARY);
+        mBooks.paySalary(SALARY);
+        worker.getSalary(this, SALARY);
         return SALARY;
     }
 
     @Override
-    public Employable payIncomeTax(GovernmentAccount nationAccount) {
-        int amount = mAccount.get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
-        nationAccount.collectIncomeTaxes(amount);
-        mAccount.payIncomeTax(amount);
-        CentralBank.INSTANCE.transfered(amount);
+    public int transfer(PrivateAccount target, int amount) {
+        int ret = mainBank().account(this).transfer(target, amount);
+        return ret;
+    }
+
+    @Override
+    public Employable payIncomeTax(GovernmentBooks nationBooks) {
+        int amount = mBooks.get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
+        nationBooks.collectIncomeTaxes(amount);
+        mBooks.payIncomeTax(amount);
+        mainBank().account(this).transfer(mainBank().nationAccount(), amount);
         return this;
     }
 
@@ -192,8 +207,16 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity {
      */
     public int acceptDebt(Loan debt) {
         mLoans.add(debt);
-        debt.accepted(mAccount);
+        debt.accepted(this, mainBank().account(this));
         return debt.amount();
+    }
+
+    // テスト用集計メソッド
+    public int realDeposits() {
+        return mAccounts.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .mapToInt(PrivateAccount::amount)
+                .sum();
     }
 
 }

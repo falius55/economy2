@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -12,11 +12,11 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
  * 会計を表すすべてのクラスの基底クラス
  * @param T 勘定科目一覧を定義した列挙型。AccountTitleインターフェースを実装していなければならない
  */
-public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implements MutableAccount<T> {
+public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements MutableBooks<T> {
     private final Class<T> mClass;
     private final Map<AccountType, Map<T, Integer>> mAccountsBook; // 帳簿(EnumMap) 科目種別から、勘定科目からその金額へのマップ、へのマップ
 
-    protected AbstractAccount(Class<T> clazz) {
+    protected AbstractBooks(Class<T> clazz) {
         mClass = clazz;
         mAccountsBook = initBook(clazz);
     }
@@ -25,8 +25,8 @@ public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implemen
      * 引数の会計を、自分の会計に吸収併合します。結婚、合併など
      */
     @Override
-    public AbstractAccount<T> merge(Account<T> another) {
-        if (!(another instanceof AbstractAccount)) {
+    public AbstractBooks<T> merge(Books<T> another) {
+        if (!(another instanceof AbstractBooks)) {
             throw new IllegalArgumentException();
         }
         for (T item : mClass.getEnumConstants()) {
@@ -86,6 +86,13 @@ public abstract class AbstractAccount<T extends Enum<T> & AccountTitle> implemen
     public final int get(T item) {
         Map<T, Integer> itemMap = mAccountsBook.get(item.type());
         return itemMap.get(item).intValue();
+    }
+
+    @Override
+    public final int benefit() {
+        int ret = get(AccountType.REVENUE)
+                - get(AccountType.EXPENSE);
+        return ret;
     }
 
     /**

@@ -1,6 +1,7 @@
 package jp.gr.java_conf.falius.economy2.player;
 
-import jp.gr.java_conf.falius.economy2.account.GovernmentAccount;
+import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 
 public interface Employable extends Entity {
 
@@ -34,6 +35,8 @@ public interface Employable extends Entity {
      */
     public int paySalary(Worker worker);
 
-    public Employable payIncomeTax(GovernmentAccount nationAccount);
+    public int transfer(PrivateAccount workerAccount, int amount);
+
+    public Employable payIncomeTax(GovernmentBooks nationBooks);
 
 }

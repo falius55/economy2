@@ -1,6 +1,9 @@
 package jp.gr.java_conf.falius.economy2.stockmanager;
 
 import java.util.OptionalInt;
+import java.util.Set;
+
+import jp.gr.java_conf.falius.economy2.loan.Deferment;
 
 public interface StockManager {
 
@@ -19,13 +22,13 @@ public interface StockManager {
      * 仕入費用を集計します
      * @return 仕入に要した費用
      */
-    public int calcPurchaseExpense();
+    public Set<Deferment> purchasePayable();
 
     /**
      * 現在の商品原価総額を返します。
      * @return
      */
-    public int calcMerchandiseCost();
+    public int stockCost();
 
     public void update();
 }

@@ -97,9 +97,9 @@ public class WorkerParsonTest {
 
         Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
         WorkerParsonAccountTitle title = optTitle.get();
-        int expense = worker.accountBook().get(title);
+        int expense = worker.books().get(title);
 
-        System.out.println(worker.accountBook().toString());
+        System.out.println(worker.books().toString());
         assertThat(expense, is(price));
         assertThat(worker.cash() + worker.deposit(), is(salary - tax - expense));
         assertThat(worker.deposit(), is(lessThan(salary - tax)));
@@ -117,10 +117,10 @@ public class WorkerParsonTest {
         assertThat(worker.deposit(), is(salary - tax));
 
         PrivateBusiness farmer = worker.establish(Industry.FARMER, initial).get();
-        assertThat(farmer.accountBook().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
+        assertThat(farmer.books().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
 
         assertThat(worker.deposit(), is(salary - tax - initial));
-        assertThat(worker.accountBook().get(WorkerParsonAccountTitle.ESTABLISH_EXPENSES), is(initial));
+        assertThat(worker.books().get(WorkerParsonAccountTitle.ESTABLISH_EXPENSES), is(initial));
 
     }
 
@@ -137,9 +137,9 @@ public class WorkerParsonTest {
         assertThat(worker.cash() + worker.deposit(), is(0));
 
         worker.borrow(capital);
-        System.out.println(worker.accountBook().toString());
+        System.out.println(worker.books().toString());
         assertThat(worker.deposit(), is(capital));
-        assertThat(worker.accountBook().get(WorkerParsonAccountTitle.LOANS_PAYABLE), is(capital));
+        assertThat(worker.books().get(WorkerParsonAccountTitle.LOANS_PAYABLE), is(capital));
 
         System.out.println("borrow");
     }

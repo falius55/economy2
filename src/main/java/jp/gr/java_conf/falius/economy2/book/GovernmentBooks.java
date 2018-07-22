@@ -1,51 +1,51 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
 
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
 
-public class GovernmentAccount extends AbstractDoubleEntryAccount<GovernmentAccountTitle>
-        implements AccountOpenableAccount<GovernmentAccountTitle> {
+public class GovernmentBooks extends AbstractDoubleEntryBooks<GovernmentAccountTitle>
+        implements AccountOpenableBooks<GovernmentAccountTitle> {
 
-    public static GovernmentAccount newInstance() {
-        return new GovernmentAccount();
+    public static GovernmentBooks newInstance() {
+        return new GovernmentBooks();
     }
 
-    private GovernmentAccount() {
+    private GovernmentBooks() {
         super(GovernmentAccountTitle.class);
     }
 
     @Override
-    public GovernmentAccount saveMoney(int amount) {
+    public GovernmentBooks saveMoney(int amount) {
         addLeft(GovernmentAccountTitle.DEPOSIT, amount);
         addRight(GovernmentAccountTitle.CASH, amount);
         return this;
     }
 
     @Override
-    public GovernmentAccount downMoney(int amount) {
+    public GovernmentBooks downMoney(int amount) {
         addLeft(GovernmentAccountTitle.CASH, amount);
         addRight(GovernmentAccountTitle.DEPOSIT, amount);
         return this;
     }
 
-    public GovernmentAccount issueBonds(int amount) {
+    public GovernmentBooks issueBonds(int amount) {
         addLeft(GovernmentAccountTitle.DEPOSIT, amount);
         addRight(GovernmentAccountTitle.GOVERNMENT_BOND, amount);
         return this;
     }
 
-    public GovernmentAccount redeemBonds(int amount) {
+    public GovernmentBooks redeemBonds(int amount) {
         addLeft(GovernmentAccountTitle.GOVERNMENT_BOND, amount);
         addRight(GovernmentAccountTitle.DEPOSIT, amount);
         return this;
     }
 
-    public GovernmentAccount collectIncomeTaxes(int amount) {
+    public GovernmentBooks collectIncomeTaxes(int amount) {
         addLeft(GovernmentAccountTitle.DEPOSIT, amount);
         addRight(GovernmentAccountTitle.INCOME_TAX, amount);
         return this;
     }
 
-    public GovernmentAccount collectConsumptionTax(int amount) {
+    public GovernmentBooks collectConsumptionTax(int amount) {
         addLeft(GovernmentAccountTitle.DEPOSIT, amount);
         addRight(GovernmentAccountTitle.CONSUMPTION_TAX, amount);
         return this;

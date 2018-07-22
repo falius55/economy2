@@ -1,20 +1,31 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
+import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 
-public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAccountTitle>
-        implements BankAccount<PrivateBankAccountTitle>, PrivateAccount<PrivateBankAccountTitle>,
-        LendableAccount<PrivateBankAccountTitle>, AccountOpenableAccount<PrivateBankAccountTitle> {
+public class PrivateBankBooks extends AbstractDoubleEntryBooks<PrivateBankAccountTitle>
+        implements BankBooks<PrivateBankAccountTitle>, PrivateBooks<PrivateBankAccountTitle>,
+        LendableBooks<PrivateBankAccountTitle>, AccountOpenableBooks<PrivateBankAccountTitle> {
+    private final Map<AccountOpenable, Integer> mDeposits;
 
-    public static PrivateBankAccount newInstance() {
-        return new PrivateBankAccount();
+    public static PrivateBankBooks newInstance() {
+        return new PrivateBankBooks();
     }
 
-    private PrivateBankAccount() {
+    private PrivateBankBooks() {
         super(PrivateBankAccountTitle.class);
+        mDeposits = new HashMap<>();
+    }
+
+    @Override
+    public BankBooks<PrivateBankAccountTitle> createAccount(AccountOpenable accountOpenable) {
+        mDeposits.put(accountOpenable, 0);
+        return this;
     }
 
     /*
@@ -27,7 +38,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * @param amount 金額
      * @param serviceLife 耐用年数
      */
-    private PrivateBankAccount buyFixedAsset(LocalDate date, int amount, int serviceLife) {
+    private PrivateBankBooks buyFixedAsset(LocalDate date, int amount, int serviceLife) {
         addFixedAsset(date, amount, serviceLife);
 
         addLeft(PrivateBankAccountTitle.TANGIBLE_ASSETS, amount);
@@ -39,7 +50,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * 間接法で減価償却する
      * @param date 減価償却日。この日が減価償却日である固定資産が減価償却される
      */
-    private PrivateBankAccount depreciationByIndirect(LocalDate date) {
+    private PrivateBankBooks depreciationByIndirect(LocalDate date) {
         int amount = recordFixedAssets(date);
         addLeft(PrivateBankAccountTitle.DEPRECIATION, amount);
         addRight(PrivateBankAccountTitle.ACCUMULATED_DEPRECIATION, amount);
@@ -49,7 +60,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     /**
      * 直接法で減価償却する
      */
-    private PrivateBankAccount depreciationByDirect(LocalDate date) {
+    private PrivateBankBooks depreciationByDirect(LocalDate date) {
         int amount = recordFixedAssets(date);
         addLeft(PrivateBankAccountTitle.DEPRECIATION, amount);
         addRight(PrivateBankAccountTitle.TANGIBLE_ASSETS, amount);
@@ -59,7 +70,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     /**
      * 土地の購入
      */
-    private PrivateBankAccount buyLand(int amount) {
+    private PrivateBankBooks buyLand(int amount) {
         addLeft(PrivateBankAccountTitle.TANGIBLE_ASSETS, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
@@ -69,7 +80,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * お金を銀行に預けた時の処理を行う
      */
     @Override
-    public PrivateBankAccount saveMoney(int amount) {
+    public PrivateBankBooks saveMoney(int amount) {
         addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBankAccountTitle.CASH, amount);
         return this;
@@ -79,7 +90,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * お金を下ろした時の処理を行う
      */
     @Override
-    public PrivateBankAccount downMoney(int amount) {
+    public PrivateBankBooks downMoney(int amount) {
         addLeft(PrivateBankAccountTitle.CASH, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
@@ -89,21 +100,21 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * 貸金処理を行う
      */
     @Override
-    public PrivateBankAccount lend(int amount) {
+    public PrivateBankBooks lend(int amount) {
         addLeft(PrivateBankAccountTitle.LOANS_RECEIVABLE, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
 
     @Override
-    public PrivateBankAccount acceptGovernmentBond(int amount) {
+    public PrivateBankBooks acceptGovernmentBond(int amount) {
         addLeft(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
 
     @Override
-    public PrivateBankAccount redeemedGovernmentBond(int amount) {
+    public PrivateBankBooks redeemedGovernmentBond(int amount) {
         addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
         return this;
@@ -113,7 +124,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * 返済を受けた時の処理を行う
      */
     @Override
-    public PrivateBankAccount repaid(int amount) {
+    public PrivateBankBooks repaid(int amount) {
         addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBankAccountTitle.LOANS_RECEIVABLE, amount);
         return this;
@@ -122,7 +133,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     /**
      * お金を預かる
      */
-    public PrivateBankAccount keep(int amount) {
+    public PrivateBankBooks keep(int amount) {
         addLeft(PrivateBankAccountTitle.CASH, amount);
         addRight(PrivateBankAccountTitle.DEPOSIT, amount);
         return this;
@@ -132,17 +143,17 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
      * 預金返済処理
      */
     @Override
-    public PrivateBankAccount paidOut(int amount) {
+    public PrivateBankBooks paidOut(int amount) {
         addLeft(PrivateBankAccountTitle.DEPOSIT, amount);
         addRight(PrivateBankAccountTitle.CASH, amount);
         return this;
     }
 
     /**
-     * 民間預金への送金処理
+     * 振り込みます。
+     * 帳簿上は、預金(負債)と日銀当座預金(資産)がともに減じます。
      */
-    @Override
-    public PrivateBankAccount transfer(int amount) {
+    public PrivateBankBooks transfer(int amount) {
         addLeft(PrivateBankAccountTitle.DEPOSIT, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
@@ -150,31 +161,31 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
 
     /**
      * 振り込みを受ける
+     * 帳簿上は、預金(負債)と日銀当座預金(資産)がともに増えます。
      * @param amount
      */
-    @Override
-    public PrivateBankAccount transfered(int amount) {
+    public PrivateBankBooks transfered(int amount) {
         addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBankAccountTitle.DEPOSIT, amount);
         return this;
     }
 
     @Override
-    public BankAccount<PrivateBankAccountTitle> buyGorvementBond(int amount) {
+    public BankBooks<PrivateBankAccountTitle> buyGorvementBond(int amount) {
         addLeft(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;
     }
 
     @Override
-    public BankAccount<PrivateBankAccountTitle> sellGovernmentBond(int amount) {
+    public BankBooks<PrivateBankAccountTitle> sellGovernmentBond(int amount) {
         addLeft(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         addRight(PrivateBankAccountTitle.GOVERNMENT_BOND, amount);
         return this;
     }
 
     @Override
-    public PrivateBankAccount paySalary(int amount) {
+    public PrivateBankBooks paySalary(int amount) {
         int tax = Taxes.computeIncomeTaxFromManthly(amount);
         addLeft(PrivateBankAccountTitle.SALARIES_EXPENSE, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount - tax);
@@ -183,7 +194,7 @@ public class PrivateBankAccount extends AbstractDoubleEntryAccount<PrivateBankAc
     }
 
     @Override
-    public PrivateBankAccount payIncomeTax(int amount) {
+    public PrivateBankBooks payIncomeTax(int amount) {
         addLeft(PrivateBankAccountTitle.DEPOSITS_RECEIVED, amount);
         addRight(PrivateBankAccountTitle.CHECKING_ACCOUNTS, amount);
         return this;

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.account;
+package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -46,7 +46,7 @@ final class FixedAssetManager {
     }
 
     void printAll() {
-        for (FixedAsset asset : mFixedAssets) { asset.print(); }
+        mFixedAssets.stream().forEach(FixedAsset::print);
     }
 
     int depreciatedBalance() {

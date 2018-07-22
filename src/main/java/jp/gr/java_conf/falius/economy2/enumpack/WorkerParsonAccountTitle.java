@@ -13,6 +13,7 @@ public enum WorkerParsonAccountTitle implements AccountTitle {
     /** 支払利息(費用) */ INTEREST_EXPENSE("支払利息", AccountType.EXPENSE),
     /** 会社設立費(費用) */ ESTABLISH_EXPENSES("創業費", AccountType.EXPENSE),
     /** 所得税(費用) */ TAX("所得税", AccountType.EXPENSE),
+    /** 最終消費(費用) */ CONSUMPTION("最終消費", AccountType.EXPENSE),
 
     /** 給料 */ SALARIES("給与", AccountType.REVENUE),
     /** 受取利息(収益) */ RECEIVE_INTEREST("受取利息", AccountType.REVENUE),
@@ -63,7 +64,8 @@ public enum WorkerParsonAccountTitle implements AccountTitle {
      * @return 労働者が購入するような製品でない場合は空のOptional
      */
     public static Optional<WorkerParsonAccountTitle> titleFrom(Product product) {
-        return Optional.ofNullable(sProductToTitle.get(product));
+        return Optional.ofNullable(CONSUMPTION);
+//        return Optional.ofNullable(sProductToTitle.get(product));
     }
 
 }

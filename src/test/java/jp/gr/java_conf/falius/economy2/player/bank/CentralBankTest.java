@@ -42,21 +42,21 @@ public class CentralBankTest {
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int capital = salary - tax;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, capital).get();
-        System.out.printf("bank: %s%n", bank.accountBook().toString());
-        System.out.printf("cbank: %s%n", cbank.accountBook().toString());
+        System.out.printf("bank: %s%n", bank.books().toString());
+        System.out.printf("cbank: %s%n", cbank.books().toString());
 
         int amount = 2000;
         bank.downMoney(amount);
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(capital - amount));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.BANK_NOTE), is(amount));
-        System.out.printf("bank2: %s%n", bank.accountBook().toString());
-        System.out.printf("cbank2: %s%n", cbank.accountBook().toString());
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSIT), is(capital - amount));
+        assertThat(cbank.books().get(CentralBankAccountTitle.BANK_NOTE), is(amount));
+        System.out.printf("bank2: %s%n", bank.books().toString());
+        System.out.printf("cbank2: %s%n", cbank.books().toString());
 
         bank.saveMoney(amount);
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(capital));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.BANK_NOTE), is(0));
-        System.out.printf("bank3: %s%n", bank.accountBook().toString());
-        System.out.printf("cbank3: %s%n", cbank.accountBook().toString());
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSIT), is(capital));
+        assertThat(cbank.books().get(CentralBankAccountTitle.BANK_NOTE), is(0));
+        System.out.printf("bank3: %s%n", bank.books().toString());
+        System.out.printf("cbank3: %s%n", cbank.books().toString());
     }
 
     @Test
@@ -68,10 +68,10 @@ public class CentralBankTest {
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int capital = salary - tax;
 
-        int deposit = cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT);
+        int deposit = cbank.books().get(CentralBankAccountTitle.DEPOSIT);
         PrivateBusiness farmer = worker.establish(Industry.FARMER, capital).get();
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(capital));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(deposit));  // 中央銀行には影響せず
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSIT), is(capital));
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSIT), is(deposit));  // 中央銀行には影響せず
     }
 
     @Test
@@ -82,18 +82,18 @@ public class CentralBankTest {
         WorkerParson worker = new WorkerParson();
         int salary = central.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
-        System.out.printf("central: %s%n", central.accountBook().toString());
-        System.out.printf("bank: %s%n", bank.accountBook().toString());
-        System.out.printf("worker: %s%n", worker.accountBook().toString());
+        System.out.printf("central: %s%n", central.books().toString());
+        System.out.printf("bank: %s%n", bank.books().toString());
+        System.out.printf("worker: %s%n", worker.books().toString());
 
-        assertThat(central.accountBook().get(CentralBankAccountTitle.SALARIES_EXPENSE), is(salary));
-        assertThat(central.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(salary - tax));
-        assertThat(central.accountBook().get(CentralBankAccountTitle.DEPOSITS_RECEIVED), is(tax));
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax));
-        assertThat(bank.accountBook().get(PrivateBankAccountTitle.DEPOSIT), is(salary - tax));
-        assertThat(worker.accountBook().get(WorkerParsonAccountTitle.SALARIES), is(salary));
-        assertThat(worker.accountBook().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT), is(salary - tax));
-        assertThat(worker.accountBook().get(WorkerParsonAccountTitle.TAX), is(tax));
+        assertThat(central.books().get(CentralBankAccountTitle.SALARIES_EXPENSE), is(salary));
+        assertThat(central.books().get(CentralBankAccountTitle.DEPOSIT), is(salary - tax));
+        assertThat(central.books().get(CentralBankAccountTitle.DEPOSITS_RECEIVED), is(tax));
+        assertThat(bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax));
+        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(salary - tax));
+        assertThat(worker.books().get(WorkerParsonAccountTitle.SALARIES), is(salary));
+        assertThat(worker.books().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT), is(salary - tax));
+        assertThat(worker.books().get(WorkerParsonAccountTitle.TAX), is(tax));
         System.out.println("--- end paySalary ---");
     }
 
@@ -106,10 +106,10 @@ public class CentralBankTest {
 
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.makeUnderwriteBonds(cbank);
-        System.out.println(cbank.accountBook().toString());
+        System.out.println(cbank.books().toString());
 
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(price * count));
+        assertThat(cbank.books().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count));
+        assertThat(cbank.books().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(price * count));
     }
 
     @Test
@@ -128,10 +128,10 @@ public class CentralBankTest {
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int amount = Math.min(salary - tax, price * count);
         cbank.operateSelling(amount);
-        System.out.println(cbank.accountBook().toString());
+        System.out.println(cbank.books().toString());
 
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count - amount));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(salary - tax - amount));
+        assertThat(cbank.books().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count - amount));
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSIT), is(salary - tax - amount));
         System.out.println("operate selling");
     }
 
@@ -145,19 +145,19 @@ public class CentralBankTest {
         int salary = cbank.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int moneyStock = salary - tax;
-        System.out.println(cbank.accountBook().toString());
+        System.out.println(cbank.books().toString());
 
         int count = 10;
         int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.advertiseBonds();
-        System.out.println(cbank.accountBook().toString());
+        System.out.println(cbank.books().toString());
 
         cbank.operateBuying(price * count);
-        System.out.println(cbank.accountBook().toString());
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(moneyStock));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(price * count));
+        System.out.println(cbank.books().toString());
+        assertThat(cbank.books().get(CentralBankAccountTitle.GOVERNMENT_BOND), is(price * count));
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSIT), is(moneyStock));
+        assertThat(cbank.books().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(price * count));
 
         System.out.println("operate buying");
     }
@@ -179,9 +179,9 @@ public class CentralBankTest {
 
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.advertiseBonds();
-        System.out.println(cbank.accountBook().toString());
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(count * price));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSIT), is(moneyStock - count * price));
+        System.out.println(cbank.books().toString());
+        assertThat(cbank.books().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(count * price));
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSIT), is(moneyStock - count * price));
 
         System.out.println("advertise");
     }
@@ -217,22 +217,22 @@ public class CentralBankTest {
         worker.buy(product, require);
 
         int allIncomeTax = 0;
-        allIncomeTax += cbank.accountBook().get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += bank.accountBook().get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += farmer.accountBook().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += maker.accountBook().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += coop.accountBook().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += cbank.books().get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += bank.books().get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += farmer.books().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += maker.books().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += coop.books().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
         int allConsumptionTax = 0;
-         allConsumptionTax+= farmer.accountBook().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
-         allConsumptionTax+= maker.accountBook().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
-         allConsumptionTax+= coop.accountBook().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
+         allConsumptionTax+= farmer.books().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
+         allConsumptionTax+= maker.books().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
+         allConsumptionTax+= coop.books().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
 
-        System.out.println(cbank.accountBook().toString());
+        System.out.println(cbank.books().toString());
         nation.collectTaxes();
-        System.out.println(cbank.accountBook().toString());
+        System.out.println(cbank.books().toString());
 
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.DEPOSITS_RECEIVED), is(0));
-        assertThat(cbank.accountBook().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(allIncomeTax + allConsumptionTax));
+        assertThat(cbank.books().get(CentralBankAccountTitle.DEPOSITS_RECEIVED), is(0));
+        assertThat(cbank.books().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT), is(allIncomeTax + allConsumptionTax));
 
         System.out.println("collect taxes");
     }

@@ -1,26 +1,19 @@
 package jp.gr.java_conf.falius.economy2.account;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
-import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
+import jp.gr.java_conf.falius.economy2.player.bank.Bank;
+import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 
-/**
- * 会計帳簿を表すインターフェース
- * @param T 科目一覧の列挙型
- */
-public interface Account<T extends Enum<T> & AccountTitle> {
+public interface Account {
 
-    /**
-     * 指定した科目種別の総額を集計します
-     * @param type 科目種別
-     * @return 集計結果
-     */
-    public int get(AccountType type);
+    public Bank bank();
 
-    /**
-     * 指定した勘定科目の金額を返します
-     * @param item 勘定科目
-     * @return 指定した勘定科目の金額
-     */
-    public int get(T item);
+    public int amount();
 
+    public int transfer(Account target, int amount);
+
+    public int transfer(CentralBank central, int amount);
+
+    public int increase(int amount);
+
+    public int decrease(int amount);
 }
