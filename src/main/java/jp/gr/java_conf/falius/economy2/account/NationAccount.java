@@ -5,38 +5,59 @@ import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 /**
  * 政府預金口座
  * @author "ymiyauchi"
+ * @since 1.0
  *
  */
 public class NationAccount implements Account {
     private final CentralBank mBank;
     private int mAmount = 0;
 
+    /**
+     *
+     * @param bank
+     * @since 1.0
+     */
     public NationAccount(CentralBank bank) {
         mBank = bank;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public CentralBank bank() {
         return mBank;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int amount() {
         return mAmount;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int increase(int amount) {
         mAmount += amount;
         return mAmount;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int decrease(int amount) {
         mAmount -= amount;
         return mAmount;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int transfer(Account target, int amount) {
         if (target instanceof CentralAccount) {
@@ -58,22 +79,42 @@ public class NationAccount implements Account {
      * @param amount
      * @return
      */
+    /**
+     *
+     * @param target
+     * @param amount
+     * @return
+     * @since 1.0
+     */
     public int transfer(CentralAccount target, int amount) {
         target.bank().books().transferToPrivateBankFromNation(amount);
         target.increase(amount);
         return decrease(amount);
     }
 
+    /**
+     *
+     * @param target
+     * @param amount
+     * @return
+     * @since 1.0
+     */
     public int transfer(PrivateAccount target, int amount) {
         target.increase(amount);
         return decrease(amount);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int transfer(CentralBank central, int amount) {
         return decrease(amount);
     }
 
+    /**
+     * @since 1.0
+     */
     public void clear() {
         mAmount = 0;
     }

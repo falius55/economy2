@@ -25,6 +25,12 @@ import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
 public class PrivateBusiness implements AccountOpenable, Employable, PrivateEntity, Borrowable, Deferrable {
     private static final Set<PrivateBusiness> sOwns = new HashSet<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
@@ -39,18 +45,40 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     private final Set<Loan> mLoans = new HashSet<>();
     private final Set<Deferment> mPayables = new HashSet<>();
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public static Stream<PrivateBusiness> stream() {
         return sOwns.stream();
     }
 
+    /**
+     *
+     * @param type
+     * @return
+     * @since 1.0
+     */
     public static Stream<PrivateBusiness> stream(Industry.Type type) {
         return sOwns.stream().filter(pb -> pb.mIndustry.type() == type);
     }
 
+    /**
+     * @since 1.0
+     */
     public static void clear() {
         sOwns.clear();
     }
 
+    /**
+     *
+     * @param founder
+     * @param industry
+     * @param products
+     * @param initialCapital
+     * @since 1.0
+     */
     PrivateBusiness(WorkerParson founder, Industry industry, Set<Product> products, int initialCapital) {
         mIndustry = industry;
         mProducts = products;
@@ -67,6 +95,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     /**
      * 候補が見つからなければ例外を投げる
+     * @since 1.0
      */
     private PrivateBank searchBank() {
         Optional<PrivateBank> opt = PrivateBank.stream().findAny();
@@ -76,31 +105,49 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return opt.get();
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public final PrivateBusinessBooks books() {
         return mBooks;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public PrivateBank mainBank() {
         return mMainBank;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int cash() {
         return mBooks.get(PrivateBusinessAccountTitle.CASH);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int deposit() {
         return mBooks.get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean isRecruit() {
         return mStuffManager.isRecruit();
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean has(Worker worker) {
         return mStuffManager.has(worker);
@@ -108,6 +155,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     /**
      * 業種が同じかどうかを判定します
+     * @since 1.0
      */
     public boolean is(Industry industry) {
         return industry == mIndustry;
@@ -115,11 +163,17 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     /**
      * 業態が同じかどうかを判定します
+     * @since 1.0
      */
     public boolean is(Industry.Type type) {
         return type == mIndustry.type();
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public int stockCost() {
         return mStockManagers.values().stream()
                 .mapToInt(StockManager::stockCost)
@@ -129,13 +183,17 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     /**
      * 製品が売っているのかどうかを判断します
      * @param product 製品
-     * @param lot 必要となるロット数
+     * @param require 必要量
+     * @since 1.0
      */
     public boolean canSale(Product product, int require) {
         // 製品を取り扱っており、在庫があればtrue
         return mProducts.contains(product) && mStockManagers.get(product).canShipOut(require);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public void closeEndOfMonth() {
         update();
@@ -152,6 +210,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         }
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public AccountOpenable saveMoney(int amount) {
         mBooks.saveMoney(amount);
@@ -159,6 +220,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public AccountOpenable downMoney(int amount) {
         mBooks.downMoney(amount);
@@ -166,6 +230,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean borrow(int amount) {
         Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
@@ -181,6 +248,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     /**
      * 借金をするため、申し込むために使うDebtMediatorオブジェクトを作成する
      * 借金が不成立の場合は想定外
+     * @since 1.0
      */
     private Loan offerDebt(int amount) {
         Loan debt = new Loan(this, mainBank().account(this), amount, Period.ofYears(1));
@@ -190,23 +258,33 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     /**
      * 借金を返済します
+     * @since 1.0
      */
     @Override
     public void repay(int amount) {
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public Employable employ(Worker worker) {
         mStuffManager.employ(worker);
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public Employable fire(Worker worker) {
         mStuffManager.fire(worker);
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int paySalary(Worker worker) {
         mBooks.paySalary(SALARY);
@@ -214,11 +292,17 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return SALARY;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int transfer(PrivateAccount target, int amount) {
         return mainBank().account(this).transfer(target, amount);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public Employable payIncomeTax(GovernmentBooks nationBooks) {
         int amount = mBooks.get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
@@ -228,6 +312,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     public PrivateBusiness payConsumptionTax(GovernmentBooks nationBooks) {
         int amount = mBooks.get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
         nationBooks.collectConsumptionTax(amount);
@@ -239,11 +326,15 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     /**
      * 指定された製品を指定された数量分売ります
      * @return 売値。販売できなければ空のOptionalInt
+     * @since 1.0
      */
     public OptionalInt saleByCash(Product product, int require) {
         return saleBy(PrivateBusinessAccountTitle.CASH, product, require);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public Optional<Deferment> saleByReceivable(Product product, int require) {
         OptionalInt optPrice = saleBy(PrivateBusinessAccountTitle.RECEIVABLE, product, require);
@@ -255,6 +346,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return Optional.of(ret);
     }
 
+    /**
+     * @since 1.0
+     */
     private OptionalInt saleBy(PrivateBusinessAccountTitle title, Product product, int require) {
         // 倉庫、工場から製品を持ってくる
         OptionalInt optCost = mStockManagers.get(product).shipOut(require);
@@ -280,6 +374,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return OptionalInt.of(price);
     }
 
+    /**
+     * @since 1.0
+     */
     public void update() {
         // use in Market#closeEndOfMonth
         mStockManagers.values().stream()
@@ -289,6 +386,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
 
     /**
      * 未計上の仕入費を計上します。
+     * @since 1.0
      */
     private void recodePurchase() {
         Set<Deferment> payables = mStockManagers.values().stream()

@@ -5,10 +5,22 @@ import java.time.LocalDate;
 import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 
+/**
+ * 複式簿記を表すすべてのクラスの基底クラス
+ * @author "ymiyauchi"
+ *
+ * @param <T>
+ * @since 1.0
+ */
 public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
         extends AbstractBooks<T> implements DoubleEntryBooks<T> {
     private final FixedAssetManager mFixedAssetManager;
 
+    /**
+     *
+     * @param clazz
+     * @since 1.0
+     */
     protected AbstractDoubleEntryBooks(Class<T> clazz) {
         super(clazz);
         mFixedAssetManager = new FixedAssetManager();
@@ -19,6 +31,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
      * @param rl 記入箇所。借方(LEFT)か貸し方(RIGHT)か
      * @param item 勘定科目
      * @param amount 金額
+     * @since 1.0
      */
     private final void add(AccountType.RL rl, T item, int amount) {
         if (item.type().rl().equals(rl)) {
@@ -32,6 +45,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
      * 借方に記入します
      * @param item 勘定科目
      * @param amount 金額
+     * @since 1.0
      */
     @Override
     public final void addLeft(T item, int amount) {
@@ -42,6 +56,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
      * 貸方に記入します
      * @param item 勘定科目
      * @param amount 金額
+     * @since 1.0
      */
     @Override
     public final void addRight(T item, int amount) {
@@ -52,9 +67,10 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
 
     /**
      * 固定資産を追加します
-     * @param mDateOfAcquisition 取得日
-     * @param mAcquisitionCost 取得原価
-     * @param mServiceLife 耐用年数
+     * @param dateOfAcquisition 取得日
+     * @param acquisitionCost 取得原価
+     * @param serviceLife 耐用年数
+     * @since 1.0
      */
     protected final void addFixedAsset(LocalDate dateOfAcquisition, int acquisitionCost, int serviceLife) {
         mFixedAssetManager.add(dateOfAcquisition, acquisitionCost, serviceLife);
@@ -66,6 +82,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
      * ただし、帳簿への記帳処理は行いません
      * @param date 記入日
      * @return その日の償却額
+     * @since 1.0
      */
     protected final int recordFixedAssets(LocalDate date) {
         return mFixedAssetManager.record(date);
@@ -73,6 +90,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
 
     /**
      * 保有している固定資産の現在価値の総額を計算します
+     * @since 1.0
      */
     protected final int fixedAssetsValue() {
         return mFixedAssetManager.presentValue();

@@ -2,6 +2,11 @@ package jp.gr.java_conf.falius.economy2.helper;
 
 import jp.gr.java_conf.falius.util.range.IntRange;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ */
 public class Taxes {
     // 消費税額
     private static final double CONSUMPTION_TAX = 0.08;
@@ -27,8 +32,9 @@ public class Taxes {
 
     /**
      * 税込額から、消費税額を計算します。
-     * @param cons 税込額
+     * @param price 税込額
      * @return
+     * @since 1.0
      */
     public static int computeConsumptionTax(int price) {
         return (int) (price - ((double) price / (1 + CONSUMPTION_TAX)));
@@ -38,6 +44,7 @@ public class Taxes {
      * 税抜価格から、税込価格を計算します。
      * @param price
      * @return
+     * @since 1.0
      */
     public static int computeInConsumptionTax(int price) {
         return (int) (price * (1 + CONSUMPTION_TAX));
@@ -48,6 +55,7 @@ public class Taxes {
      * @param price 税込みの売値
      * @param cost 税込みの原価
      * @return
+     * @since 1.0
      */
     public static int computeAccruedConsumptionTax(int price, int cost) {
         int purchaseTax = computeConsumptionTax(cost);
@@ -55,6 +63,12 @@ public class Taxes {
         return consumptionTax - purchaseTax;
     }
 
+    /**
+     *
+     * @param monthlyIncome
+     * @return
+     * @since 1.0
+     */
     public static int computeIncomeTaxFromManthly(int monthlyIncome) {
         return computeIncomeTax(monthlyIncome * 12) / 12;
     }
@@ -63,6 +77,7 @@ public class Taxes {
      * 所得から、１年分の所得税額を計算します。
      * @param income
      * @return
+     * @since 1.0
      */
     public static int computeIncomeTax(int income) {
         return (int) (computeProgressiveTax(income, INCOME_TAX) * (1 + RECONSTRUCTION_TAX));
@@ -72,6 +87,7 @@ public class Taxes {
      * 企業の一年間の利益から、法人税額を計算します。
      * @param income
      * @return
+     * @since 1.0
      */
     public static int computeCorporationTax(int income) {
         if (income < 0) { return 0; }

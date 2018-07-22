@@ -9,13 +9,19 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
 
 /**
- * 会計を表すすべてのクラスの基底クラス
+ * 会計帳簿を表すすべてのクラスの基底クラス
  * @param T 勘定科目一覧を定義した列挙型。AccountTitleインターフェースを実装していなければならない
+ * @since 1.0
  */
 public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements MutableBooks<T> {
     private final Class<T> mClass;
     private final Map<AccountType, Map<T, Integer>> mAccountsBook; // 帳簿(EnumMap) 科目種別から、勘定科目からその金額へのマップ、へのマップ
 
+    /**
+     *
+     * @param clazz
+     * @since 1.0
+     */
     protected AbstractBooks(Class<T> clazz) {
         mClass = clazz;
         mAccountsBook = initBook(clazz);
@@ -23,6 +29,7 @@ public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements
 
     /**
      * 引数の会計を、自分の会計に吸収併合します。結婚、合併など
+     * @since 1.0
      */
     @Override
     public AbstractBooks<T> merge(Books<T> another) {
@@ -50,12 +57,20 @@ public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements
         ));
     }
 
+    /**
+     * @since 1.0
+     */
     public void clearBook() {
         mAccountsBook.values().stream()
                 .forEach(m -> m.forEach((k, v) -> m.compute(k, (t, i) -> 0)));
     }
 
-    // 特定科目の金額を増加する
+    /**
+     * 特定科目の金額を増加します。
+     * @param item
+     * @param amount
+     * @since 1.0
+     */
     protected final void increase(T item, int amount) {
         Map<T, Integer> itemMap = mAccountsBook.get(item.type());
         itemMap.put(item, itemMap.get(item).intValue() + amount);
@@ -70,6 +85,7 @@ public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements
      * 指定した科目種別の総額を計算します
      * @param type 科目種別
      * @return 集計結果
+     * @since 1.0
      */
     @Override
     public final int get(AccountType type) {
@@ -81,6 +97,7 @@ public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements
      * 指定した勘定科目の金額を返します
      * @param item 勘定科目
      * @return 指定した勘定科目の金額
+     * @since 1.0
      */
     @Override
     public final int get(T item) {
@@ -88,6 +105,9 @@ public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements
         return itemMap.get(item).intValue();
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public final int benefit() {
         int ret = get(AccountType.REVENUE)
@@ -97,6 +117,7 @@ public abstract class AbstractBooks<T extends Enum<T> & AccountTitle> implements
 
     /**
      * 帳簿内容の文字列表現を返します
+     * @since 1.0
      */
     @Override
     public String toString() {

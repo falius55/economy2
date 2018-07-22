@@ -7,12 +7,26 @@ import jp.gr.java_conf.falius.economy2.book.Books;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
 public class PrivateBusinessAggregater {
     private final List<PrivateBusiness> mPrivateBusinesses = new ArrayList<>();
 
+    /**
+     * @since 1.0
+     */
     PrivateBusinessAggregater() {
     }
 
+    /**
+     *
+     * @param privateBusiness
+     * @since 1.0
+     */
     public void add(PrivateBusiness privateBusiness) {
         mPrivateBusinesses.add(privateBusiness);
     }
@@ -20,6 +34,7 @@ public class PrivateBusinessAggregater {
     /**
      * 付加価値総額
      * @return
+     * @since 1.0
      */
     public int addedValue() {
         mPrivateBusinesses.stream()
@@ -40,6 +55,7 @@ public class PrivateBusinessAggregater {
     /**
      * 固定資本減耗
      * @return
+     * @since 1.0
      */
     public int depreciation() {
         return mPrivateBusinesses.stream()
@@ -51,6 +67,7 @@ public class PrivateBusinessAggregater {
     /**
      * 営業余剰
      * @return
+     * @since 1.0
      */
     public int benefits() {
         mPrivateBusinesses.stream()
@@ -68,6 +85,7 @@ public class PrivateBusinessAggregater {
     /**
      * 未払い消費税
      * @return
+     * @since 1.0
      */
     public int accruedConsumptionTax() {
         return mPrivateBusinesses.stream()
@@ -76,6 +94,11 @@ public class PrivateBusinessAggregater {
                 .sum();
     }
 
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
     public int cashAndDeposits() {
         return mPrivateBusinesses.stream()
                 .mapToInt(pb -> pb.cash() + pb.deposit())
@@ -85,6 +108,7 @@ public class PrivateBusinessAggregater {
     /**
      * 在庫品増加(投資)
      * @return
+     * @since 1.0
      */
     public int I() {
         return mPrivateBusinesses.stream()
@@ -92,6 +116,9 @@ public class PrivateBusinessAggregater {
                 .sum(); // - 初頭の在庫額
     }
 
+    /**
+     * @since 1.0
+     */
     public void clear() {
         mPrivateBusinesses.clear();
     }

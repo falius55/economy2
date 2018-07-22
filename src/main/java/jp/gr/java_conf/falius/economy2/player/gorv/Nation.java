@@ -17,6 +17,12 @@ import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
 public class Nation implements Government, AccountOpenable {
     public static final Nation INSTANCE;
 
