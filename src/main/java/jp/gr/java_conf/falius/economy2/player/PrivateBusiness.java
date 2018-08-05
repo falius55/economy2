@@ -290,17 +290,11 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      */
     @Override
     public int paySalary(Worker worker) {
-        mBooks.paySalary(SALARY);
-        worker.getSalary(this, SALARY);
+        int takeHome = mBooks.paySalary(SALARY);
+        worker.books().getSalary(SALARY);
+        PrivateAccount workerAccount = worker.books().mainAccount();
+        mainBank().account(this).transfer(workerAccount, takeHome);
         return SALARY;
-    }
-
-    /**
-     * @since 1.0
-     */
-    @Override
-    public int transfer(PrivateAccount target, int amount) {
-        return mainBank().account(this).transfer(target, amount);
     }
 
     /**

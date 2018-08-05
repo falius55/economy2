@@ -24,8 +24,8 @@ public class Bond {
     private LocalDate mDeadLine; // 期限
     private boolean mIsPayOff = false;
 
+    private final GovernmentBooks mIssuerBooks; // 債務者の会計
     private BankBooks<?> mUnderWriterBooks = null; // 債権者の会計
-    private GovernmentBooks mIssuerBooks; // 債務者の会計
 
     public Bond(GovernmentBooks issuerBook, int amount, Period period) {
         mIssuerBooks = issuerBook;

@@ -226,12 +226,13 @@ public class PrivateBankBooks extends AbstractDoubleEntryBooks<PrivateBankTitle>
      * @since 1.0
      */
     @Override
-    public PrivateBankBooks paySalary(int amount) {
+    public int paySalary(int amount) {
         int tax = Taxes.computeIncomeTaxFromManthly(amount);
+        int takeHome = amount - tax;
         addLeft(PrivateBankTitle.SALARIES_EXPENSE, amount);
-        addRight(PrivateBankTitle.CHECKING_ACCOUNTS, amount - tax);
+        addRight(PrivateBankTitle.CHECKING_ACCOUNTS, takeHome);
         addRight(PrivateBankTitle.DEPOSITS_RECEIVED, tax);
-        return this;
+        return takeHome;
     }
 
     /**

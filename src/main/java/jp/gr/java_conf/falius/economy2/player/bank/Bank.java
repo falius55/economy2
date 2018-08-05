@@ -2,7 +2,6 @@ package jp.gr.java_conf.falius.economy2.player.bank;
 
 import java.util.Set;
 
-import jp.gr.java_conf.falius.economy2.account.NationAccount;
 import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.book.BankBooks;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
@@ -37,14 +36,5 @@ public interface Bank extends Employable {
      * @since 1.0
      */
     public Set<Bond> searchBonds(Set<Bond> bondMarket);
-
-    /**
-     * 国の口座に振り込みます。
-     * @param target
-     * @param amount
-     * @return
-     * @since 1.0
-     */
-    public int transfer(NationAccount target, int amount);
 
 }

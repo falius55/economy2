@@ -13,11 +13,11 @@ public interface EmployableBooks<T extends Enum<T> & Title> extends Books<T>  {
 
     /**
      *
-     * @param amount
-     * @return
+     * @param amount 額面
+     * @return 手取額
      * @since 1.0
      */
-    public EmployableBooks<T> paySalary(int amount);
+    public int paySalary(int amount);
 
     /**
      * 預かり金を納税します。

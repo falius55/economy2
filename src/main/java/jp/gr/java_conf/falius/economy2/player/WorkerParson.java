@@ -14,7 +14,6 @@ import jp.gr.java_conf.falius.economy2.book.WorkerParsonBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
@@ -172,18 +171,6 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     }
 
     /**
-     * 給料を受け取る
-     * @since 1.0
-     */
-    @Override
-    public void getSalary(Employable from, int amount) {
-        mBooks.getSalary(amount);
-        PrivateAccount workerAccount = mainBank().account(this);
-        int tax = Taxes.computeIncomeTaxFromManthly(amount);
-        from.transfer(workerAccount, amount - tax);
-    }
-
-    /**
      * @since 1.0
      */
     @Override
@@ -292,8 +279,8 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         }
 
         if (deposit < initialCapital) {
-            int shortfall = initialCapital - deposit;
-            saveMoney(shortfall);
+            int shortage = initialCapital - deposit;
+            saveMoney(shortage);
         }
         mBooks.establish(initialCapital);
         PrivateBusiness business = new PrivateBusiness(this, industry, products, initialCapital);

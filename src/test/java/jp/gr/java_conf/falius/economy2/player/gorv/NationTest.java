@@ -30,6 +30,10 @@ public class NationTest {
         Market.INSTANCE.clear();
     }
 
+    private void checkAccount(Nation nation) {
+        assertThat(nation.mainBank().nationAccount().amount(), is(nation.books().get(GovernmentTitle.DEPOSIT)));
+    }
+
     @Test
     public void centralBankBondsTest() {
         Nation nation = Nation.INSTANCE;
@@ -41,6 +45,7 @@ public class NationTest {
         System.out.println(nation.books().toString());
         assertThat(nation.books().get(GovernmentTitle.GOVERNMENT_BOND), is(count * price));
         assertThat(nation.books().get(GovernmentTitle.DEPOSIT), is(count * price));
+        checkAccount(nation);
     }
 
     @Test
@@ -63,6 +68,7 @@ public class NationTest {
         System.out.println(nation.books().toString());
         assertThat(nation.books().get(GovernmentTitle.GOVERNMENT_BOND), is(count * price));
         assertThat(nation.books().get(GovernmentTitle.DEPOSIT), is(count * price));
+        checkAccount(nation);
 
         System.out.println("advertise");
     }
@@ -119,6 +125,7 @@ public class NationTest {
         assertThat(nation.books().get(GovernmentTitle.INCOME_TAX)
                 + nation.books().get(GovernmentTitle.CONSUMPTION_TAX),
                 is(nation.books().get(GovernmentTitle.DEPOSIT) ));
+        checkAccount(nation);
 
         System.out.println("collect taxes");
     }

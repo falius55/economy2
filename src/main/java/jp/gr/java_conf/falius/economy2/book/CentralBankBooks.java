@@ -172,12 +172,13 @@ public class CentralBankBooks extends AbstractDoubleEntryBooks<CentralBankTitle>
      * @since 1.0
      */
     @Override
-    public CentralBankBooks paySalary(int amount) {
+    public int paySalary(int amount) {
         int tax = Taxes.computeIncomeTaxFromManthly(amount);
+        int takeHome = amount - tax;
         addLeft(CentralBankTitle.SALARIES_EXPENSE, amount);
-        addRight(CentralBankTitle.DEPOSIT, amount - tax);
+        addRight(CentralBankTitle.DEPOSIT, takeHome);
         addRight(CentralBankTitle.DEPOSITS_RECEIVED, tax);
-        return this;
+        return takeHome;
     }
 
     /**

@@ -164,8 +164,10 @@ public class CentralBank implements Bank, Transferable {
      */
     @Override
     public int paySalary(Worker worker) {
-        mBooks.paySalary(SALARY);
-        worker.getSalary(this, SALARY);
+        int takeHome = mBooks.paySalary(SALARY);
+        worker.books().getSalary(SALARY);
+        PrivateAccount workerAccount = worker.books().mainAccount();
+        transfer(workerAccount, takeHome);
         return SALARY;
     }
 
@@ -291,8 +293,7 @@ public class CentralBank implements Bank, Transferable {
     /**
      * @since 1.0
      */
-    @Override
-    public int transfer(PrivateAccount target, int amount) {
+    private int transfer(PrivateAccount target, int amount) {
         target.bank().books().transfered(amount);
         PrivateBank targetBank = target.bank();
         CentralBank.INSTANCE.account(targetBank).increase(amount);
@@ -302,8 +303,8 @@ public class CentralBank implements Bank, Transferable {
     /**
      * @since 1.0
      */
-    @Override
-    public int transfer(NationAccount target, int amount) {
+//    @Override
+    private int transfer(NationAccount target, int amount) {
         return target.increase(amount);
     }
 

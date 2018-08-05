@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.CentralAccount;
-import jp.gr.java_conf.falius.economy2.account.NationAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
 import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.agreement.Loan;
@@ -216,14 +215,6 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @since 1.0
      */
     @Override
-    public int transfer(NationAccount target, int amount) {
-        return mainBank().account(this).transfer(target, amount);
-    }
-
-    /**
-     * @since 1.0
-     */
-    @Override
     public AccountOpenable saveMoney(int amount) {
         mBooks.saveMoney(amount);
         mainBank().keep(this, amount);
@@ -263,18 +254,11 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public int paySalary(Worker worker) {
-        mBooks.paySalary(SALARY);
-        worker.getSalary(this, SALARY);
+        int takeHome = mBooks.paySalary(SALARY);
+        worker.books().getSalary(SALARY);
+        PrivateAccount workerAccount = worker.books().mainAccount();
+        mainBank().account(this).transfer(workerAccount, takeHome);
         return SALARY;
-    }
-
-    /**
-     * @since 1.0
-     */
-    @Override
-    public int transfer(PrivateAccount target, int amount) {
-        int ret = mainBank().account(this).transfer(target, amount);
-        return ret;
     }
 
     /**

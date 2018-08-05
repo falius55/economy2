@@ -246,12 +246,13 @@ public class PrivateBusinessBooks extends AbstractDoubleEntryBooks<PrivateBusine
      * @since 1.0
      */
     @Override
-    public PrivateBusinessBooks paySalary(int amount) {
+    public int paySalary(int amount) {
         int tax = Taxes.computeIncomeTax(amount * 12) / 12;
+        int takeHome = amount - tax;
         addLeft(PrivateBusinessTitle.SALARIES_EXPENSE, amount);
-        addRight(PrivateBusinessTitle.CHECKING_ACCOUNTS, amount - tax);
+        addRight(PrivateBusinessTitle.CHECKING_ACCOUNTS, takeHome);
         addRight(PrivateBusinessTitle.DEPOSITS_RECEIVED, tax);
-        return this;
+        return takeHome;
     }
 
     /**

@@ -28,6 +28,11 @@ public class WorkerParsonTest {
         Market.INSTANCE.clear();
     }
 
+    private void checkAccount(WorkerParson worker) {
+        assertThat(worker.mainBank().account(worker).amount(),
+                is(worker.books().get(WorkerParsonTitle.ORDINARY_DEPOSIT)));
+    }
+
     @Test
     public void jobTest() {
         CentralBank cbank = CentralBank.INSTANCE;
@@ -72,6 +77,9 @@ public class WorkerParsonTest {
         int salary3 = cbank.paySalary(founder3);
         int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
         int capital3 = salary3 - tax3;
+        checkAccount(founder);
+        checkAccount(founder2);
+        checkAccount(founder3);
 
         PrivateBusiness farmar = founder.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
@@ -80,6 +88,9 @@ public class WorkerParsonTest {
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness coop = founder3.establish(Industry.SUPER_MARKET, capital3).get();
+        checkAccount(founder);
+        checkAccount(founder2);
+        checkAccount(founder3);
 
         WorkerParson worker = new WorkerParson();
         assertThat(worker.cash(), is(0));
@@ -88,12 +99,14 @@ public class WorkerParsonTest {
         int salary = cbank.paySalary(worker);
         assertThat(worker.cash(), is(0));
         assertThat(worker.deposit(), is(salary - tax));
+        checkAccount(worker);
 
         Product product = Product.RICE_BALL;
         int require = 3;
         OptionalInt optPrice = worker.buy(product, require);
         int price = optPrice.getAsInt();
         assertThat(price, is(not(0)));
+        checkAccount(worker);
 
         Optional<WorkerParsonTitle> optTitle = WorkerParsonTitle.titleFrom(product);
         WorkerParsonTitle title = optTitle.get();
@@ -121,6 +134,7 @@ public class WorkerParsonTest {
 
         assertThat(worker.deposit(), is(salary - tax - initial));
         assertThat(worker.books().get(WorkerParsonTitle.ESTABLISH_EXPENSES), is(initial));
+        checkAccount(worker);
 
     }
 
@@ -135,11 +149,13 @@ public class WorkerParsonTest {
         int capital = salary - tax;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         assertThat(worker.cash() + worker.deposit(), is(0));
+        checkAccount(worker);
 
         worker.borrow(capital);
         System.out.println(worker.books().toString());
         assertThat(worker.deposit(), is(capital));
         assertThat(worker.books().get(WorkerParsonTitle.LOANS_PAYABLE), is(capital));
+        checkAccount(worker);
 
         System.out.println("borrow");
     }
