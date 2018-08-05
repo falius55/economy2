@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.loan;
+package jp.gr.java_conf.falius.economy2.agreement;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -8,7 +8,7 @@ import jp.gr.java_conf.falius.economy2.book.BankBooks;
 import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.book.PrivateBankBooks;
-import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 /**
@@ -144,7 +144,7 @@ public class Bond {
         if (isPayOff()) {
             return true;
         }
-        if (mIssuerBooks.get(GovernmentAccountTitle.DEPOSIT) < amount()) {
+        if (mIssuerBooks.get(GovernmentTitle.DEPOSIT) < amount()) {
             return false;
         }
         mIssuerBooks.redeemBonds(amount());

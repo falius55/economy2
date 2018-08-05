@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import jp.gr.java_conf.falius.economy2.account.CentralAccount;
 import jp.gr.java_conf.falius.economy2.account.NationAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
-import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.loan.Bond;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
@@ -172,7 +172,7 @@ public class CentralBank implements Bank {
      */
     @Override
     public Employable payIncomeTax(GovernmentBooks nationBooks) {
-        int amount = mBooks.get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
+        int amount = mBooks.get(CentralBankTitle.DEPOSITS_RECEIVED);
         nationBooks.collectIncomeTaxes(amount);
         mBooks.payIncomeTax(amount);
         transfer(mNationAccount, amount);
@@ -237,7 +237,7 @@ public class CentralBank implements Bank {
      * @since 1.0
      */
     public void operateSelling(int maxAmount) {
-        int amount = Math.min(mBooks.get(CentralBankAccountTitle.GOVERNMENT_BOND), maxAmount);
+        int amount = Math.min(mBooks.get(CentralBankTitle.GOVERNMENT_BOND), maxAmount);
         Set<Bond> sells = Nation.INSTANCE.bonds().stream()
                 .filter(bond -> !bond.isPayOff())
                 .filter(Bond::ofCentralBank)

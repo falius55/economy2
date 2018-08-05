@@ -12,14 +12,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.agreement.Deferment;
+import jp.gr.java_conf.falius.economy2.agreement.Loan;
+import jp.gr.java_conf.falius.economy2.agreement.PaymentByInstallments;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.book.PrivateBusinessBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
-import jp.gr.java_conf.falius.economy2.loan.Deferment;
-import jp.gr.java_conf.falius.economy2.loan.Loan;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
@@ -31,7 +32,7 @@ import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
  * @since 1.0
  *
  */
-public class PrivateBusiness implements AccountOpenable, Employable, PrivateEntity, Borrowable, Deferrable {
+public class PrivateBusiness implements AccountOpenable, Employable, PrivateEntity, Borrowable, Deferrable, InstallmentReceivable {
     private static final Set<PrivateBusiness> sOwns = new HashSet<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
     private static final int SALARY = 50000;
@@ -83,8 +84,9 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         mIndustry = industry;
         mProducts = products;
         mStockManagers = products.stream()
-                .collect(Collectors.toMap(Function.identity(), industry.type()::newManager, (p1, p2) -> p1,
-                        () -> new EnumMap<Product, StockManager>(Product.class)));
+                .collect(Collectors.toMap(Function.identity(),
+                        (product) -> industry.type().newManager(product, mStuffManager),
+                        (p1, p2) -> p1, () -> new EnumMap<Product, StockManager>(Product.class)));
         mMainBank = searchBank();
         mMainBank.createAccount(this);
         mBooks.establish(initialCapital);
@@ -126,7 +128,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      */
     @Override
     public int cash() {
-        return mBooks.get(PrivateBusinessAccountTitle.CASH);
+        return mBooks.get(PrivateBusinessTitle.CASH);
     }
 
     /**
@@ -134,7 +136,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      */
     @Override
     public int deposit() {
-        return mBooks.get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
+        return mBooks.get(PrivateBusinessTitle.CHECKING_ACCOUNTS);
     }
 
     /**
@@ -305,7 +307,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      */
     @Override
     public Employable payIncomeTax(GovernmentBooks nationBooks) {
-        int amount = mBooks.get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
+        int amount = mBooks.get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         nationBooks.collectIncomeTaxes(amount);
         mBooks.payIncomeTax(amount);
         mainBank().account(this).transfer(CentralBank.INSTANCE.nationAccount(), amount);
@@ -316,7 +318,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      * @since 1.0
      */
     public PrivateBusiness payConsumptionTax(GovernmentBooks nationBooks) {
-        int amount = mBooks.get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
+        int amount = mBooks.get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
         nationBooks.collectConsumptionTax(amount);
         mBooks.payConsumptionTax(amount);
         mainBank().account(this).transfer(CentralBank.INSTANCE.nationAccount(), amount);
@@ -329,27 +331,46 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      * @since 1.0
      */
     public OptionalInt saleByCash(Product product, int require) {
-        return saleBy(PrivateBusinessAccountTitle.CASH, product, require);
+        OptionalInt optPrice = sale(product, require);
+        if (!optPrice.isPresent()) {
+            return OptionalInt.empty();
+        }
+        mBooks.saleByCash(optPrice.getAsInt());
+        return optPrice;
     }
 
     /**
+     * 売り掛けで販売します。
      * @since 1.0
      */
     @Override
     public Optional<Deferment> saleByReceivable(Product product, int require) {
-        OptionalInt optPrice = saleBy(PrivateBusinessAccountTitle.RECEIVABLE, product, require);
+        OptionalInt optPrice = sale(product, require);
         if (!optPrice.isPresent()) {
             return Optional.empty();
         }
         int price = optPrice.getAsInt();
+        mBooks.saleByReceivable(price);
         Deferment ret = new Deferment(this, price);
+        return Optional.of(ret);
+    }
+
+    public Optional<PaymentByInstallments<PrivateBusinessTitle>> saleByInstallments(
+            Product product, int require) {
+        OptionalInt optPrice = sale(product, require);
+        if (!optPrice.isPresent()) {
+            return Optional.empty();
+        }
+        int price = optPrice.getAsInt();
+        PaymentByInstallments<PrivateBusinessTitle> ret = PaymentByInstallments.newInstanceByCount(price, 12,
+                this);
         return Optional.of(ret);
     }
 
     /**
      * @since 1.0
      */
-    private OptionalInt saleBy(PrivateBusinessAccountTitle title, Product product, int require) {
+    private OptionalInt sale(Product product, int require) {
         // 倉庫、工場から製品を持ってくる
         OptionalInt optCost = mStockManagers.get(product).shipOut(require);
         if (!optCost.isPresent()) {
@@ -358,17 +379,6 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         int cost = optCost.getAsInt();
 
         int price = (int) (cost * (1 + MARGIN)); // 原価にマージンを上乗せして売値を決める
-        switch (title) {
-        case CASH:
-            mBooks.saleByCash(price);
-            break;
-        case RECEIVABLE:
-            mBooks.saleByReceivable(price);
-            break;
-        default:
-            throw new IllegalArgumentException(); // no reach
-        }
-
         int accruedConsumptionTax = Taxes.computeConsumptionTax(price) - Taxes.computeConsumptionTax(cost);
         mBooks.settleConsumptionTax(accruedConsumptionTax);
         return OptionalInt.of(price);
@@ -391,7 +401,8 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     private void recodePurchase() {
         Set<Deferment> payables = mStockManagers.values().stream()
                 .map(StockManager::purchasePayable)
-                .reduce(new HashSet<>(), (collect, payable) -> {collect.addAll(payable); return collect;});
+                .flatMap(Set::stream) // Set<Deferment>のstreamからDefermentのstreamにする
+                .collect(Collectors.toSet());
         mPayables.addAll(payables);
 
         int purchase = payables.stream()

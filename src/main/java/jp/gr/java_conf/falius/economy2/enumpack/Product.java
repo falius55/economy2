@@ -1,6 +1,7 @@
 package jp.gr.java_conf.falius.economy2.enumpack;
 
 import java.time.Period;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +40,7 @@ public enum Product {
     /**
      * @since 1.0
      */
-    RICE("米", 800, Type.CONSUMER, 1000 /* g */, Period.ofDays(364), 1000000 /* g */) {
+    RICE("米", 800, Type.CONSUMER, 1000 /* g */, Period.ofYears(1), 1000000 /* g */) {
         protected Map<Product, Integer> createMaterialMap() {
             Map<Product, Integer> ret = new EnumMap<Product, Integer>(Product.class);
             return ret;
@@ -95,7 +96,7 @@ public enum Product {
     private final int mProductionVolume; // 一度の製造数
 
     private static final Map<String, Product> sStringToEnum = new HashMap<String, Product>(); // 日本語名から商品enumへのマップ
-    private static final Map<Product, Map<Product, Integer>> sMaterials = new EnumMap<Product, Map<Product, Integer>>(
+    private static final Map<Product, Map<Product, Integer>> sMaterials = new EnumMap<>(
             Product.class); // 原材料から必要数量へのマップ
 
     static {
@@ -119,8 +120,9 @@ public enum Product {
      */
     Product(String name, int price, Type type, int numOfLot, Period manufacturePeriod, int productionVolume) {
         this(name, price, type, 0, numOfLot, manufacturePeriod, productionVolume);
-        if (type == Type.FIXED_ASSET)
+        if (type == Type.FIXED_ASSET) {
             throw new IllegalArgumentException("arguments has no mServiceLife");
+        }
     }
 
     /**
@@ -145,8 +147,9 @@ public enum Product {
         mManufacturePeriod = manufacturePeriod;
         mProductionVolume = productionVolume;
 
-        if (type == Type.FIXED_ASSET && serviceLife == 0)
+        if (type == Type.FIXED_ASSET && serviceLife == 0) {
             throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -228,11 +231,7 @@ public enum Product {
     public Map<Product, Integer> materials() {
         // ないとは思うが、もしオーバーライドしたcreateMaterialMap()でEnumMap以外を返すようにした場合にもHashMapで対応する
         Map<Product, Integer> materials = Product.sMaterials.get(this);
-        if (materials instanceof EnumMap) {
-            return new EnumMap<Product, Integer>((EnumMap<Product, Integer>) materials);
-        } else {
-            return new HashMap<Product, Integer>(materials);
-        }
+        return Collections.unmodifiableMap(materials);
     }
 
     /**
@@ -280,10 +279,6 @@ public enum Product {
      * @since 1.0
      */
     public static void printAll() {
-        // for (Product pd : values()) {
-        //  pd.print();
-        // }
-
         TableBuilder tb = new TableBuilder("商品名", "値段", "単位あたり数量", "種別", "耐用年数", "原材料", "取扱業者");
         for (Product pd : values())
             tb.insert(pd)

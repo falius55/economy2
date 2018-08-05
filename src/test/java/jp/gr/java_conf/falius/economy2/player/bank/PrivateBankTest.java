@@ -10,10 +10,10 @@ import org.junit.After;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
@@ -40,8 +40,8 @@ public class PrivateBankTest {
         System.out.println(bank.books().toString());
 
         PrivateBusiness pb = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(capital));
-        assertThat(bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(capital));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(capital));
+        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(capital));
 
         System.out.println("--- establish business ---");
     }
@@ -62,8 +62,8 @@ public class PrivateBankTest {
         worker.borrow(amount);
         System.out.println(bank.books().toString());
         assertThat(bank.deposit(), is(capital - amount + amount));  // 自分に振り込むので変化なし
-        assertThat(bank.books().get(PrivateBankAccountTitle.LOANS_RECEIVABLE), is(amount));
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(capital + amount));
+        assertThat(bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE), is(amount));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(capital + amount));
 
         System.out.println(cbank.books().toString());
 
@@ -83,8 +83,8 @@ public class PrivateBankTest {
         int amount = capital;
         farmer.borrow(amount);
         assertThat(bank.deposit(), is(capital - amount + amount));  // 自分に振り込むので変化なし
-        assertThat(bank.books().get(PrivateBankAccountTitle.LOANS_RECEIVABLE), is(amount));
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(capital + amount));
+        assertThat(bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE), is(amount));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(capital + amount));
     }
 
     @Test
@@ -125,22 +125,22 @@ public class PrivateBankTest {
         System.out.printf("bank : %s%n", bank.books().toString());
 
         int loan = 0;
-        loan += worker.books().get(WorkerParsonAccountTitle.LOANS_PAYABLE);
-        loan += farmer.books().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
-        loan += maker.books().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
-        loan += coop.books().get(PrivateBusinessAccountTitle.LOANS_PAYABLE);
-        assertThat(bank.books().get(PrivateBankAccountTitle.LOANS_RECEIVABLE), is(loan));
+        loan += worker.books().get(WorkerParsonTitle.LOANS_PAYABLE);
+        loan += farmer.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
+        loan += maker.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
+        loan += coop.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
+        assertThat(bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE), is(loan));
 
         int deposit = 0;
-        deposit += worker.books().get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
-        deposit += farmer.books().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
-        deposit += maker.books().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
-        deposit += coop.books().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS);
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(deposit));
+        deposit += worker.books().get(WorkerParsonTitle.ORDINARY_DEPOSIT);
+        deposit += farmer.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS);
+        deposit += maker.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS);
+        deposit += coop.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS);
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(deposit));
 
-        assertThat(bank.books().get(PrivateBankAccountTitle.CASH)
-                + bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS)
-                + bank.books().get(PrivateBankAccountTitle.LOANS_RECEIVABLE),
+        assertThat(bank.books().get(PrivateBankTitle.CASH)
+                + bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)
+                + bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE),
                 is(deposit));
 
     }
@@ -167,7 +167,7 @@ public class PrivateBankTest {
         System.out.printf("cbank: %s%n", cbank.books().toString());
         System.out.printf("nation: %s%n", nation.books().toString());
         assertThat(bank.deposit(), is(moneyStock - price * count));
-        assertThat(bank.books().get(PrivateBankAccountTitle.GOVERNMENT_BOND), is(price * count));
+        assertThat(bank.books().get(PrivateBankTitle.GOVERNMENT_BOND), is(price * count));
 
         System.out.println("nationBond");
     }
@@ -190,8 +190,8 @@ public class PrivateBankTest {
         cbank.operateSelling(amount);
         System.out.println(bank.books().toString());
 
-        assertThat(bank.books().get(PrivateBankAccountTitle.GOVERNMENT_BOND), is(amount));
-        assertThat(bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax - amount));
+        assertThat(bank.books().get(PrivateBankTitle.GOVERNMENT_BOND), is(amount));
+        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(salary - tax - amount));
         System.out.println("operate selling");
     }
 
@@ -215,8 +215,8 @@ public class PrivateBankTest {
 
         cbank.operateBuying(price * count);
         System.out.println(bank.books().toString());
-        assertThat(bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(moneyStock));
-        assertThat(bank.books().get(PrivateBankAccountTitle.GOVERNMENT_BOND), is(0));
+        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(moneyStock));
+        assertThat(bank.books().get(PrivateBankTitle.GOVERNMENT_BOND), is(0));
 
 
         System.out.println("operate buying");
@@ -230,18 +230,18 @@ public class PrivateBankTest {
         WorkerParson worker = new WorkerParson();
         int salary = central.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
-        assertThat(bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax));
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(salary - tax));
+        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(salary - tax));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(salary - tax));
 
         int beforeChecking = salary - tax;
         int beforeDeposit = salary - tax;
         int bankSalary = bank.paySalary(worker);
         int bankTax = Taxes.computeIncomeTaxFromManthly(bankSalary);
-        assertThat(bank.books().get(PrivateBankAccountTitle.SALARIES_EXPENSE), is(bankSalary));
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSITS_RECEIVED), is(bankTax));
+        assertThat(bank.books().get(PrivateBankTitle.SALARIES_EXPENSE), is(bankSalary));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSITS_RECEIVED), is(bankTax));
         // 自分に振り込まれるので変わらず ↓
-        assertThat(bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(beforeChecking));
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(beforeDeposit + bankSalary - bankTax));
+        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(beforeChecking));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(beforeDeposit + bankSalary - bankTax));
 
         System.out.println("--- end paySalary ---");
     }

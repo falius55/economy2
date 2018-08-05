@@ -3,8 +3,8 @@ package jp.gr.java_conf.falius.economy2.player.bank;
 import java.util.Set;
 
 import jp.gr.java_conf.falius.economy2.account.NationAccount;
+import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.book.BankBooks;
-import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 

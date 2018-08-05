@@ -11,11 +11,11 @@ import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.NationAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.agreement.Bond;
+import jp.gr.java_conf.falius.economy2.agreement.Loan;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.book.PrivateBankBooks;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.loan.Bond;
-import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
@@ -110,7 +110,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public int cash() {
-        return mBooks.get(PrivateBankAccountTitle.CASH);
+        return mBooks.get(PrivateBankTitle.CASH);
     }
 
     /**
@@ -118,7 +118,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public int deposit() {
-        return mBooks.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
+        return mBooks.get(PrivateBankTitle.CHECKING_ACCOUNTS);
     }
 
     /**
@@ -142,8 +142,8 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public boolean canLend(int amount) {
-        int cash = mBooks.get(PrivateBankAccountTitle.CASH);
-        int checking = mBooks.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
+        int cash = mBooks.get(PrivateBankTitle.CASH);
+        int checking = mBooks.get(PrivateBankTitle.CHECKING_ACCOUNTS);
         return cash + checking >= amount;
     }
 
@@ -170,7 +170,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public void paidOut(AccountOpenable openable, int amount) {
-        int cash = mBooks.get(PrivateBankAccountTitle.CASH);
+        int cash = mBooks.get(PrivateBankTitle.CASH);
         if (cash < amount) {
             downMoney(amount - cash);
         }
@@ -279,7 +279,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public Employable payIncomeTax(GovernmentBooks nationBooks) {
-        int amount = mBooks.get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
+        int amount = mBooks.get(PrivateBankTitle.DEPOSITS_RECEIVED);
         nationBooks.collectIncomeTaxes(amount);
         mBooks.payIncomeTax(amount);
         mainBank().account(this).transfer(mainBank().nationAccount(), amount);

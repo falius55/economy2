@@ -2,8 +2,8 @@ package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
-import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
+import jp.gr.java_conf.falius.economy2.enumpack.Title;
+import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 
 /**
  * 複式簿記を表すすべてのクラスの基底クラス
@@ -12,7 +12,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
  * @param <T>
  * @since 1.0
  */
-public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
+public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & Title>
         extends AbstractBooks<T> implements DoubleEntryBooks<T> {
     private final FixedAssetManager mFixedAssetManager;
 
@@ -33,7 +33,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
      * @param amount 金額
      * @since 1.0
      */
-    private final void add(AccountType.RL rl, T item, int amount) {
+    private final void add(TitleType.RL rl, T item, int amount) {
         if (item.type().rl().equals(rl)) {
             super.increase(item, amount);
         } else {
@@ -49,7 +49,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
      */
     @Override
     public final void addLeft(T item, int amount) {
-        add(AccountType.RL.LEFT, item, amount);
+        add(TitleType.RL.LEFT, item, amount);
     }
 
     /**
@@ -60,7 +60,7 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & AccountTitle>
      */
     @Override
     public final void addRight(T item, int amount) {
-        add(AccountType.RL.RIGHT, item, amount);
+        add(TitleType.RL.RIGHT, item, amount);
     }
 
     // 以下は固定資産

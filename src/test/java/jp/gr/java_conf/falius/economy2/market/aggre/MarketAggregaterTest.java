@@ -10,9 +10,9 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Test;
 
-import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
@@ -32,14 +32,14 @@ public class MarketAggregaterTest {
 
     private void check() {
         int realDepositsOfCentralBank = CentralBank.INSTANCE.realDeposits();
-        int depositsOfCentralBankOfBooks = CentralBank.INSTANCE.books().get(CentralBankAccountTitle.DEPOSIT);
+        int depositsOfCentralBankOfBooks = CentralBank.INSTANCE.books().get(CentralBankTitle.DEPOSIT);
         assertThat(realDepositsOfCentralBank, is(depositsOfCentralBankOfBooks));
         int checkingAccountsOfPrivateBanksOfBooks =
-                PrivateBank.stream().mapToInt(pb -> pb.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS)).sum();
+                PrivateBank.stream().mapToInt(pb -> pb.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)).sum();
         assertThat(checkingAccountsOfPrivateBanksOfBooks, is(realDepositsOfCentralBank));
         int realDepositsOfPrivateBank = PrivateBank.stream().mapToInt(PrivateBank::realDeposits).sum();
         int depositsOfPrivateBankOfBooks =
-                PrivateBank.stream().map(PrivateBank::books).mapToInt(book -> book.get(PrivateBankAccountTitle.DEPOSIT)).sum();
+                PrivateBank.stream().map(PrivateBank::books).mapToInt(book -> book.get(PrivateBankTitle.DEPOSIT)).sum();
         assertThat(realDepositsOfPrivateBank, is(depositsOfPrivateBankOfBooks));
         int workerDeposits = WorkerParson.stream().mapToInt(WorkerParson::deposit).sum();
         int businessDeposits = PrivateBusiness.stream().mapToInt(PrivateBusiness::deposit).sum();
@@ -47,7 +47,7 @@ public class MarketAggregaterTest {
         WorkerParson.stream().forEach(worker -> assertThat(worker.mainBank().account(worker).amount(), is(worker.deposit())));
         PrivateBusiness.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
         PrivateBank.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
-        int nationDepositOfCentralOfBooks = CentralBank.INSTANCE.books().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT);
+        int nationDepositOfCentralOfBooks = CentralBank.INSTANCE.books().get(CentralBankTitle.GOVERNMENT_DEPOSIT);
         assertThat(CentralBank.INSTANCE.nationAccount().amount(), is(nationDepositOfCentralOfBooks));
         assertThat(Nation.INSTANCE.deposit(), is(nationDepositOfCentralOfBooks));
 

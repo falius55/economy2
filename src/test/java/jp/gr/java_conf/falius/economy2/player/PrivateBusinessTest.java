@@ -10,11 +10,11 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Test;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
-import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
@@ -68,7 +68,7 @@ public class PrivateBusinessTest {
         int initial = moneyStock / 2;
 
         PrivateBusiness farmer = worker.establish(Industry.FARMER, initial).get();
-        assertThat(farmer.books().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
+        assertThat(farmer.books().get(PrivateBusinessTitle.CAPITAL_STOCK), is(initial));
         assertThat(farmer.deposit(), is(initial));
     }
 
@@ -84,12 +84,13 @@ public class PrivateBusinessTest {
 
         farmer.borrow(capital);
         assertThat(farmer.deposit(), is(capital * 2));
-        assertThat(farmer.books().get(PrivateBusinessAccountTitle.LOANS_PAYABLE), is(capital));
-        assertThat(farmer.books().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(capital));
+        assertThat(farmer.books().get(PrivateBusinessTitle.LOANS_PAYABLE), is(capital));
+        assertThat(farmer.books().get(PrivateBusinessTitle.CAPITAL_STOCK), is(capital));
     }
 
     @Test
     public void distributionTest() {
+        System.out.println("--- distribution ---");
         CentralBank cbank = CentralBank.INSTANCE;
         Bank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
@@ -120,34 +121,35 @@ public class PrivateBusinessTest {
 
         int countToEndOfMonth = Market.INSTANCE.nowDate().lengthOfMonth() - Market.INSTANCE.nowDate().getDayOfMonth();
         IntStream.range(0, countToEndOfMonth + 10).forEach(n -> Market.INSTANCE.nextDay());
-        System.out.println(farmer.books().toString());
-        System.out.println(maker.books().toString());
-        System.out.println(coop.books().toString());
+        System.out.printf("farmer: %s%n", farmer.books().toString());
+        System.out.printf("maker: %s%n", maker.books().toString());
+        System.out.printf("coop: %s%n", coop.books().toString());
 
-        int farmerSales = farmer.books().get(PrivateBusinessAccountTitle.SALES);
-        int makerSales = maker.books().get(PrivateBusinessAccountTitle.SALES);
-        int coopSales = coop.books().get(PrivateBusinessAccountTitle.SALES);
+        int farmerSales = farmer.books().get(PrivateBusinessTitle.SALES);
+        int makerSales = maker.books().get(PrivateBusinessTitle.SALES);
+        int coopSales = coop.books().get(PrivateBusinessTitle.SALES);
         assertThat(farmerSales, is(greaterThan(0)));
 
         assertThat(farmerSales,
-                is(maker.books().get(PrivateBusinessAccountTitle.PURCHESES)));
+                is(maker.books().get(PrivateBusinessTitle.PURCHESES)));
         assertThat(makerSales,
-                is(coop.books().get(PrivateBusinessAccountTitle.PURCHESES)));
+                is(coop.books().get(PrivateBusinessTitle.PURCHESES)));
         assertThat(coopSales, is(price));
-        int coopCash = coop.books().get(PrivateBusinessAccountTitle.CASH);
+        int coopCash = coop.books().get(PrivateBusinessTitle.CASH);
         assertThat(coopCash, is(price));
 
         accountCheck(farmer);
         accountCheck(maker);
         accountCheck(coop);
+        System.out.println("--- distribution ---");
     }
 
     private void accountCheck(PrivateBusiness pb) {
-        int expense = pb.books().get(AccountType.EXPENSE);
-        int revenue = pb.books().get(AccountType.REVENUE);
-        int liabilities = pb.books().get(AccountType.LIABILITIES);
-        int equity = pb.books().get(AccountType.EQUITY);
-        int assets = pb.books().get(AccountType.ASSETS);
+        int expense = pb.books().get(TitleType.EXPENSE);
+        int revenue = pb.books().get(TitleType.REVENUE);
+        int liabilities = pb.books().get(TitleType.LIABILITIES);
+        int equity = pb.books().get(TitleType.EQUITY);
+        int assets = pb.books().get(TitleType.ASSETS);
 
         int benefit = revenue - expense;
 
@@ -163,18 +165,18 @@ public class PrivateBusinessTest {
         WorkerParson worker = new WorkerParson();
         int salary = central.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
-        assertThat(central.books().get(CentralBankAccountTitle.DEPOSIT), is(salary - tax));
-        assertThat(bank.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS), is(salary - tax));
-        assertThat(bank.books().get(PrivateBankAccountTitle.DEPOSIT), is(salary - tax));
+        assertThat(central.books().get(CentralBankTitle.DEPOSIT), is(salary - tax));
+        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(salary - tax));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(salary - tax));
 
         int capital = salary - tax;
         PrivateBusiness company = worker.establish(Industry.FARMER, capital).get();
-        assertThat(company.books().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS), is(capital));
+        assertThat(company.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS), is(capital));
         int coSalary = company.paySalary(worker);
         int coTax = Taxes.computeIncomeTaxFromManthly(coSalary);
-        assertThat(company.books().get(PrivateBusinessAccountTitle.SALARIES_EXPENSE), is(coSalary));
-        assertThat(company.books().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED), is(coTax));
-        assertThat(company.books().get(PrivateBusinessAccountTitle.CHECKING_ACCOUNTS),
+        assertThat(company.books().get(PrivateBusinessTitle.SALARIES_EXPENSE), is(coSalary));
+        assertThat(company.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED), is(coTax));
+        assertThat(company.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS),
                 is(capital - (coSalary - coTax)));
 
         System.out.println("--- end paySalary ---");

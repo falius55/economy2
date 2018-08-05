@@ -9,11 +9,11 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Test;
 
-import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
@@ -39,8 +39,8 @@ public class NationTest {
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.makeUnderwriteBonds(CentralBank.INSTANCE);
         System.out.println(nation.books().toString());
-        assertThat(nation.books().get(GovernmentAccountTitle.GOVERNMENT_BOND), is(count * price));
-        assertThat(nation.books().get(GovernmentAccountTitle.DEPOSIT), is(count * price));
+        assertThat(nation.books().get(GovernmentTitle.GOVERNMENT_BOND), is(count * price));
+        assertThat(nation.books().get(GovernmentTitle.DEPOSIT), is(count * price));
     }
 
     @Test
@@ -61,8 +61,8 @@ public class NationTest {
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.advertiseBonds();
         System.out.println(nation.books().toString());
-        assertThat(nation.books().get(GovernmentAccountTitle.GOVERNMENT_BOND), is(count * price));
-        assertThat(nation.books().get(GovernmentAccountTitle.DEPOSIT), is(count * price));
+        assertThat(nation.books().get(GovernmentTitle.GOVERNMENT_BOND), is(count * price));
+        assertThat(nation.books().get(GovernmentTitle.DEPOSIT), is(count * price));
 
         System.out.println("advertise");
     }
@@ -98,27 +98,27 @@ public class NationTest {
         worker.buy(product, require);
 
         int allIncomeTax = 0;
-        allIncomeTax += cbank.books().get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += bank.books().get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += farmer.books().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += maker.books().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += coop.books().get(PrivateBusinessAccountTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += cbank.books().get(CentralBankTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += bank.books().get(PrivateBankTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += farmer.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += maker.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += coop.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         int allConsumptionTax = 0;
-         allConsumptionTax+= farmer.books().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
-         allConsumptionTax+= maker.books().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
-         allConsumptionTax+= coop.books().get(PrivateBusinessAccountTitle.ACCRUED_CONSUMPTION_TAX);
+         allConsumptionTax+= farmer.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
+         allConsumptionTax+= maker.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
+         allConsumptionTax+= coop.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
 
         System.out.println(nation.books().toString());
         nation.collectTaxes();
         System.out.println(nation.books().toString());
 
-        assertThat(nation.books().get(GovernmentAccountTitle.INCOME_TAX), is(greaterThan(0)));
-        assertThat(nation.books().get(GovernmentAccountTitle.INCOME_TAX), is(allIncomeTax));
-        assertThat(nation.books().get(GovernmentAccountTitle.CONSUMPTION_TAX), is(greaterThan(0)));
-        assertThat(nation.books().get(GovernmentAccountTitle.CONSUMPTION_TAX), is(allConsumptionTax));
-        assertThat(nation.books().get(GovernmentAccountTitle.INCOME_TAX)
-                + nation.books().get(GovernmentAccountTitle.CONSUMPTION_TAX),
-                is(nation.books().get(GovernmentAccountTitle.DEPOSIT) ));
+        assertThat(nation.books().get(GovernmentTitle.INCOME_TAX), is(greaterThan(0)));
+        assertThat(nation.books().get(GovernmentTitle.INCOME_TAX), is(allIncomeTax));
+        assertThat(nation.books().get(GovernmentTitle.CONSUMPTION_TAX), is(greaterThan(0)));
+        assertThat(nation.books().get(GovernmentTitle.CONSUMPTION_TAX), is(allConsumptionTax));
+        assertThat(nation.books().get(GovernmentTitle.INCOME_TAX)
+                + nation.books().get(GovernmentTitle.CONSUMPTION_TAX),
+                is(nation.books().get(GovernmentTitle.DEPOSIT) ));
 
         System.out.println("collect taxes");
     }

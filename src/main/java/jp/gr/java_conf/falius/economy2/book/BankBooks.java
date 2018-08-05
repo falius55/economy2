@@ -1,6 +1,6 @@
 package jp.gr.java_conf.falius.economy2.book;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.Title;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 
 /**
@@ -10,7 +10,7 @@ import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
  * @param <T>
  * @since 1.0
  */
-public interface BankBooks<T extends Enum<T> & AccountTitle> extends EmployableBooks<T> {
+public interface BankBooks<T extends Enum<T> & Title> extends EmployableBooks<T> {
 
     /**
      * お金を預かる

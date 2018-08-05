@@ -1,12 +1,12 @@
 package jp.gr.java_conf.falius.economy2.book;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.Title;
 
 /**
  * 複式簿記会計のインターフェース
  * @since 1.0
  */
-public interface DoubleEntryBooks<T extends Enum<T> & AccountTitle> extends Books<T> {
+public interface DoubleEntryBooks<T extends Enum<T> & Title> extends Books<T> {
 
     /**
      * 借方に記帳します。

@@ -5,11 +5,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.book.Books;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
-import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.loan.Bond;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
@@ -44,7 +44,7 @@ public class Nation implements Government, AccountOpenable {
     }
 
     @Override
-    public Books<GovernmentAccountTitle> books() {
+    public Books<GovernmentTitle> books() {
         return mBooks;
     }
 
@@ -55,12 +55,12 @@ public class Nation implements Government, AccountOpenable {
 
     @Override
     public int cash() {
-        return mBooks.get(GovernmentAccountTitle.CASH);
+        return mBooks.get(GovernmentTitle.CASH);
     }
 
     @Override
     public int deposit() {
-        return mBooks.get(GovernmentAccountTitle.DEPOSIT);
+        return mBooks.get(GovernmentTitle.DEPOSIT);
     }
 
     public Set<Bond> bonds() {

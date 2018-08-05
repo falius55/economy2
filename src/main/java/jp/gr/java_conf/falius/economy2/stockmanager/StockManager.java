@@ -3,7 +3,7 @@ package jp.gr.java_conf.falius.economy2.stockmanager;
 import java.util.OptionalInt;
 import java.util.Set;
 
-import jp.gr.java_conf.falius.economy2.loan.Deferment;
+import jp.gr.java_conf.falius.economy2.agreement.Deferment;
 
 /**
  *

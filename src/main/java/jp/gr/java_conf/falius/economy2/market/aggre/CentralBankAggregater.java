@@ -1,6 +1,6 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
-import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 
 /**
@@ -23,7 +23,7 @@ public class CentralBankAggregater {
      * @since 1.0
      */
     public int salaries() {
-        return mBank.books().get(CentralBankAccountTitle.SALARIES_EXPENSE);
+        return mBank.books().get(CentralBankTitle.SALARIES_EXPENSE);
     }
 
     /**
@@ -32,7 +32,7 @@ public class CentralBankAggregater {
      * @since 1.0
      */
     public int governmentBonds() {
-        return mBank.books().get(CentralBankAccountTitle.GOVERNMENT_BOND);
+        return mBank.books().get(CentralBankTitle.GOVERNMENT_BOND);
     }
 
     /**
@@ -41,7 +41,7 @@ public class CentralBankAggregater {
      * @since 1.0
      */
     public int bankNotes() {
-        return mBank.books().get(CentralBankAccountTitle.BANK_NOTE);
+        return mBank.books().get(CentralBankTitle.BANK_NOTE);
     }
 
 }

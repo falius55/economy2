@@ -12,9 +12,9 @@ import org.junit.After;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
@@ -95,8 +95,8 @@ public class WorkerParsonTest {
         int price = optPrice.getAsInt();
         assertThat(price, is(not(0)));
 
-        Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
-        WorkerParsonAccountTitle title = optTitle.get();
+        Optional<WorkerParsonTitle> optTitle = WorkerParsonTitle.titleFrom(product);
+        WorkerParsonTitle title = optTitle.get();
         int expense = worker.books().get(title);
 
         System.out.println(worker.books().toString());
@@ -117,10 +117,10 @@ public class WorkerParsonTest {
         assertThat(worker.deposit(), is(salary - tax));
 
         PrivateBusiness farmer = worker.establish(Industry.FARMER, initial).get();
-        assertThat(farmer.books().get(PrivateBusinessAccountTitle.CAPITAL_STOCK), is(initial));
+        assertThat(farmer.books().get(PrivateBusinessTitle.CAPITAL_STOCK), is(initial));
 
         assertThat(worker.deposit(), is(salary - tax - initial));
-        assertThat(worker.books().get(WorkerParsonAccountTitle.ESTABLISH_EXPENSES), is(initial));
+        assertThat(worker.books().get(WorkerParsonTitle.ESTABLISH_EXPENSES), is(initial));
 
     }
 
@@ -139,7 +139,7 @@ public class WorkerParsonTest {
         worker.borrow(capital);
         System.out.println(worker.books().toString());
         assertThat(worker.deposit(), is(capital));
-        assertThat(worker.books().get(WorkerParsonAccountTitle.LOANS_PAYABLE), is(capital));
+        assertThat(worker.books().get(WorkerParsonTitle.LOANS_PAYABLE), is(capital));
 
         System.out.println("borrow");
     }

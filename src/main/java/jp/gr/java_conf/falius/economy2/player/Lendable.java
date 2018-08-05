@@ -1,7 +1,7 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import jp.gr.java_conf.falius.economy2.agreement.Loan;
 import jp.gr.java_conf.falius.economy2.book.LendableBooks;
-import jp.gr.java_conf.falius.economy2.loan.Loan;
 
 /**
  *

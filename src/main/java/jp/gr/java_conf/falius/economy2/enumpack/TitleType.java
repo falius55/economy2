@@ -4,7 +4,7 @@ package jp.gr.java_conf.falius.economy2.enumpack;
  * 科目種別(費用、収益、資産、負債、資本)
  * @since 1.0
  */
-public enum AccountType {
+public enum TitleType {
     /** 費用 @since 1.0 */ EXPENSE("費用", RL.LEFT),
     /** 収益 @since 1.0 */ REVENUE("収益", RL.RIGHT),
     /** 資産 @since 1.0 */ ASSETS("資産", RL.LEFT),
@@ -20,7 +20,7 @@ public enum AccountType {
      * @param rl
      * @since 1.0
      */
-    AccountType(String name, RL rl) {
+    TitleType(String name, RL rl) {
         mName = name;
         this.rl = rl;
     }

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.loan;
+package jp.gr.java_conf.falius.economy2.agreement;
 
 import java.time.LocalDate;
 import java.time.Period;
