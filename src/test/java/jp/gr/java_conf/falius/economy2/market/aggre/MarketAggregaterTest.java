@@ -31,6 +31,7 @@ public class MarketAggregaterTest {
     }
 
     private void check() {
+        // account check
         int realDepositsOfCentralBank = CentralBank.INSTANCE.realDeposits();
         int depositsOfCentralBankOfBooks = CentralBank.INSTANCE.books().get(CentralBankTitle.DEPOSIT);
         assertThat(realDepositsOfCentralBank, is(depositsOfCentralBankOfBooks));
@@ -51,6 +52,7 @@ public class MarketAggregaterTest {
         assertThat(CentralBank.INSTANCE.nationAccount().amount(), is(nationDepositOfCentralOfBooks));
         assertThat(Nation.INSTANCE.deposit(), is(nationDepositOfCentralOfBooks));
 
+        // GDP check
         MarketAggregater aggregater = Market.INSTANCE.aggregater();
         System.out.printf("GDP: %d%n", aggregater.GDP());
         System.out.printf("sGDP: %d%n", aggregater.sGDP());
@@ -261,6 +263,7 @@ public class MarketAggregaterTest {
         System.out.printf("M: %d%n", Market.INSTANCE.aggregater().M());
         assertThat(Market.INSTANCE.aggregater().M(), is(capital + capital));
 
+        check();
         System.out.println("--- worker borrow money stock ---");
     }
 
@@ -278,6 +281,7 @@ public class MarketAggregaterTest {
 
         farmer.borrow(capital);
         assertThat(Market.INSTANCE.aggregater().M(), is(capital + capital));
+        check();
         System.out.println("--- business borrow money stock ---");
     }
 

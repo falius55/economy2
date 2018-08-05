@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.book;
 
+import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
 
 /**
@@ -10,21 +11,31 @@ import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
  */
 public class GovernmentBooks extends AbstractDoubleEntryBooks<GovernmentTitle>
         implements AccountOpenableBooks<GovernmentTitle> {
+    private final Account mAccount;
 
     /**
      *
      * @return
      * @since 1.0
      */
-    public static GovernmentBooks newInstance() {
-        return new GovernmentBooks();
+    public static GovernmentBooks newInstance(Account mainAccount) {
+        return new GovernmentBooks(mainAccount);
     }
 
     /**
      * @since 1.0
      */
-    private GovernmentBooks() {
+    private GovernmentBooks(Account mainAccount) {
         super(GovernmentTitle.class);
+        mAccount = mainAccount;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public Account mainAccount() {
+        return mAccount;
     }
 
     /**

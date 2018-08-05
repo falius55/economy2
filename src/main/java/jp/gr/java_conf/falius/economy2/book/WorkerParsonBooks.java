@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.book;
 
+import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
@@ -13,21 +14,31 @@ import jp.gr.java_conf.falius.economy2.helper.Taxes;
 public class WorkerParsonBooks extends AbstractBooks<WorkerParsonTitle>
         implements PrivateBooks<WorkerParsonTitle>, BorrowableBooks<WorkerParsonTitle>,
         AccountOpenableBooks<WorkerParsonTitle> {
+    private final PrivateAccount mAccount;
 
     /**
      *
      * @return
      * @since 1.0
      */
-    public static WorkerParsonBooks newInstance() {
-        return new WorkerParsonBooks();
+    public static WorkerParsonBooks newInstance(PrivateAccount mainAccount) {
+        return new WorkerParsonBooks(mainAccount);
     }
 
     /**
      * @since 1.0
      */
-    private WorkerParsonBooks() {
+    private WorkerParsonBooks(PrivateAccount mainAccount) {
         super(WorkerParsonTitle.class);
+        mAccount = mainAccount;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public PrivateAccount mainAccount() {
+        return mAccount;
     }
 
     /**

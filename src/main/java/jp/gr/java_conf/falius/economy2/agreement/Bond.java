@@ -105,15 +105,16 @@ public class Bond {
      * 債務が受け入れられ、債権債務関係が発生する
      * @since 1.0
      */
-    public Bond accepted(BankBooks<?> underwriterBook) {
+    public Bond accepted(BankBooks<?> underwriterBooks) {
         if (isConcluded()) {
             throw new IllegalStateException("債権債務関係はすでに発生しています");
         }
-        mUnderWriterBooks = underwriterBook;
+        mUnderWriterBooks = underwriterBooks;
         mAccrualDate = Market.INSTANCE.nowDate();
         mDeadLine = mAccrualDate.plus(mPeriod);
         mIssuerBooks.issueBonds(amount());
-        underwriterBook.acceptGovernmentBond(amount());
+        underwriterBooks.acceptGovernmentBond(amount());
+        underwriterBooks.transferable().transfer(mIssuerBooks.mainAccount(), mAmount);
         return this;
     }
 
@@ -128,6 +129,7 @@ public class Bond {
         }
         mUnderWriterBooks.sellGovernmentBond(amount());
         transferee.buyGorvementBond(amount());
+        transferee.transferable().transfer(mUnderWriterBooks.transferable(), mAmount);
         mUnderWriterBooks = transferee;
         return this;
     }
@@ -149,6 +151,7 @@ public class Bond {
         }
         mIssuerBooks.redeemBonds(amount());
         mUnderWriterBooks.redeemedGovernmentBond(amount());
+        mIssuerBooks.mainAccount().transfer(mUnderWriterBooks.transferable(), mAmount);
         mIsPayOff = true;
         return true;
     }

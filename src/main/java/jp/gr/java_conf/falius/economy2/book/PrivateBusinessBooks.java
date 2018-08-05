@@ -2,8 +2,9 @@ package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
 
-import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
+import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 /**
@@ -16,21 +17,31 @@ public class PrivateBusinessBooks extends AbstractDoubleEntryBooks<PrivateBusine
         implements EmployableBooks<PrivateBusinessTitle>, PrivateBooks<PrivateBusinessTitle>,
         BorrowableBooks<PrivateBusinessTitle>, AccountOpenableBooks<PrivateBusinessTitle>,
         InstallmentReceivableBooks<PrivateBusinessTitle> {
+    private final PrivateAccount mAccount;
 
     /**
      *
      * @return
      * @since 1.0
      */
-    public static PrivateBusinessBooks newInstance() {
-        return new PrivateBusinessBooks();
+    public static PrivateBusinessBooks newInstance(PrivateAccount mainAccount) {
+        return new PrivateBusinessBooks(mainAccount);
     }
 
     /**
      * @since 1.0
      */
-    private PrivateBusinessBooks() {
+    private PrivateBusinessBooks(PrivateAccount mainAccount) {
         super(PrivateBusinessTitle.class);
+        mAccount = mainAccount;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public PrivateAccount mainAccount() {
+        return mAccount;
     }
 
     /*

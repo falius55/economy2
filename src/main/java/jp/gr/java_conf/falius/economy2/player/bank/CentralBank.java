@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import jp.gr.java_conf.falius.economy2.account.CentralAccount;
 import jp.gr.java_conf.falius.economy2.account.NationAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.account.Transferable;
 import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
@@ -27,7 +28,7 @@ import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
  * @since 1.0
  *
  */
-public class CentralBank implements Bank {
+public class CentralBank implements Bank, Transferable {
     public static final CentralBank INSTANCE;
     private static final int SALARY = 100000;
 
@@ -78,9 +79,10 @@ public class CentralBank implements Bank {
      * @param privateBank
      * @since 1.0
      */
-    public void createAccount(PrivateBank privateBank) {
+    public CentralAccount createAccount(PrivateBank privateBank) {
         CentralAccount account = new CentralAccount(this, privateBank);
         mAccounts.put(privateBank, account);
+        return account;
     }
 
     /**
@@ -263,7 +265,26 @@ public class CentralBank implements Bank {
      * @return
      * @since 1.0
      */
-    public int transfer(CentralAccount target, int amount) {
+    @Override
+    public int transfer(Transferable target, int amount) {
+        if (target instanceof NationAccount) {
+            return transfer((NationAccount) target, amount);
+        } else if (target instanceof PrivateAccount) {
+            return transfer((PrivateAccount) target, amount);
+        } else if (target instanceof CentralAccount) {
+            return transfer((CentralAccount) target, amount);
+        }
+        throw new IllegalArgumentException();
+    }
+
+    /**
+     *
+     * @param target
+     * @param amount
+     * @return
+     * @since 1.0
+     */
+    private int transfer(CentralAccount target, int amount) {
         return target.increase(amount);
     }
 

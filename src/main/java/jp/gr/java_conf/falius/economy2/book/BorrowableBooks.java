@@ -9,7 +9,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.Title;
  * @param <T>
  * @since 1.0
  */
-public interface BorrowableBooks<T extends Enum<T> & Title>  extends Books<T> {
+public interface BorrowableBooks<T extends Enum<T> & Title>  extends AccountOpenableBooks<T> {
 
     /**
      * 借金処理

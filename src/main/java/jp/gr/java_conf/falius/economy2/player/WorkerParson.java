@@ -27,8 +27,8 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Borrowable {
     private static final Set<WorkerParson> sOwns = new HashSet<WorkerParson>();
 
-    private final WorkerParsonBooks mBooks = WorkerParsonBooks.newInstance();
     private final PrivateBank mMainBank;
+    private final WorkerParsonBooks mBooks;
     private final Set<Loan> mLoans = new HashSet<>();
 
     private Employable mJob = null;
@@ -54,7 +54,8 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      */
     public WorkerParson() {
         mMainBank = searchBank();
-        mMainBank.createAccount(this);
+        PrivateAccount account = mMainBank.createAccount(this);
+        mBooks = WorkerParsonBooks.newInstance(account);
         Market.INSTANCE.aggregater().add(this);
         sOwns.add(this);
     }
@@ -251,7 +252,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * @since 1.0
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(this, mainBank().account(this), amount, Period.ofYears(1));
+        Loan debt = new Loan(this, amount, Period.ofYears(1));
         mLoans.add(debt);
         return debt;
     }

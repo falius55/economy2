@@ -1,12 +1,10 @@
 package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
+import jp.gr.java_conf.falius.economy2.account.CentralAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
-import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 
 /**
  *
@@ -17,32 +15,31 @@ import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 public class PrivateBankBooks extends AbstractDoubleEntryBooks<PrivateBankTitle>
         implements BankBooks<PrivateBankTitle>, PrivateBooks<PrivateBankTitle>,
         LendableBooks<PrivateBankTitle>, AccountOpenableBooks<PrivateBankTitle> {
-    private final Map<AccountOpenable, Integer> mDeposits;
+    private final CentralAccount mMyAccount;
 
     /**
      *
      * @return
      * @since 1.0
      */
-    public static PrivateBankBooks newInstance() {
-        return new PrivateBankBooks();
+    public static PrivateBankBooks newInstance(CentralAccount mainAccount) {
+        return new PrivateBankBooks(mainAccount);
     }
 
     /**
      * @since 1.0
      */
-    private PrivateBankBooks() {
+    private PrivateBankBooks(CentralAccount mainAccount) {
         super(PrivateBankTitle.class);
-        mDeposits = new HashMap<>();
+        mMyAccount = mainAccount;
     }
 
     /**
      * @since 1.0
      */
     @Override
-    public BankBooks<PrivateBankTitle> createAccount(AccountOpenable accountOpenable) {
-        mDeposits.put(accountOpenable, 0);
-        return this;
+    public CentralAccount mainAccount() {
+        return mMyAccount;
     }
 
     /*

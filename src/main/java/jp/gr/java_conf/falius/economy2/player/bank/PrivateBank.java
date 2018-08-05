@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import jp.gr.java_conf.falius.economy2.account.CentralAccount;
 import jp.gr.java_conf.falius.economy2.account.NationAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
 import jp.gr.java_conf.falius.economy2.agreement.Bond;
@@ -40,9 +41,9 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
     private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
-    private final PrivateBankBooks mBooks = PrivateBankBooks.newInstance();
     private final Set<Loan> mLoans = new HashSet<>();
     private final Map<AccountOpenable, PrivateAccount> mAccounts = new HashMap<>();
+    private final PrivateBankBooks mBooks;
 
     /**
      *
@@ -66,7 +67,8 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
     public PrivateBank() {
         sOwns.add(this);
         Market.INSTANCE.aggregater().add(this);
-        mainBank().createAccount(this);
+        CentralAccount account = mainBank().createAccount(this);
+        mBooks = PrivateBankBooks.newInstance(account);
     }
 
     /**
@@ -100,9 +102,10 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @param accountOpenable
      * @since 1.0
      */
-    public void createAccount(AccountOpenable accountOpenable) {
+    public PrivateAccount createAccount(AccountOpenable accountOpenable) {
         PrivateAccount account = new PrivateAccount(this, accountOpenable);
         mAccounts.put(accountOpenable, account);
+        return account;
     }
 
     /**
@@ -282,7 +285,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
         int amount = mBooks.get(PrivateBankTitle.DEPOSITS_RECEIVED);
         nationBooks.collectIncomeTaxes(amount);
         mBooks.payIncomeTax(amount);
-        mainBank().account(this).transfer(mainBank().nationAccount(), amount);
+        mainBank().account(this).transfer(nationBooks.mainAccount(), amount);
         return this;
     }
 
@@ -294,7 +297,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
     @Override
     public int acceptDebt(Loan debt) {
         mLoans.add(debt);
-        debt.accepted(this, mainBank().account(this));
+        debt.accepted(this);
         return debt.amount();
     }
 

@@ -63,13 +63,15 @@ public class CentralAccount implements Account {
      * @since 1.0
      */
     @Override
-    public int transfer(Account target, int amount) {
+    public int transfer(Transferable target, int amount) {
         if (target instanceof NationAccount) {
             return transfer((NationAccount) target, amount);
         } else if (target instanceof PrivateAccount) {
             return transfer((PrivateAccount) target, amount);
         } else if (target instanceof CentralAccount) {
             return transfer((CentralAccount) target, amount);
+        } else if (target instanceof CentralBank) {
+            return transfer((CentralBank) target, amount);
         }
         throw new IllegalArgumentException();
     }

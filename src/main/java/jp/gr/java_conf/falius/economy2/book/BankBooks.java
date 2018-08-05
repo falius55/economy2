@@ -1,7 +1,6 @@
 package jp.gr.java_conf.falius.economy2.book;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Title;
-import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 
 /**
  *
@@ -56,11 +55,4 @@ public interface BankBooks<T extends Enum<T> & Title> extends EmployableBooks<T>
      */
     public BankBooks<T> sellGovernmentBond(int amount);
 
-    /**
-     *
-     * @param accountOpenable
-     * @return
-     * @since 1.0
-     */
-    public BankBooks<T> createAccount(AccountOpenable accountOpenable);
 }

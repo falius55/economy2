@@ -41,8 +41,8 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
     private final Set<Product> mProducts;
     private final Map<Product, StockManager> mStockManagers; // 製品ごとに在庫管理
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
-    private final PrivateBusinessBooks mBooks = PrivateBusinessBooks.newInstance();
     private final PrivateBank mMainBank;
+    private final PrivateBusinessBooks mBooks;
     private final Set<Loan> mLoans = new HashSet<>();
     private final Set<Deferment> mPayables = new HashSet<>();
 
@@ -88,7 +88,8 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
                         (product) -> industry.type().newManager(product, mStuffManager),
                         (p1, p2) -> p1, () -> new EnumMap<Product, StockManager>(Product.class)));
         mMainBank = searchBank();
-        mMainBank.createAccount(this);
+        PrivateAccount account = mMainBank.createAccount(this);
+        mBooks = PrivateBusinessBooks.newInstance(account);
         mBooks.establish(initialCapital);
         sOwns.add(this);
         Market.INSTANCE.aggregater().add(this);
@@ -253,7 +254,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
      * @since 1.0
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(this, mainBank().account(this), amount, Period.ofYears(1));
+        Loan debt = new Loan(this, amount, Period.ofYears(1));
         mLoans.add(debt);
         return debt;
     }
@@ -363,7 +364,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         }
         int price = optPrice.getAsInt();
         PaymentByInstallments<PrivateBusinessTitle> ret = PaymentByInstallments.newInstanceByCount(price, 12,
-                this);
+                mBooks);
         return Optional.of(ret);
     }
 

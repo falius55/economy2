@@ -1,5 +1,7 @@
 package jp.gr.java_conf.falius.economy2.book;
 
+import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.account.Transferable;
 import jp.gr.java_conf.falius.economy2.enumpack.Title;
 
 /**
@@ -26,4 +28,15 @@ public interface AccountOpenableBooks<T extends Enum<T> & Title>  extends Books<
      * @since 1.0
      */
     public AccountOpenableBooks<T> downMoney(int amount);
+
+    /**
+     * @return
+     * @since 1.0
+     */
+    public Account mainAccount();
+
+    @Override
+    default public Transferable transferable() {
+        return mainAccount();
+    }
 }

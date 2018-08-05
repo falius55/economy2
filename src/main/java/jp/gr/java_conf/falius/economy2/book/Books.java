@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.book;
 
+import jp.gr.java_conf.falius.economy2.account.Transferable;
 import jp.gr.java_conf.falius.economy2.enumpack.Title;
 import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 
@@ -32,5 +33,11 @@ public interface Books<T extends Enum<T> & Title> {
      * @since 1.0
      */
     public int benefit();
+
+    /**
+     * @return
+     * @since 1.0
+     */
+    public Transferable transferable();
 
 }

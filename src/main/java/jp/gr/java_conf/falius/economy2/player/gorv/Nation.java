@@ -23,10 +23,10 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
  * @since 1.0
  *
  */
-public class Nation implements Government, AccountOpenable {
+public class Nation implements Government {
     public static final Nation INSTANCE;
 
-    private final GovernmentBooks mBooks = GovernmentBooks.newInstance();
+    private final GovernmentBooks mBooks;
     /**
      * 未成約の国債
      */
@@ -41,6 +41,7 @@ public class Nation implements Government, AccountOpenable {
     }
 
     private Nation() {
+        mBooks = GovernmentBooks.newInstance(mainBank().nationAccount());
     }
 
     @Override
@@ -110,8 +111,6 @@ public class Nation implements Government, AccountOpenable {
         Set<Bond> successed = bank.searchBonds(mBondMarket);
         mBondMarket.removeAll(successed);
         mBonds.addAll(successed);
-        int amount = successed.stream().mapToInt(Bond::amount).sum();
-        bank.transfer(mainBank().nationAccount(), amount);
     }
 
     /**

@@ -1,11 +1,9 @@
 package jp.gr.java_conf.falius.economy2.book;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import jp.gr.java_conf.falius.economy2.account.Transferable;
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
-import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
+import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 
 /**
  *
@@ -15,7 +13,6 @@ import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
  */
 public class CentralBankBooks extends AbstractDoubleEntryBooks<CentralBankTitle>
         implements BankBooks<CentralBankTitle> {
-    private final Map<AccountOpenable, Integer> mDeposits;
 
     /**
      *
@@ -31,16 +28,11 @@ public class CentralBankBooks extends AbstractDoubleEntryBooks<CentralBankTitle>
      */
     public CentralBankBooks() {
         super(CentralBankTitle.class);
-        mDeposits = new HashMap<>();
     }
 
-    /**
-     * @since 1.0
-     */
     @Override
-    public BankBooks<CentralBankTitle> createAccount(AccountOpenable accountOpenable) {
-        mDeposits.put(accountOpenable, 0);
-        return this;
+    public Transferable transferable() {
+        return CentralBank.INSTANCE;
     }
 
     /**
