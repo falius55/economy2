@@ -136,22 +136,20 @@ public class PrivateBusinessBooks extends AbstractDoubleEntryBooks<PrivateBusine
      * @param date 減価償却日。この日が減価償却日である固定資産が減価償却される
      * @since 1.0
      */
-    private PrivateBusinessBooks depreciationByIndirect(LocalDate date) {
-        int amount = recordFixedAssets(date);
+    @Override
+    protected void depreciationByIndirect(int amount) {
         addLeft(PrivateBusinessTitle.DEPRECIATION, amount);
         addRight(PrivateBusinessTitle.ACCUMULATED_DEPRECIATION, amount);
-        return this;
     }
 
     /**
      * 直接法で減価償却する
      * @since 1.0
      */
-    private PrivateBusinessBooks depreciationByDirect(LocalDate date) {
-        int amount = recordFixedAssets(date);
+    @Override
+    protected void depreciationByDirect(int amount) {
         addLeft(PrivateBusinessTitle.DEPRECIATION, amount);
         addRight(PrivateBusinessTitle.TANGIBLE_ASSETS, amount);
-        return this;
     }
 
     /**

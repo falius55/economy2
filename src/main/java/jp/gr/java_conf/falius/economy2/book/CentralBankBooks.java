@@ -193,4 +193,16 @@ public class CentralBankBooks extends AbstractDoubleEntryBooks<CentralBankTitle>
         addRight(CentralBankTitle.GOVERNMENT_DEPOSIT, amount);
         return this;
     }
+
+    @Override
+    protected void depreciationByIndirect(int amount) {
+        addLeft(CentralBankTitle.DEPRECIATION, amount);
+        addRight(CentralBankTitle.ACCUMULATED_DEPRECIATION, amount);
+    }
+
+    @Override
+    protected void depreciationByDirect(int amount) {
+        addLeft(CentralBankTitle.DEPRECIATION, amount);
+        addRight(CentralBankTitle.TANGIBLE_ASSETS, amount);
+    }
 }

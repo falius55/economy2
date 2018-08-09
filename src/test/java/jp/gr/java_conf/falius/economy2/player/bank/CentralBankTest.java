@@ -42,7 +42,7 @@ public class CentralBankTest {
     public void keepPaidOutTest() {
         System.out.println("--- keep paid out ---");
         CentralBank cbank = CentralBank.INSTANCE;
-        PrivateBank  bank = new PrivateBank();
+        PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
         int salary = cbank.paySalary(worker);
         check(cbank);
@@ -75,7 +75,7 @@ public class CentralBankTest {
     public void establishPrivateBusinessTest() {
         System.out.println("--- establish private business ---");
         CentralBank cbank = CentralBank.INSTANCE;
-        PrivateBank  bank = new PrivateBank();
+        PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
         int salary = cbank.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
@@ -84,7 +84,7 @@ public class CentralBankTest {
         int deposit = cbank.books().get(CentralBankTitle.DEPOSIT);
         PrivateBusiness farmer = worker.establish(Industry.FARMER, capital).get();
         assertThat(cbank.books().get(CentralBankTitle.DEPOSIT), is(capital));
-        assertThat(cbank.books().get(CentralBankTitle.DEPOSIT), is(deposit));  // 中央銀行には影響せず
+        assertThat(cbank.books().get(CentralBankTitle.DEPOSIT), is(deposit)); // 中央銀行には影響せず
         check(cbank);
 
         System.out.println("--- establish private business ---");
@@ -247,9 +247,9 @@ public class CentralBankTest {
         allIncomeTax += maker.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         allIncomeTax += coop.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         int allConsumptionTax = 0;
-         allConsumptionTax+= farmer.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
-         allConsumptionTax+= maker.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
-         allConsumptionTax+= coop.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
+        allConsumptionTax += farmer.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
+        allConsumptionTax += maker.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
+        allConsumptionTax += coop.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
 
         System.out.println(cbank.books().toString());
         nation.collectTaxes();
@@ -260,5 +260,62 @@ public class CentralBankTest {
         check(cbank);
 
         System.out.println("--- collect taxes ---");
+    }
+
+    @Test
+    public void nationOrderTest() {
+        System.out.println("--- order ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        IntStream.range(0, 100).map(n -> cbank.paySalary(founder)).sum();
+        int capital = founder.deposit();
+
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        System.out.println("創業時");
+        System.out.printf("cbank: %s%n", cbank.books().toString());
+        System.out.printf("bank: %s%n", bank.books().toString());
+
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+
+        System.out.println("支出負担分、国債を発行する。");
+        nation.closeEndOfMonth();
+        System.out.printf("cbank: %s%n", cbank.books().toString());
+        System.out.printf("bank: %s%n", bank.books().toString());
+        int issued = cbank.books().get(CentralBankTitle.GOVERNMENT_BOND)
+                + bank.books().get(PrivateBankTitle.GOVERNMENT_BOND);
+        assertThat(issued, is(nation.deposit()));
+
+        System.out.println("分割払いで支払い");
+        IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        System.out.printf("cbank: %s%n", cbank.books().toString());
+        System.out.printf("bank: %s%n", bank.books().toString());
+        System.out.printf("business: %s%n", business.books().toString());
+        int paid = price - nation.expenditureBurden();
+        int pbBonds = bank.books().get(PrivateBankTitle.GOVERNMENT_BOND);
+        int expectCentralAccount = capital - pbBonds + paid;
+        assertThat(cbank.books().get(CentralBankTitle.DEPOSIT), is(expectCentralAccount));
+        assertThat(cbank.books().get(CentralBankTitle.GOVERNMENT_DEPOSIT), is(issued - paid));
+        check(cbank);
+
+        System.out.println("払いきると建物を引き替え");
+        while (true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        System.out.printf("cbank: %s%n", cbank.books().toString());
+        System.out.printf("bank: %s%n", bank.books().toString());
+        System.out.printf("business: %s%n", business.books().toString());
+        assertThat(cbank.books().get(CentralBankTitle.DEPOSIT), is(capital - pbBonds + price));
+        assertThat(cbank.books().get(CentralBankTitle.DEPOSIT),
+                is(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)));
+        assertThat(cbank.books().get(CentralBankTitle.GOVERNMENT_DEPOSIT), is(issued - price));
+        check(cbank);
+
+        System.out.println("--- order ---");
     }
 }

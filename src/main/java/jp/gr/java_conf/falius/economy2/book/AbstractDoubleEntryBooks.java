@@ -27,6 +27,15 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & Title>
     }
 
     /**
+     * @since 1.0
+     */
+    @Override
+    public void clearBook() {
+        super.clearBook();
+        mFixedAssetManager.clear();
+    }
+
+    /**
      * 帳簿に記入します
      * @param rl 記入箇所。借方(LEFT)か貸し方(RIGHT)か
      * @param item 勘定科目
@@ -72,27 +81,34 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & Title>
      * @param serviceLife 耐用年数
      * @since 1.0
      */
-    protected final void addFixedAsset(LocalDate dateOfAcquisition, int acquisitionCost, int serviceLife) {
+    protected void addFixedAsset(LocalDate dateOfAcquisition, int acquisitionCost, int serviceLife) {
         mFixedAssetManager.add(dateOfAcquisition, acquisitionCost, serviceLife);
     }
 
+    public int updateFixedAssets() {
+        int amount = mFixedAssetManager.update();
+        depreciationByIndirect(amount);
+        return amount;
+    }
+
     /**
-     * 所有している固定資産全てにおいて、減価償却の処理を行います
-     * より具体的には、dateが償却日である固定資産のみ減価償却し、その償却費の総額を返します。
-     * ただし、帳簿への記帳処理は行いません
-     * @param date 記入日
-     * @return その日の償却額
+     * 間接法で減価償却する
+     * @param date 減価償却日。この日が減価償却日である固定資産が減価償却される
      * @since 1.0
      */
-    protected final int recordFixedAssets(LocalDate date) {
-        return mFixedAssetManager.record(date);
-    }
+    protected abstract void depreciationByIndirect(int amount);
+
+    /**
+     * 直接法で減価償却する
+     * @since 1.0
+     */
+    protected abstract void depreciationByDirect(int amount);
 
     /**
      * 保有している固定資産の現在価値の総額を計算します
      * @since 1.0
      */
-    protected final int fixedAssetsValue() {
+    public int fixedAssetsValue() {
         return mFixedAssetManager.presentValue();
     }
 

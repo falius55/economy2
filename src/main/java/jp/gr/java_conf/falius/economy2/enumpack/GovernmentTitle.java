@@ -18,6 +18,8 @@ public enum GovernmentTitle implements Title {
     /** 有形固定資産(資産) @since 1.0  */ TANGIBLE_ASSETS("有形固定資産", TitleType.ASSETS),
     /** 政府預金(資産) @since 1.0  */ DEPOSIT("政府預金", TitleType.ASSETS),
     /** 建物(資産) @since 1.0  */ BUILDINGS("建物", TitleType.ASSETS),
+    /** システム(資産) @since 1.0 */ SYSTEM("システム", TitleType.ASSETS),
+    /** 固定資産仮勘定(資産) @since 1.0 */ FIXEDASSET_SUSPENSE_ACCOUNT("固定資産仮勘定", TitleType.ASSETS),
 
     /** 公債(負債) @since 1.0  */ GOVERNMENT_BOND("公債発行残高", TitleType.LIABILITIES),
     /** 預かり金(負債) @since 1.0  */ DEPOSITS_RECEIVED("預かり金", TitleType.LIABILITIES),

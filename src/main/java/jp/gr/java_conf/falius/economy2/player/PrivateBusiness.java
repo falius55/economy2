@@ -32,7 +32,8 @@ import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
  * @since 1.0
  *
  */
-public class PrivateBusiness implements AccountOpenable, Employable, PrivateEntity, Borrowable, Deferrable, InstallmentReceivable {
+public class PrivateBusiness
+        implements AccountOpenable, Employable, PrivateEntity, Borrowable, Deferrable, InstallmentReceivable {
     private static final Set<PrivateBusiness> sOwns = new HashSet<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
     private static final int SALARY = 50000;
@@ -350,6 +351,13 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
         return Optional.of(ret);
     }
 
+    /**
+     *
+     * @param product
+     * @param require
+     * @return
+     * @since 1.0
+     */
     public Optional<PaymentByInstallments<PrivateBusinessTitle>> saleByInstallments(
             Product product, int require) {
         OptionalInt optPrice = sale(product, require);
@@ -357,7 +365,7 @@ public class PrivateBusiness implements AccountOpenable, Employable, PrivateEnti
             return Optional.empty();
         }
         int price = optPrice.getAsInt();
-        PaymentByInstallments<PrivateBusinessTitle> ret = PaymentByInstallments.newInstanceByCount(price, 12,
+        PaymentByInstallments<PrivateBusinessTitle> ret = PaymentByInstallments.newInstanceByCount(product, price, 12,
                 mBooks);
         return Optional.of(ret);
     }

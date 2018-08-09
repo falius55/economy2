@@ -60,6 +60,8 @@ public class MarketAggregaterTest {
         assertThat(aggregater.GDP(), is(aggregater.sGDP()));
         assertThat(aggregater.sGDP(), is(aggregater.GDE()));
         assertThat(aggregater.GDP(), is(aggregater.GDE()));
+
+        System.out.printf("M: %d%n", aggregater.M());
     }
 
     @Test
@@ -354,5 +356,43 @@ public class MarketAggregaterTest {
         nation.collectTaxes();
         check();
         System.out.println("--- collect taxes ---");
+    }
+
+    @Test
+    public void nationOrderTest() {
+        System.out.println("--- order ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        IntStream.range(0, 100).map(n -> cbank.paySalary(founder)).sum();
+        int capital = founder.deposit();
+
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        System.out.println("創業時");
+        check();
+
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+        check();
+
+        System.out.println("支出負担分、国債を発行する。");
+        nation.closeEndOfMonth();
+        check();
+
+        System.out.println("分割払いで支払い");
+        IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        check();
+
+        System.out.println("払いきると建物を引き替え");
+        while (true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        check();
+
+        System.out.println("--- order ---");
     }
 }

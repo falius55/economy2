@@ -6,6 +6,7 @@ import java.time.Period;
 import jp.gr.java_conf.falius.economy2.account.Account;
 import jp.gr.java_conf.falius.economy2.book.InstallmentPayableBooks;
 import jp.gr.java_conf.falius.economy2.book.InstallmentReceivableBooks;
+import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.Title;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
@@ -13,9 +14,10 @@ import jp.gr.java_conf.falius.economy2.market.Market;
  * 分割払いを管理するクラス
  * @author "ymiyauchi"
  * @since 1.0
- * @param <T> 支払い科目の種類
+ * @param <T> 受け取り科目の種類
  */
 public class PaymentByInstallments<T extends Enum<T> & Title> {
+    private final Product mProduct;
     private final int mAmount;
     private final int mInstallment; // 分割払いの一回分
     private final int mCount;
@@ -33,8 +35,8 @@ public class PaymentByInstallments<T extends Enum<T> & Title> {
      * @since 1.0
      */
     public static <T extends Enum<T> & Title> PaymentByInstallments<T> newInstanceByInstallment(
-            int amount, int installment, InstallmentReceivableBooks<T> receiverBooks) {
-        return newInstanceByInstallment(amount, installment, Period.ofMonths(1), receiverBooks);
+            Product product, int amount, int installment, InstallmentReceivableBooks<T> receiverBooks) {
+        return newInstanceByInstallment(product, amount, installment, Period.ofMonths(1), receiverBooks);
     }
 
     /**
@@ -47,9 +49,9 @@ public class PaymentByInstallments<T extends Enum<T> & Title> {
      * @since 1.0
      */
     public static <T extends Enum<T> & Title> PaymentByInstallments<T> newInstanceByInstallment(
-            int amount, int installment, Period period, InstallmentReceivableBooks<T> receiverBooks) {
+            Product product, int amount, int installment, Period period, InstallmentReceivableBooks<T> receiverBooks) {
         int count = amount % installment == 0 ? amount / installment : amount / installment + 1;
-        return new PaymentByInstallments<>(amount, installment, count, period, receiverBooks);
+        return new PaymentByInstallments<>(product, amount, installment, count, period, receiverBooks);
     }
 
     /**
@@ -61,8 +63,8 @@ public class PaymentByInstallments<T extends Enum<T> & Title> {
      * @since 1.0
      */
     public static <T extends Enum<T> & Title> PaymentByInstallments<T> newInstanceByCount(
-            int amount, int count, InstallmentReceivableBooks<T> receiverBooks) {
-        return newInstanceByCount(amount, count, Period.ofMonths(1), receiverBooks);
+            Product product, int amount, int count, InstallmentReceivableBooks<T> receiverBooks) {
+        return newInstanceByCount(product, amount, count, Period.ofMonths(1), receiverBooks);
     }
 
 
@@ -76,13 +78,24 @@ public class PaymentByInstallments<T extends Enum<T> & Title> {
      * @since 1.0
      */
     public static <T extends Enum<T> & Title> PaymentByInstallments<T> newInstanceByCount(
-            int amount, int count, Period period, InstallmentReceivableBooks<T> receiverBooks) {
+            Product product, int amount, int count, Period period, InstallmentReceivableBooks<T> receiverBooks) {
         int installment = amount / count;
-        return new PaymentByInstallments<>(amount, installment, count, period, receiverBooks);
+        return new PaymentByInstallments<>(product, amount, installment, count, period, receiverBooks);
     }
 
-    private PaymentByInstallments(int amount, int installment, int count, Period period,
+    /**
+     *
+     * @param product
+     * @param amount
+     * @param installment
+     * @param count
+     * @param period
+     * @param receiverBooks
+     * @since 1.0
+     */
+    private PaymentByInstallments(Product product, int amount, int installment, int count, Period period,
             InstallmentReceivableBooks<T> receiverBooks) {
+        mProduct = product;
         mAmount = amount;
         mInstallment = installment;
         mCount = count;
@@ -92,22 +105,67 @@ public class PaymentByInstallments<T extends Enum<T> & Title> {
         mLastPayment = Market.INSTANCE.nowDate();
     }
 
+    /**
+     * @return
+     * @since 1.0
+     */
     public int allAmount() {
         return mAmount;
     }
 
+    /**
+     * @return
+     * @since 1.0
+     */
     public int installment() {
         return mInstallment;
     }
 
+    /**
+     * @return
+     * @since 1.0
+     */
+    public int remain() {
+        return mRemain;
+    }
+
+    /**
+     * @return
+     * @since 1.0
+     */
     public int count() {
         return mCount;
     }
 
+    /**
+     * @return
+     * @since 1.0
+     */
+    public Product product() {
+        return mProduct;
+    }
+
+    /**
+     * @return
+     * @since 1.0
+     */
+    public boolean isComplete() {
+        return mRemain <= 0;
+    }
+
+    /**
+     * @param payerBooks
+     * @since 1.0
+     */
     public <U extends Enum<U> & Title> void update(InstallmentPayableBooks<U> payerBooks) {
         mLastPayment = settle(payerBooks);
     }
 
+    /**
+     * @param payerBooks
+     * @return
+     * @since 1.0
+     */
     private <U extends Enum<U> & Title> LocalDate settle(InstallmentPayableBooks<U> payerBooks) {
         LocalDate today = Market.INSTANCE.nowDate();
         LocalDate ret = mLastPayment;
@@ -120,6 +178,11 @@ public class PaymentByInstallments<T extends Enum<T> & Title> {
         return ret;
     }
 
+    /**
+     * @param payerBooks
+     * @return
+     * @since 1.0
+     */
     private <U extends Enum<U> & Title> void settleOnce(InstallmentPayableBooks<U> payerBooks) {
             int installment = mRemain >= mInstallment ? mInstallment : mRemain;
             mReceiverBooks.receiveInstallment(installment);

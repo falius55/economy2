@@ -1,5 +1,7 @@
 package jp.gr.java_conf.falius.economy2.player.gorv;
 
+import java.util.OptionalInt;
+
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 
@@ -40,6 +42,6 @@ public interface Government extends AccountOpenable {
      * @return
      * @since 1.0
      */
-    public Government order(Product product);
+    public OptionalInt order(Product product);
 
 }

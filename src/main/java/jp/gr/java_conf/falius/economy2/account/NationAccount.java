@@ -80,12 +80,6 @@ public class NationAccount implements Account {
      * @param target
      * @param amount
      * @return
-     */
-    /**
-     *
-     * @param target
-     * @param amount
-     * @return
      * @since 1.0
      */
     public int transfer(CentralAccount target, int amount) {
@@ -102,7 +96,10 @@ public class NationAccount implements Account {
      * @since 1.0
      */
     public int transfer(PrivateAccount target, int amount) {
+        target.bank().books().transfered(amount);
+        target.bank().mainBank().books().transferToPrivateBankFromNation(amount);
         target.increase(amount);
+        target.bank().mainBank().account(target.bank()).increase(amount);
         return decrease(amount);
     }
 

@@ -67,10 +67,10 @@ public class HumanResource implements StockManager {
         for (int i = 0; i < num; i++) {
             boolean tmp = addContract(NUM_OF_WORKER_PER_UNIT);
             if (!tmp) {
-                return OptionalInt.of(mProduct.price() * i);
+                return OptionalInt.of(mProduct.lotCost() * i);
             }
         }
-        return OptionalInt.of(mProduct.price() * num);
+        return OptionalInt.of(mProduct.lotCost() * num);
     }
 
     private boolean addContract(int numOfWorker) {

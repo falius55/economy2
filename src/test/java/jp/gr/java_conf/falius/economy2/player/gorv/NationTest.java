@@ -129,4 +129,54 @@ public class NationTest {
 
         System.out.println("collect taxes");
     }
+
+    @Test
+    public void orderTest() {
+        System.out.println("--- order ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        Bank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        int salary = cbank.paySalary(founder);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+
+        System.out.println("支出負担分、国債を発行する。");
+        nation.closeEndOfMonth();
+        System.out.printf("nation: %s%n", nation.books().toString());
+        assertThat(nation.books().get(GovernmentTitle.GOVERNMENT_BOND), is(price));
+        assertThat(nation.deposit(), is(price));
+        assertThat(nation.expenditureBurden(), is(price));
+        checkAccount(nation);
+
+        System.out.println("分割払いで支払い");
+        IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        System.out.printf("nation: %s%n", nation.books().toString());
+        int paid = price - nation.expenditureBurden();
+        assertThat(nation.expenditureBurden(), is(lessThan(price)));
+        assertThat(nation.books().get(GovernmentTitle.FIXEDASSET_SUSPENSE_ACCOUNT), is(paid));
+        assertThat(nation.deposit(), is(nation.expenditureBurden()));
+        checkAccount(nation);
+
+        System.out.println("払いきると建物を引き替え");
+        while(true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        System.out.printf("nation: %s%n", nation.books().toString());
+        assertThat(nation.books().get(GovernmentTitle.BUILDINGS), is(price));
+        assertThat(nation.books().get(GovernmentTitle.FIXEDASSET_SUSPENSE_ACCOUNT), is(0));
+        assertThat(nation.expenditureBurden(), is(0));
+
+        checkAccount(nation);
+
+        System.out.println("--- order ---");
+    }
 }

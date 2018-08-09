@@ -1,6 +1,7 @@
 package jp.gr.java_conf.falius.economy2.market;
 
 import java.time.LocalDate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.market.aggre.MarketAggregater;
@@ -70,6 +71,17 @@ public class Market {
 
     /**
      *
+     * @param n
+     * @return
+     * @since 1.0
+     */
+    public Market nextDay(int n) {
+        IntStream.range(0, n).forEach(i -> nextDay());
+        return this;
+    }
+
+    /**
+     *
      * @return
      * @since 1.0
      */
@@ -82,12 +94,27 @@ public class Market {
     }
 
     /**
+     *
+     * @return
+     * @since 1.0
+     */
+    public Market nextEndOfMonth() {
+        if (nowDate().lengthOfMonth() == nowDate().getDayOfMonth()) {
+            nextDay();
+        }
+        int countToEndOfMonth = nowDate().lengthOfMonth() - nowDate().getDayOfMonth();
+        nextDay(countToEndOfMonth);
+        return this;
+    }
+
+    /**
      * @since 1.0
      */
     private void closeEndOfMonth() {
-        PrivateBusiness.stream().forEach(pb -> pb.update());
-        PrivateBusiness.stream().forEach(pb -> pb.closeEndOfMonth());
-        PrivateBank.stream().forEach(pb -> pb.closeEndOfMonth());
+        PrivateBusiness.stream().forEach(PrivateBusiness::update);
+        PrivateBusiness.stream().forEach(PrivateBusiness::closeEndOfMonth);
+        PrivateBank.stream().forEach(PrivateBank::closeEndOfMonth);
+        Nation.INSTANCE.closeEndOfMonth();
     }
 
     /**

@@ -21,6 +21,7 @@ import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
+import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 public class PrivateBusinessTest {
 
@@ -195,6 +196,51 @@ public class PrivateBusinessTest {
         checkAccount(company);
 
         System.out.println("--- end paySalary ---");
+    }
+
+    @Test
+    public void receiveByInstallmentsTest() {
+        System.out.println("--- installments ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        Bank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        int salary = cbank.paySalary(founder);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        System.out.println("創業時");
+        System.out.printf("business: %s%n", business.books().toString());
+
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+
+        System.out.println("支出負担分、国債を発行する。");
+        nation.closeEndOfMonth();
+
+        System.out.println("分割払いで支払い");
+        int oldDeposit = business.deposit();
+        IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        System.out.printf("business: %s%n", business.books().toString());
+        int received = price - nation.expenditureBurden();
+        assertThat(business.deposit(), is(oldDeposit + received));
+        assertThat(business.books().get(PrivateBusinessTitle.SALES), is(received));
+        checkAccount(business);
+
+        System.out.println("払いきると建物を引き替え");
+        while(true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        System.out.printf("business: %s%n", business.books().toString());
+        assertThat(business.deposit(), is(oldDeposit + price));
+        assertThat(business.books().get(PrivateBusinessTitle.SALES), is(price));
+        checkAccount(business);
+
+        System.out.println("--- installments ---");
     }
 
 }

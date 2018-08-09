@@ -1,8 +1,8 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
-import jp.gr.java_conf.falius.economy2.book.Books;
-import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
+import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 /**
@@ -13,12 +13,13 @@ import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
  */
 public class NationAggregater {
     final Nation mNation = Nation.INSTANCE;
-    private final Books<GovernmentTitle> mBooks = Nation.INSTANCE.books();
+    private final GovernmentBooks mBooks = Nation.INSTANCE.books();
 
     /**
      * @since 1.0
      */
-    NationAggregater() {}
+    NationAggregater() {
+    }
 
     /**
      * 政府所得(純間接税) = 間接税 - 補助金
@@ -63,6 +64,7 @@ public class NationAggregater {
      * @since 1.0
      */
     public int G() {
-        return mBooks.get(TitleType.EXPENSE);
+        return mBooks.get(TitleType.EXPENSE) + mBooks.fixedAssetsValue()
+                + mBooks.get(GovernmentTitle.FIXEDASSET_SUSPENSE_ACCOUNT);
     }
 }

@@ -40,7 +40,7 @@ public class Farm implements StockManager {
         mManufacturePeriod = product.manufacturePeriod();
         mProductionVolume = product.productionVolume();
         mLastManufacture = Market.INSTANCE.nowDate();
-        double cost = (double) product.price() / product.numOfLot();
+        double cost = (double) product.lotCost() / product.numOfLot();
         mCost = cost > 0 ? cost : 1;
 
     }
