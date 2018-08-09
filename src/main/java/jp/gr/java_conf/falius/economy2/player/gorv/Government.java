@@ -1,7 +1,9 @@
 package jp.gr.java_conf.falius.economy2.player.gorv;
 
+import java.util.OptionalInt;
+
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.player.Entity;
+import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 
 /**
  *
@@ -9,7 +11,7 @@ import jp.gr.java_conf.falius.economy2.player.Entity;
  * @since 1.0
  *
  */
-public interface Government extends Entity {
+public interface Government extends AccountOpenable {
 
     /**
      * 国債を発行する。
@@ -40,6 +42,6 @@ public interface Government extends Entity {
      * @return
      * @since 1.0
      */
-    public Government order(Product product);
+    public OptionalInt order(Product product);
 
 }

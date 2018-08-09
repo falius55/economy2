@@ -4,17 +4,25 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 import java.time.LocalDate;
-import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Test;
+
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class FixedAssetManagerTest {
 
+    @After
+    public void after() {
+        Market.INSTANCE.clear();
+    }
+
     @Test
     public void simpleTest() {
+        System.out.println("--- simple test ---");
         // 固定資産ひとつだけ
         // すべて償却される場合
-        final int DAYS_OF_YEAR = 364;
+        final int DAYS_OF_YEAR = 366;
         int acquisitionCost = 10000;  // 取得原価
         int serviceLife = 2;  // 耐用年数
 
@@ -23,14 +31,15 @@ public class FixedAssetManagerTest {
         fm.add(date, acquisitionCost, serviceLife);
 
         int count = DAYS_OF_YEAR * serviceLife;
-        for (int i = 0; i < count; i++, date = date.plusDays(1)) {
-            fm.record(date);
-        }
+        Market.INSTANCE.nextDay(count);
+        fm.update();
 
+        fm.printAll();
+        System.out.printf("today: %s%n", Market.INSTANCE.nowDate().toString());
+        System.out.println("--- simple test ---");
         assertThat(fm.unDepreciatedBalance(), is(0));
         assertThat(fm.depreciatedBalance(),
                 is(acquisitionCost * (100 - FixedAssetManager.FixedAsset.RESIDUAL_PERCENT) / 100));
-        fm.printAll();
     }
 
     @Test
@@ -45,13 +54,11 @@ public class FixedAssetManagerTest {
         for (int i = 0; i < count; i++) {
             // 取得日、取得原価、耐用年数
             fm.add(date, 100000 * (i + 1), i % 10 + 1);
-            depreciatedBalance += fm.record(date);
             date = date.plusDays(1);
         }
 
-        depreciatedBalance += Stream.iterate(date, d -> d.plusDays(1)).limit(600)
-                .mapToInt(fm::record)
-                .sum();
+        Market.INSTANCE.nextDay(600);
+        depreciatedBalance += fm.update();
 
         // 結果の表示
         fm.printAll();

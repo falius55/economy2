@@ -1,6 +1,7 @@
 package jp.gr.java_conf.falius.economy2.player;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -28,6 +29,10 @@ public class HumanResourcesDepartment {
         mCapacity = capacity;
     }
 
+    public Set<Worker> employers() {
+        return Collections.unmodifiableSet(mEmployers);
+    }
+
     /**
      * 職員として採用します
      * @since 1.0
@@ -50,7 +55,9 @@ public class HumanResourcesDepartment {
      * @since 1.0
      */
     public HumanResourcesDepartment add(LocalDate date, Worker parson) {
-        if (!mWorkingRecord.containsKey(date)) mWorkingRecord.put(date, new HashSet<Worker>());
+        if (!mWorkingRecord.containsKey(date)) {
+            mWorkingRecord.put(date, new HashSet<Worker>());
+        }
 
         mWorkingRecord.get(date).add(parson);
         return this;

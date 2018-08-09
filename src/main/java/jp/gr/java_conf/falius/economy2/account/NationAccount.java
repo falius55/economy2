@@ -59,11 +59,13 @@ public class NationAccount implements Account {
      * @since 1.0
      */
     @Override
-    public int transfer(Account target, int amount) {
+    public int transfer(Transferable target, int amount) {
         if (target instanceof CentralAccount) {
             return transfer((CentralAccount) target, amount);
         } else if (target instanceof PrivateAccount) {
             return transfer((PrivateAccount) target, amount);
+        } else if (target instanceof CentralBank) {
+            return transfer((CentralBank) target, amount);
         }
         throw new IllegalArgumentException();
     }
@@ -75,12 +77,6 @@ public class NationAccount implements Account {
     // Nation(CentralBankAccount) -> PrivateBank(CentralBankAccount)
     /**
      * 政府が民間銀行の日銀当座預金に振り込み
-     * @param target
-     * @param amount
-     * @return
-     */
-    /**
-     *
      * @param target
      * @param amount
      * @return
@@ -100,7 +96,10 @@ public class NationAccount implements Account {
      * @since 1.0
      */
     public int transfer(PrivateAccount target, int amount) {
+        target.bank().books().transfered(amount);
+        target.bank().mainBank().books().transferToPrivateBankFromNation(amount);
         target.increase(amount);
+        target.bank().mainBank().account(target.bank()).increase(amount);
         return decrease(amount);
     }
 

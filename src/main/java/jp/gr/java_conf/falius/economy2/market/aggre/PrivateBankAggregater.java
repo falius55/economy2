@@ -3,7 +3,7 @@ package jp.gr.java_conf.falius.economy2.market.aggre;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
 /**
@@ -37,7 +37,7 @@ public class PrivateBankAggregater {
      */
     public int deposits() {
         return mBanks.stream()
-                .mapToInt(pb -> pb.books().get(PrivateBankAccountTitle.DEPOSIT))
+                .mapToInt(pb -> pb.books().get(PrivateBankTitle.DEPOSIT))
                 .sum();
     }
 
@@ -60,7 +60,7 @@ public class PrivateBankAggregater {
     public int governmentBonds() {
         return mBanks.stream()
                 .map(PrivateBank::books)
-                .mapToInt(book -> book.get(PrivateBankAccountTitle.GOVERNMENT_BOND))
+                .mapToInt(book -> book.get(PrivateBankTitle.GOVERNMENT_BOND))
                 .sum();
     }
 

@@ -3,7 +3,7 @@ package jp.gr.java_conf.falius.economy2.market.aggre;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
 
 /**
@@ -38,7 +38,7 @@ public class WorkerAggregater {
     public int salary() {
         return mWorkers.stream()
                 .map(WorkerParson::books)
-                .mapToInt(book -> book.get(WorkerParsonAccountTitle.SALARIES))
+                .mapToInt(book -> book.get(WorkerParsonTitle.SALARIES))
                 .sum();
     }
 
@@ -50,7 +50,7 @@ public class WorkerAggregater {
     public int consumption() {
         return mWorkers.stream()
                 .map(WorkerParson::books)
-                .mapToInt(book -> book.get(WorkerParsonAccountTitle.CONSUMPTION))
+                .mapToInt(book -> book.get(WorkerParsonTitle.CONSUMPTION))
                 .sum();
     }
 

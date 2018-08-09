@@ -11,10 +11,11 @@ import java.util.stream.Collectors;
 import jp.gr.java_conf.falius.economy2.account.CentralAccount;
 import jp.gr.java_conf.falius.economy2.account.NationAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.account.Transferable;
+import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
-import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.loan.Bond;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
@@ -27,7 +28,7 @@ import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
  * @since 1.0
  *
  */
-public class CentralBank implements Bank {
+public class CentralBank implements Bank, Transferable {
     public static final CentralBank INSTANCE;
     private static final int SALARY = 100000;
 
@@ -78,9 +79,10 @@ public class CentralBank implements Bank {
      * @param privateBank
      * @since 1.0
      */
-    public void createAccount(PrivateBank privateBank) {
+    public CentralAccount createAccount(PrivateBank privateBank) {
         CentralAccount account = new CentralAccount(this, privateBank);
         mAccounts.put(privateBank, account);
+        return account;
     }
 
     /**
@@ -162,8 +164,10 @@ public class CentralBank implements Bank {
      */
     @Override
     public int paySalary(Worker worker) {
-        mBooks.paySalary(SALARY);
-        worker.getSalary(this, SALARY);
+        int takeHome = mBooks.paySalary(SALARY);
+        worker.books().getSalary(SALARY);
+        PrivateAccount workerAccount = worker.books().mainAccount();
+        transfer(workerAccount, takeHome);
         return SALARY;
     }
 
@@ -172,7 +176,7 @@ public class CentralBank implements Bank {
      */
     @Override
     public Employable payIncomeTax(GovernmentBooks nationBooks) {
-        int amount = mBooks.get(CentralBankAccountTitle.DEPOSITS_RECEIVED);
+        int amount = mBooks.get(CentralBankTitle.DEPOSITS_RECEIVED);
         nationBooks.collectIncomeTaxes(amount);
         mBooks.payIncomeTax(amount);
         transfer(mNationAccount, amount);
@@ -237,7 +241,7 @@ public class CentralBank implements Bank {
      * @since 1.0
      */
     public void operateSelling(int maxAmount) {
-        int amount = Math.min(mBooks.get(CentralBankAccountTitle.GOVERNMENT_BOND), maxAmount);
+        int amount = Math.min(mBooks.get(CentralBankTitle.GOVERNMENT_BOND), maxAmount);
         Set<Bond> sells = Nation.INSTANCE.bonds().stream()
                 .filter(bond -> !bond.isPayOff())
                 .filter(Bond::ofCentralBank)
@@ -263,15 +267,33 @@ public class CentralBank implements Bank {
      * @return
      * @since 1.0
      */
-    public int transfer(CentralAccount target, int amount) {
+    @Override
+    public int transfer(Transferable target, int amount) {
+        if (target instanceof NationAccount) {
+            return transfer((NationAccount) target, amount);
+        } else if (target instanceof PrivateAccount) {
+            return transfer((PrivateAccount) target, amount);
+        } else if (target instanceof CentralAccount) {
+            return transfer((CentralAccount) target, amount);
+        }
+        throw new IllegalArgumentException();
+    }
+
+    /**
+     *
+     * @param target
+     * @param amount
+     * @return
+     * @since 1.0
+     */
+    private int transfer(CentralAccount target, int amount) {
         return target.increase(amount);
     }
 
     /**
      * @since 1.0
      */
-    @Override
-    public int transfer(PrivateAccount target, int amount) {
+    private int transfer(PrivateAccount target, int amount) {
         target.bank().books().transfered(amount);
         PrivateBank targetBank = target.bank();
         CentralBank.INSTANCE.account(targetBank).increase(amount);
@@ -281,8 +303,8 @@ public class CentralBank implements Bank {
     /**
      * @since 1.0
      */
-    @Override
-    public int transfer(NationAccount target, int amount) {
+//    @Override
+    private int transfer(NationAccount target, int amount) {
         return target.increase(amount);
     }
 

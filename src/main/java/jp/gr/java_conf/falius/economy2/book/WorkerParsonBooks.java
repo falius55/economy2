@@ -1,7 +1,8 @@
 package jp.gr.java_conf.falius.economy2.book;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
-import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 
 /**
@@ -10,24 +11,34 @@ import jp.gr.java_conf.falius.economy2.helper.Taxes;
  * @since 1.0
  *
  */
-public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
-        implements PrivateBooks<WorkerParsonAccountTitle>, BorrowableBooks<WorkerParsonAccountTitle>,
-        AccountOpenableBooks<WorkerParsonAccountTitle> {
+public class WorkerParsonBooks extends AbstractBooks<WorkerParsonTitle>
+        implements PrivateBooks<WorkerParsonTitle>, BorrowableBooks<WorkerParsonTitle>,
+        AccountOpenableBooks<WorkerParsonTitle> {
+    private final PrivateAccount mAccount;
 
     /**
      *
      * @return
      * @since 1.0
      */
-    public static WorkerParsonBooks newInstance() {
-        return new WorkerParsonBooks();
+    public static WorkerParsonBooks newInstance(PrivateAccount mainAccount) {
+        return new WorkerParsonBooks(mainAccount);
     }
 
     /**
      * @since 1.0
      */
-    private WorkerParsonBooks() {
-        super(WorkerParsonAccountTitle.class);
+    private WorkerParsonBooks(PrivateAccount mainAccount) {
+        super(WorkerParsonTitle.class);
+        mAccount = mainAccount;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public PrivateAccount mainAccount() {
+        return mAccount;
     }
 
     /**
@@ -35,8 +46,8 @@ public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
      */
     @Override
     public WorkerParsonBooks saveMoney(int amount) {
-        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
-        super.decrease(WorkerParsonAccountTitle.CASH, amount);
+        super.increase(WorkerParsonTitle.ORDINARY_DEPOSIT, amount);
+        super.decrease(WorkerParsonTitle.CASH, amount);
         return this;
     }
 
@@ -45,8 +56,8 @@ public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
      */
     @Override
     public WorkerParsonBooks downMoney(int amount) {
-        super.increase(WorkerParsonAccountTitle.CASH, amount);
-        super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
+        super.increase(WorkerParsonTitle.CASH, amount);
+        super.decrease(WorkerParsonTitle.ORDINARY_DEPOSIT, amount);
         return this;
     }
 
@@ -55,8 +66,8 @@ public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
      */
     @Override
     public WorkerParsonBooks borrow(int amount) {
-        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount);
-        super.increase(WorkerParsonAccountTitle.LOANS_PAYABLE, amount);
+        super.increase(WorkerParsonTitle.ORDINARY_DEPOSIT, amount);
+        super.increase(WorkerParsonTitle.LOANS_PAYABLE, amount);
         return this;
     }
 
@@ -75,11 +86,11 @@ public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
      * @return
      * @since 1.0
      */
-    public Books<WorkerParsonAccountTitle> getSalary(int amount) {
+    public Books<WorkerParsonTitle> getSalary(int amount) {
         int tax = Taxes.computeIncomeTaxFromManthly(amount);
-        super.increase(WorkerParsonAccountTitle.SALARIES, amount);
-        super.increase(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, amount - tax);
-        super.increase(WorkerParsonAccountTitle.TAX, tax);
+        super.increase(WorkerParsonTitle.SALARIES, amount);
+        super.increase(WorkerParsonTitle.ORDINARY_DEPOSIT, amount - tax);
+        super.increase(WorkerParsonTitle.TAX, tax);
         return this;
     }
 
@@ -90,8 +101,8 @@ public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
      * @since 1.0
      */
     public WorkerParsonBooks establish(int initialCapital) {
-        super.increase(WorkerParsonAccountTitle.ESTABLISH_EXPENSES, initialCapital);
-        super.decrease(WorkerParsonAccountTitle.ORDINARY_DEPOSIT, initialCapital);
+        super.increase(WorkerParsonTitle.ESTABLISH_EXPENSES, initialCapital);
+        super.decrease(WorkerParsonTitle.ORDINARY_DEPOSIT, initialCapital);
         return this;
     }
 
@@ -102,12 +113,12 @@ public class WorkerParsonBooks extends AbstractBooks<WorkerParsonAccountTitle>
      * @return
      * @since 1.0
      */
-    public WorkerParsonBooks buyOnCash(WorkerParsonAccountTitle expenseTitle, int amount) {
-        if (expenseTitle.type() != AccountType.EXPENSE) {
+    public WorkerParsonBooks buyOnCash(WorkerParsonTitle expenseTitle, int amount) {
+        if (expenseTitle.type() != TitleType.EXPENSE) {
             throw new IllegalArgumentException();
         }
         super.increase(expenseTitle, amount);
-        super.decrease(WorkerParsonAccountTitle.CASH, amount);
+        super.decrease(WorkerParsonTitle.CASH, amount);
         return this;
     }
 

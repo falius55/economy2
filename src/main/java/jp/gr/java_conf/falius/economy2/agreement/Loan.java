@@ -1,10 +1,11 @@
-package jp.gr.java_conf.falius.economy2.loan;
+package jp.gr.java_conf.falius.economy2.agreement;
 
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Objects;
 
 import jp.gr.java_conf.falius.economy2.account.Account;
+import jp.gr.java_conf.falius.economy2.account.Transferable;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.Borrowable;
 import jp.gr.java_conf.falius.economy2.player.Lendable;
@@ -24,8 +25,6 @@ public class Loan {
 
     private Lendable mCreditor = null; // 債権者
     private final Borrowable mDebtor; // 債務者
-    private Account mCreditorAccount = null;
-    private final Account mDebtorAccount;
 
 
     /**
@@ -36,9 +35,8 @@ public class Loan {
      * @param period
      * @since 1.0
      */
-    public Loan(Borrowable debtor, Account account, int amount, Period period) {
+    public Loan(Borrowable debtor, int amount, Period period) {
         mDebtor = debtor;
-        mDebtorAccount = account;
         mAmount = amount;
         mPeriod = period;
     }
@@ -94,17 +92,18 @@ public class Loan {
      * 債務が受け入れられ、債権債務関係が発生する
      * @since 1.0
      */
-    public Loan accepted(Lendable creditor, Account account) {
+    public Loan accepted(Lendable creditor) {
         if (isConcluded()) {
             throw new IllegalStateException("債権債務関係はすでに発生しています");
         }
         mCreditor = creditor;
-        mCreditorAccount = account;
         mAccrualDate = Market.INSTANCE.nowDate();
         mDeadLine = mAccrualDate.plus(mPeriod);
         mDebtor.books().borrow(amount());
         creditor.books().lend(amount());
-        mCreditorAccount.transfer(mDebtorAccount, mAmount);
+        Account debtorAccount = mDebtor.books().mainAccount();
+        Transferable creditorTransferable = creditor.books().transferable();
+        creditorTransferable.transfer(debtorAccount, mAmount);
         return this;
     }
 
@@ -117,7 +116,9 @@ public class Loan {
         amount = amount <= mAmount ? amount : mAmount;
         mDebtor.books().repay(amount);
         mCreditor.books().repaid(amount);
-        mDebtorAccount.transfer(mCreditorAccount, amount);
+        Account debtorAccount = mDebtor.books().mainAccount();
+        Transferable creditorTransferable = mCreditor.books().transferable();
+        debtorAccount.transfer(creditorTransferable, amount);
         return mAmount == 0;
     }
 }

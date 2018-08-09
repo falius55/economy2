@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 
+import jp.gr.java_conf.falius.economy2.agreement.Deferment;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.loan.Deferment;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
 /**

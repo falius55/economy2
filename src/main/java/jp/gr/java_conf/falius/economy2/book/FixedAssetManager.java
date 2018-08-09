@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
+
+import jp.gr.java_conf.falius.economy2.market.Market;
 
 /**
  *
@@ -16,9 +16,16 @@ import java.util.stream.Collectors;
  */
 final class FixedAssetManager {
     private final Set<FixedAsset> mFixedAssets; // TODO:建物は科目が別なので、別に保持する
+    private LocalDate mLastUpdate;
 
     FixedAssetManager() {
-        mFixedAssets = new TreeSet<FixedAsset>();
+        mFixedAssets = new TreeSet<>();
+        mLastUpdate = LocalDate.now(); // Nationなどstaticイニシャライザ内で実体化されるため、Market.INSTANCE.nowDate()を使うと初期化エラー
+    }
+
+    void clear() {
+        mLastUpdate = LocalDate.now();
+        mFixedAssets.clear();
     }
 
     /**
@@ -40,9 +47,25 @@ final class FixedAssetManager {
      * @return その日の償却額
      * @since 1.0
      */
-    int record(LocalDate date) {
+    private int record(LocalDate date) {
         return mFixedAssets.stream()
-                .collect(Collectors.summingInt(asset -> asset.record(date)));
+                .mapToInt(asset -> asset.record(date))
+                .sum();
+    }
+
+    /**
+     * @return 償却額合計
+     * @since 1.0
+     */
+    int update() {
+        int ret = 0;
+        LocalDate today = Market.INSTANCE.nowDate();
+        for (LocalDate date = mLastUpdate.plusDays(1); date.isBefore(today)
+                || date.equals(today); date = date.plusDays(1)) {
+            ret += record(date);
+        }
+        mLastUpdate = today;
+        return ret;
     }
 
     /**
@@ -51,14 +74,15 @@ final class FixedAssetManager {
      */
     int presentValue() {
         return mFixedAssets.stream()
-                .collect(Collectors.summingInt(FixedAsset::presentValue));
+                .mapToInt(FixedAsset::presentValue)
+                .sum();
     }
 
     /**
      * @since 1.0
      */
     void printAll() {
-        mFixedAssets.stream().forEach(FixedAsset::print);
+        mFixedAssets.forEach(FixedAsset::print);
     }
 
     /**
@@ -66,7 +90,8 @@ final class FixedAssetManager {
      */
     int depreciatedBalance() {
         return mFixedAssets.stream()
-                .collect(Collectors.summingInt(FixedAsset::depreciatedBalance));
+                .mapToInt(FixedAsset::depreciatedBalance)
+                .sum();
     }
 
     /**
@@ -74,7 +99,8 @@ final class FixedAssetManager {
      */
     int unDepreciatedBalance() {
         return mFixedAssets.stream()
-                .collect(Collectors.summingInt(FixedAsset::unDepreciatedBalance));
+                .mapToInt(FixedAsset::unDepreciatedBalance)
+                .sum();
     }
 
     /**
@@ -83,15 +109,34 @@ final class FixedAssetManager {
      * @since 1.0
      */
     static class FixedAsset implements Comparable<FixedAsset> {
-        static final int RESIDUAL_PERCENT = 10; // 取得原価に対する残存価額の割合(%)
-        private final LocalDate mDateOfAcquisition; // 取得日
-        private final int mAcquisitionCost; // 取得原価
-        private final int mServiceLife; // 耐用年数
-        private final int mResidualValue; // 残存価額
-        private final int mFixedAmountOfMonths; // 定額法における、償却月額
-        private final LocalDate mLastRecordedDate; // 最終計上日 TODO: 営業日を考慮する
-        private int mUndepreciatedBalance; // 未償却残高
-        private final SortedMap<LocalDate, Integer> mRecordMap; // 償却日から未償却額へのマップ
+        /**
+         * 取得原価に対する残存価額の割合(%)
+         */
+        static final int RESIDUAL_PERCENT = 10;
+        /**
+         * 取得日
+         */
+        private final LocalDate mDateOfAcquisition;
+        /**
+         * 取得原価
+         */
+        private final int mAcquisitionCost;
+        /**
+         * 耐用年数
+         */
+        private final int mServiceLife;
+        /**
+         * 残存価額
+         */
+        private final int mResidualValue;
+        /**
+         * 定額法における、償却月額
+         */
+        private final int mFixedAmountOfMonths;
+        /**
+         * 償却日から、未償却額へのマップ
+         */
+        private final SortedMap<LocalDate, Integer> mRecordMap;
 
         /**
          * @param dateOfAcquisition 取得日
@@ -103,12 +148,12 @@ final class FixedAssetManager {
             mDateOfAcquisition = dateOfAcquisition;
             mAcquisitionCost = acquisitionCost;
             mServiceLife = serviceLife;
-            mLastRecordedDate = dateOfAcquisition.plusYears(serviceLife).minusMonths(1);
             mResidualValue = acquisitionCost * RESIDUAL_PERCENT / 100; // 切り捨て
             mFixedAmountOfMonths = (int) Math.ceil((double) (acquisitionCost - mResidualValue) / (serviceLife * 12));
-            mUndepreciatedBalance = acquisitionCost - mResidualValue;
 
+            int amortizable = acquisitionCost - mResidualValue; // 償却可能額
             mRecordMap = new TreeMap<LocalDate, Integer>(); //  償却日から残存額へのマップ 償却日でソートされる
+            mRecordMap.put(Market.INSTANCE.nowDate(), amortizable);
         }
 
         /**
@@ -116,7 +161,7 @@ final class FixedAssetManager {
          * @since 1.0
          */
         private int presentValue() {
-            return mResidualValue + mUndepreciatedBalance;
+            return mResidualValue + unDepreciatedBalance();
         }
 
         /**
@@ -126,7 +171,7 @@ final class FixedAssetManager {
          */
         private int depreciatedBalance() {
             // 取得原価　ー　未償却額　ー　残存価額
-            return mAcquisitionCost - mUndepreciatedBalance - mResidualValue;
+            return mAcquisitionCost - unDepreciatedBalance() - mResidualValue;
         }
 
         /**
@@ -135,24 +180,35 @@ final class FixedAssetManager {
          * @since 1.0
          */
         private int unDepreciatedBalance() {
-            return mUndepreciatedBalance;
+            return mRecordMap.get(lastRecordedDate());
+        }
+
+        private LocalDate lastRecordedDate() {
+            return mRecordMap.lastKey();
         }
 
         /**
-         * その日が計上日であるかを返します(毎月。営業日無視)
+         * その日が新規計上すべき日であるかを返します(毎月。営業日無視)
          * @since 1.0
          */
-        private boolean isRecordedDate(LocalDate date) {
-            if (date.isBefore(mDateOfAcquisition)) { return false; }  // 取得日より前
+        private boolean shouldRecord(LocalDate date) {
+            if (date.isBefore(mDateOfAcquisition)) {
+                return false;
+            } // 取得日より前
             // TODO: 営業日を考慮する
             // 償却が終わっている
-            if (date.isAfter(mLastRecordedDate) || mRecordMap.containsKey(date)) { return false; }
+            if (unDepreciatedBalance() <= 0) {
+                return false;
+            }
+            if (mRecordMap.containsKey(date)) {
+                return false;
+            }
             // 対応する日がない
             if (date.lengthOfMonth() < mDateOfAcquisition.getDayOfMonth()) {
-                return date.getDayOfMonth() == date.lengthOfMonth();  // その日が月末かどうか
+                return date.getDayOfMonth() == date.lengthOfMonth(); // その日が月末かどうか
             }
             // 対応する日がある
-            return date.getDayOfMonth() == mDateOfAcquisition.getDayOfMonth();  // その日が取得日と同じかどうか
+            return date.getDayOfMonth() == mDateOfAcquisition.getDayOfMonth(); // その日が取得日と同じかどうか
         }
 
         /**
@@ -162,11 +218,12 @@ final class FixedAssetManager {
          * @since 1.0
          */
         private int record(LocalDate date) {
-            if (!isRecordedDate(date)) { return 0; }
-            if (mUndepreciatedBalance <= 0) { return 0; }
-            int amount = mUndepreciatedBalance < mFixedAmountOfMonths ? mUndepreciatedBalance : mFixedAmountOfMonths;
-            mUndepreciatedBalance -= amount;
-            mRecordMap.put(date, mUndepreciatedBalance); // 記録
+            if (!shouldRecord(date)) {
+                return 0;
+            }
+            int undepreciatedBalance = unDepreciatedBalance();
+            int amount = Math.min(undepreciatedBalance, mFixedAmountOfMonths);
+            mRecordMap.put(date, undepreciatedBalance - amount); // 記録
             return amount;
         }
 
@@ -187,14 +244,7 @@ final class FixedAssetManager {
         void print() {
             System.out.printf("get:%s, all-amount:%d円, per-amount:%d, life:%d年%n", mDateOfAcquisition, mAcquisitionCost,
                     mFixedAmountOfMonths, mServiceLife);
-
-            mRecordMap.forEach(new BiConsumer<LocalDate, Integer>() {
-
-                @Override
-                public void accept(LocalDate depreciateDate, Integer undepreciatedAmount) {
-                    System.out.printf("%s　%d円%n", depreciateDate, undepreciatedAmount);
-                }
-            });
+            mRecordMap.forEach((date, amount) -> System.out.printf("%s %d円%n", date, amount));
         }
 
         /**

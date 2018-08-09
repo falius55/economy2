@@ -2,14 +2,12 @@ package jp.gr.java_conf.falius.economy2.stockmanager;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.IntStream;
 
+import jp.gr.java_conf.falius.economy2.agreement.Deferment;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.loan.Deferment;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 /**
@@ -30,7 +28,7 @@ public class Farm implements StockManager {
     /** 一度の製造数 */
     private final int mProductionVolume;
     /** 単位あたり原価 */
-    private final int mCost;
+    private final double mCost;
 
     /**
      *
@@ -42,7 +40,7 @@ public class Farm implements StockManager {
         mManufacturePeriod = product.manufacturePeriod();
         mProductionVolume = product.productionVolume();
         mLastManufacture = Market.INSTANCE.nowDate();
-        int cost = product.price() / product.numOfLot();
+        double cost = (double) product.lotCost() / product.numOfLot();
         mCost = cost > 0 ? cost : 1;
 
     }
@@ -64,7 +62,7 @@ public class Farm implements StockManager {
         if (!canShipOut(require)) {
             return OptionalInt.empty();
         }
-        int cost = mCost * require;
+        int cost = (int) (mCost * require);
         mStock -= require;
         return OptionalInt.of(cost);
     }
@@ -74,7 +72,7 @@ public class Farm implements StockManager {
      */
     @Override
     public Set<Deferment> purchasePayable() {
-        return new HashSet<>();
+        return Collections.emptySet();
     }
 
     /**
@@ -91,20 +89,21 @@ public class Farm implements StockManager {
      */
     @Override
     public void update() {
-        LocalDate today = Market.INSTANCE.nowDate();
-        int count = (int) mLastManufacture.until(today, ChronoUnit.DAYS) / mManufacturePeriod.getDays(); // 製造日が何回きたか
-        IntStream.range(0, count)
-                .forEach(n -> manufacture());
+        mLastManufacture = updateManufacture(mLastManufacture, mManufacturePeriod);
     }
 
     /**
-     * 一度製造します。
-     * @return 仕入費用の増加分(計上済)
-     * @since 1.0
+     *
+     * @param start
+     * @param period
+     * @return 最後に生産した日
      */
-    private void manufacture() {
-        mLastManufacture = mLastManufacture.plus(mManufacturePeriod);
-        mStock += mProductionVolume;
+    private LocalDate updateManufacture(LocalDate start, Period period) {
+        LocalDate today = Market.INSTANCE.nowDate();
+        LocalDate ret = start;
+        for (LocalDate next = start.plus(period); next.isBefore(today); ret = next, next = ret.plus(period)) {
+            mStock += mProductionVolume;
+        }
+        return ret;
     }
-
 }

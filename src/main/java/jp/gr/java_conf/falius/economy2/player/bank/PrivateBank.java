@@ -9,13 +9,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import jp.gr.java_conf.falius.economy2.account.NationAccount;
+import jp.gr.java_conf.falius.economy2.account.CentralAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.agreement.Bond;
+import jp.gr.java_conf.falius.economy2.agreement.Loan;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.book.PrivateBankBooks;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
-import jp.gr.java_conf.falius.economy2.loan.Bond;
-import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
@@ -40,9 +40,9 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
     private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
 
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
-    private final PrivateBankBooks mBooks = PrivateBankBooks.newInstance();
     private final Set<Loan> mLoans = new HashSet<>();
     private final Map<AccountOpenable, PrivateAccount> mAccounts = new HashMap<>();
+    private final PrivateBankBooks mBooks;
 
     /**
      *
@@ -66,7 +66,8 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
     public PrivateBank() {
         sOwns.add(this);
         Market.INSTANCE.aggregater().add(this);
-        mainBank().createAccount(this);
+        CentralAccount account = mainBank().createAccount(this);
+        mBooks = PrivateBankBooks.newInstance(account);
     }
 
     /**
@@ -100,9 +101,10 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @param accountOpenable
      * @since 1.0
      */
-    public void createAccount(AccountOpenable accountOpenable) {
+    public PrivateAccount createAccount(AccountOpenable accountOpenable) {
         PrivateAccount account = new PrivateAccount(this, accountOpenable);
         mAccounts.put(accountOpenable, account);
+        return account;
     }
 
     /**
@@ -110,7 +112,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public int cash() {
-        return mBooks.get(PrivateBankAccountTitle.CASH);
+        return mBooks.get(PrivateBankTitle.CASH);
     }
 
     /**
@@ -118,7 +120,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public int deposit() {
-        return mBooks.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
+        return mBooks.get(PrivateBankTitle.CHECKING_ACCOUNTS);
     }
 
     /**
@@ -142,8 +144,8 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public boolean canLend(int amount) {
-        int cash = mBooks.get(PrivateBankAccountTitle.CASH);
-        int checking = mBooks.get(PrivateBankAccountTitle.CHECKING_ACCOUNTS);
+        int cash = mBooks.get(PrivateBankTitle.CASH);
+        int checking = mBooks.get(PrivateBankTitle.CHECKING_ACCOUNTS);
         return cash + checking >= amount;
     }
 
@@ -170,7 +172,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public void paidOut(AccountOpenable openable, int amount) {
-        int cash = mBooks.get(PrivateBankAccountTitle.CASH);
+        int cash = mBooks.get(PrivateBankTitle.CASH);
         if (cash < amount) {
             downMoney(amount - cash);
         }
@@ -207,14 +209,6 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
 
                 });
         return successed;
-    }
-
-    /**
-     * @since 1.0
-     */
-    @Override
-    public int transfer(NationAccount target, int amount) {
-        return mainBank().account(this).transfer(target, amount);
     }
 
     /**
@@ -260,8 +254,10 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     @Override
     public int paySalary(Worker worker) {
-        mBooks.paySalary(SALARY);
-        worker.getSalary(this, SALARY);
+        int takeHome = mBooks.paySalary(SALARY);
+        worker.books().getSalary(SALARY);
+        PrivateAccount workerAccount = worker.books().mainAccount();
+        mainBank().account(this).transfer(workerAccount, takeHome);
         return SALARY;
     }
 
@@ -269,20 +265,11 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @since 1.0
      */
     @Override
-    public int transfer(PrivateAccount target, int amount) {
-        int ret = mainBank().account(this).transfer(target, amount);
-        return ret;
-    }
-
-    /**
-     * @since 1.0
-     */
-    @Override
     public Employable payIncomeTax(GovernmentBooks nationBooks) {
-        int amount = mBooks.get(PrivateBankAccountTitle.DEPOSITS_RECEIVED);
+        int amount = mBooks.get(PrivateBankTitle.DEPOSITS_RECEIVED);
         nationBooks.collectIncomeTaxes(amount);
         mBooks.payIncomeTax(amount);
-        mainBank().account(this).transfer(mainBank().nationAccount(), amount);
+        mainBank().account(this).transfer(nationBooks.mainAccount(), amount);
         return this;
     }
 
@@ -294,7 +281,7 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
     @Override
     public int acceptDebt(Loan debt) {
         mLoans.add(debt);
-        debt.accepted(this, mainBank().account(this));
+        debt.accepted(this);
         return debt.amount();
     }
 

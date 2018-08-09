@@ -2,8 +2,8 @@ package jp.gr.java_conf.falius.economy2.player;
 
 import java.util.Optional;
 
+import jp.gr.java_conf.falius.economy2.agreement.Deferment;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.loan.Deferment;
 
 /**
  * 買掛、売掛ができる

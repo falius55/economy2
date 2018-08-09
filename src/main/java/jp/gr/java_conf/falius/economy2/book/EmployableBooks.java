@@ -1,6 +1,6 @@
 package jp.gr.java_conf.falius.economy2.book;
 
-import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.Title;
 
 /**
  *
@@ -9,15 +9,15 @@ import jp.gr.java_conf.falius.economy2.enumpack.AccountTitle;
  * @param <T>
  * @since 1.0
  */
-public interface EmployableBooks<T extends Enum<T> & AccountTitle> extends Books<T>  {
+public interface EmployableBooks<T extends Enum<T> & Title> extends Books<T>  {
 
     /**
      *
-     * @param amount
-     * @return
+     * @param amount 額面
+     * @return 手取額
      * @since 1.0
      */
-    public EmployableBooks<T> paySalary(int amount);
+    public int paySalary(int amount);
 
     /**
      * 預かり金を納税します。

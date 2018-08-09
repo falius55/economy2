@@ -9,12 +9,11 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.agreement.Loan;
 import jp.gr.java_conf.falius.economy2.book.WorkerParsonBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
-import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
@@ -27,8 +26,8 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Borrowable {
     private static final Set<WorkerParson> sOwns = new HashSet<WorkerParson>();
 
-    private final WorkerParsonBooks mBooks = WorkerParsonBooks.newInstance();
     private final PrivateBank mMainBank;
+    private final WorkerParsonBooks mBooks;
     private final Set<Loan> mLoans = new HashSet<>();
 
     private Employable mJob = null;
@@ -54,7 +53,8 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      */
     public WorkerParson() {
         mMainBank = searchBank();
-        mMainBank.createAccount(this);
+        PrivateAccount account = mMainBank.createAccount(this);
+        mBooks = WorkerParsonBooks.newInstance(account);
         Market.INSTANCE.aggregater().add(this);
         sOwns.add(this);
     }
@@ -91,7 +91,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      */
     @Override
     public int cash() {
-        return mBooks.get(WorkerParsonAccountTitle.CASH);
+        return mBooks.get(WorkerParsonTitle.CASH);
     }
 
     /**
@@ -99,7 +99,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      */
     @Override
     public int deposit() {
-        return mBooks.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
+        return mBooks.get(WorkerParsonTitle.ORDINARY_DEPOSIT);
     }
 
     /**
@@ -132,11 +132,11 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      */
     @Override
     public OptionalInt buy(Product product, int require) {
-        Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
+        Optional<WorkerParsonTitle> optTitle = WorkerParsonTitle.titleFrom(product);
         if (!optTitle.isPresent()) {
             return OptionalInt.empty();
         } // 労働者が買うような代物じゃない
-        WorkerParsonAccountTitle title = optTitle.get();
+        WorkerParsonTitle title = optTitle.get();
 
         Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.RETAIL)
                 .filter(pb -> pb.canSale(product, require)).findAny();
@@ -168,18 +168,6 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         downMoney(deposit());
         mBooks.buyOnCash(title, price);
         return optPrice;
-    }
-
-    /**
-     * 給料を受け取る
-     * @since 1.0
-     */
-    @Override
-    public void getSalary(Employable from, int amount) {
-        mBooks.getSalary(amount);
-        PrivateAccount workerAccount = mainBank().account(this);
-        int tax = Taxes.computeIncomeTaxFromManthly(amount);
-        from.transfer(workerAccount, amount - tax);
     }
 
     /**
@@ -251,7 +239,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * @since 1.0
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(this, mainBank().account(this), amount, Period.ofYears(1));
+        Loan debt = new Loan(this, amount, Period.ofYears(1));
         mLoans.add(debt);
         return debt;
     }
@@ -284,15 +272,15 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * @since 1.0
      */
     public Optional<PrivateBusiness> establish(Industry industry, Set<Product> products, int initialCapital) {
-        int cash = mBooks.get(WorkerParsonAccountTitle.CASH);
-        int deposit = mBooks.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
+        int cash = mBooks.get(WorkerParsonTitle.CASH);
+        int deposit = mBooks.get(WorkerParsonTitle.ORDINARY_DEPOSIT);
         if (cash + deposit < initialCapital) {
             return Optional.empty();
         }
 
         if (deposit < initialCapital) {
-            int shortfall = initialCapital - deposit;
-            saveMoney(shortfall);
+            int shortage = initialCapital - deposit;
+            saveMoney(shortage);
         }
         mBooks.establish(initialCapital);
         PrivateBusiness business = new PrivateBusiness(this, industry, products, initialCapital);

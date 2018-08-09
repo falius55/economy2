@@ -8,7 +8,7 @@ import jp.gr.java_conf.falius.economy2.book.BorrowableBooks;
  * @since 1.0
  *
  */
-public interface Borrowable extends Entity {
+public interface Borrowable extends AccountOpenable {
 
     /**
      * @since   1.0

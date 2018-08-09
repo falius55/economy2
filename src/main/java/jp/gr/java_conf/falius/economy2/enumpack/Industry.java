@@ -8,8 +8,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
 import jp.gr.java_conf.falius.economy2.stockmanager.Factory;
 import jp.gr.java_conf.falius.economy2.stockmanager.Farm;
+import jp.gr.java_conf.falius.economy2.stockmanager.HumanResource;
 import jp.gr.java_conf.falius.economy2.stockmanager.Repository;
 import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
 
@@ -57,6 +59,14 @@ public enum Industry {
     FOOD_MAKER("飲食メーカー", Type.MAKER) {
         public Set<Product> products() {
             return EnumSet.of(Product.RICE_BALL);
+        }
+    },
+    /**
+     * @since 1.0
+     */
+    ARCHITECTURE("建築会社", Type.CONTRACT) {
+        public Set<Product> products() {
+            return EnumSet.of(Product.BUILDINGS);
         }
     };
 
@@ -149,29 +159,36 @@ public enum Industry {
         /** 小売り @since 1.0 */
         RETAIL("小売") {
             @Override
-            public StockManager newManager(Product product) {
+            public StockManager newManager(Product product, HumanResourcesDepartment stuffs  ) {
                 return new Repository(product, MAKER);
             }
         },
         /** メーカー @since 1.0 */
         MAKER("メーカー") {
             @Override
-            public StockManager newManager(Product product) {
+            public StockManager newManager(Product product, HumanResourcesDepartment stuffs  ) {
                 return new Factory(product);
             }
         },
         /** 第一次産業 @since 1.0 */
         FARMER("第一次産業") {
             @Override
-            public StockManager newManager(Product product) {
+            public StockManager newManager(Product product, HumanResourcesDepartment stuffs  ) {
                 return new Farm(product);
             }
         },
         /** 流通業 @since 1.0 */
         DISTRIBUTOR("流通業") {
             @Override
-            public StockManager newManager(Product product) {
+            public StockManager newManager(Product product, HumanResourcesDepartment stuffs) {
                 return new Repository(product, MAKER);
+            }
+        },
+        /** 業務請負 @since 1.0 */
+        CONTRACT("業務請負") {
+            @Override
+            public StockManager newManager(Product product, HumanResourcesDepartment stuffs) {
+                return new HumanResource(product, stuffs);
             }
         },
         /** 大口小売り @since 1.0 */
@@ -191,10 +208,11 @@ public enum Industry {
         /**
          *
          * @param product
+         * @param HumanResourcesDepartment
          * @return
          * @since 1.0
          */
-        public StockManager newManager(Product product) {
+        public StockManager newManager(Product product, HumanResourcesDepartment stuffs) {
             return new Repository(product, MAKER);
         }
 

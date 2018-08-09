@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.loan;
+package jp.gr.java_conf.falius.economy2.agreement;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -8,7 +8,7 @@ import jp.gr.java_conf.falius.economy2.book.BankBooks;
 import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.book.PrivateBankBooks;
-import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 /**
@@ -24,8 +24,8 @@ public class Bond {
     private LocalDate mDeadLine; // 期限
     private boolean mIsPayOff = false;
 
+    private final GovernmentBooks mIssuerBooks; // 債務者の会計
     private BankBooks<?> mUnderWriterBooks = null; // 債権者の会計
-    private GovernmentBooks mIssuerBooks; // 債務者の会計
 
     public Bond(GovernmentBooks issuerBook, int amount, Period period) {
         mIssuerBooks = issuerBook;
@@ -105,15 +105,16 @@ public class Bond {
      * 債務が受け入れられ、債権債務関係が発生する
      * @since 1.0
      */
-    public Bond accepted(BankBooks<?> underwriterBook) {
+    public Bond accepted(BankBooks<?> underwriterBooks) {
         if (isConcluded()) {
             throw new IllegalStateException("債権債務関係はすでに発生しています");
         }
-        mUnderWriterBooks = underwriterBook;
+        mUnderWriterBooks = underwriterBooks;
         mAccrualDate = Market.INSTANCE.nowDate();
         mDeadLine = mAccrualDate.plus(mPeriod);
         mIssuerBooks.issueBonds(amount());
-        underwriterBook.acceptGovernmentBond(amount());
+        underwriterBooks.acceptGovernmentBond(amount());
+        underwriterBooks.transferable().transfer(mIssuerBooks.mainAccount(), mAmount);
         return this;
     }
 
@@ -128,6 +129,7 @@ public class Bond {
         }
         mUnderWriterBooks.sellGovernmentBond(amount());
         transferee.buyGorvementBond(amount());
+        transferee.transferable().transfer(mUnderWriterBooks.transferable(), mAmount);
         mUnderWriterBooks = transferee;
         return this;
     }
@@ -144,11 +146,12 @@ public class Bond {
         if (isPayOff()) {
             return true;
         }
-        if (mIssuerBooks.get(GovernmentAccountTitle.DEPOSIT) < amount()) {
+        if (mIssuerBooks.get(GovernmentTitle.DEPOSIT) < amount()) {
             return false;
         }
         mIssuerBooks.redeemBonds(amount());
         mUnderWriterBooks.redeemedGovernmentBond(amount());
+        mIssuerBooks.mainAccount().transfer(mUnderWriterBooks.transferable(), mAmount);
         mIsPayOff = true;
         return true;
     }
