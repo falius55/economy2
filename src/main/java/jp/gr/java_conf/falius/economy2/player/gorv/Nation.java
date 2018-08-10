@@ -99,6 +99,7 @@ public class Nation implements Government {
     @Override
     public void closeEndOfMonth() {
         update();
+        collectTaxes();
     }
 
     /**

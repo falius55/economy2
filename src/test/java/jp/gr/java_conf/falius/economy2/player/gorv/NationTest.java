@@ -91,11 +91,14 @@ public class NationTest {
         int salary3 = cbank.paySalary(worker3);
         int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
         int capital3 = salary3 - tax3;
+        int centralIncomeTax = tax + tax2 + tax3;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness coop = worker3.establish(Industry.SUPER_MARKET, capital3).get();
+        assertThat(nation.books().get(GovernmentTitle.INCOME_TAX), is(centralIncomeTax));
+        int autoCollectConsumptionTax = nation.books().get(GovernmentTitle.CONSUMPTION_TAX);
 
         cbank.paySalary(worker);
 
@@ -109,10 +112,12 @@ public class NationTest {
         allIncomeTax += farmer.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         allIncomeTax += maker.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         allIncomeTax += coop.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
+        allIncomeTax += centralIncomeTax;
         int allConsumptionTax = 0;
          allConsumptionTax+= farmer.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
          allConsumptionTax+= maker.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
          allConsumptionTax+= coop.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
+         allConsumptionTax += autoCollectConsumptionTax;
 
         System.out.println(nation.books().toString());
         nation.collectTaxes();
@@ -135,13 +140,11 @@ public class NationTest {
         System.out.println("--- order ---");
         Nation nation = Nation.INSTANCE;
         CentralBank cbank = CentralBank.INSTANCE;
-
-        Bank bank = new PrivateBank();
+        PrivateBank bank = new PrivateBank();
         WorkerParson founder = new WorkerParson();
         int salary = cbank.paySalary(founder);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int capital = salary - tax;
-
         PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
 
         int price = nation.order(Product.BUILDINGS).getAsInt();
@@ -149,18 +152,24 @@ public class NationTest {
         System.out.println("支出負担分、国債を発行する。");
         nation.closeEndOfMonth();
         System.out.printf("nation: %s%n", nation.books().toString());
-        assertThat(nation.books().get(GovernmentTitle.GOVERNMENT_BOND), is(price));
-        assertThat(nation.deposit(), is(price));
+        int collectedTaxes = nation.books().get(GovernmentTitle.INCOME_TAX) + nation.books().get(GovernmentTitle.CONSUMPTION_TAX);
+        int bondsOnGovernmentBooks = nation.books().get(GovernmentTitle.GOVERNMENT_BOND);
+        int bondsOnCentral = cbank.books().get(CentralBankTitle.GOVERNMENT_BOND);
+        int bondsOnPB = bank.books().get(PrivateBankTitle.GOVERNMENT_BOND);
+        assertThat(bondsOnGovernmentBooks, is(greaterThan(0)));
+        assertThat(bondsOnGovernmentBooks, is(bondsOnCentral + bondsOnPB));
+        assertThat(nation.deposit(), is(bondsOnGovernmentBooks + collectedTaxes));
         assertThat(nation.expenditureBurden(), is(price));
         checkAccount(nation);
 
         System.out.println("分割払いで支払い");
         IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        int newCollectedTaxes = nation.books().get(GovernmentTitle.INCOME_TAX) + nation.books().get(GovernmentTitle.CONSUMPTION_TAX);
         System.out.printf("nation: %s%n", nation.books().toString());
         int paid = price - nation.expenditureBurden();
         assertThat(nation.expenditureBurden(), is(lessThan(price)));
         assertThat(nation.books().get(GovernmentTitle.FIXEDASSET_SUSPENSE_ACCOUNT), is(paid));
-        assertThat(nation.deposit(), is(nation.expenditureBurden()));
+        assertThat(nation.deposit(), is(bondsOnGovernmentBooks + newCollectedTaxes - paid));
         checkAccount(nation);
 
         System.out.println("払いきると建物を引き替え");
@@ -171,12 +180,12 @@ public class NationTest {
             }
         }
         System.out.printf("nation: %s%n", nation.books().toString());
+        int lastCollectedTaxes = nation.books().get(GovernmentTitle.INCOME_TAX) + nation.books().get(GovernmentTitle.CONSUMPTION_TAX);
         assertThat(nation.books().get(GovernmentTitle.BUILDINGS), is(price));
         assertThat(nation.books().get(GovernmentTitle.FIXEDASSET_SUSPENSE_ACCOUNT), is(0));
         assertThat(nation.expenditureBurden(), is(0));
-
+        assertThat(nation.deposit(), is(bondsOnGovernmentBooks + lastCollectedTaxes - price));
         checkAccount(nation);
-
         System.out.println("--- order ---");
     }
 }

@@ -309,6 +309,7 @@ public class PrivateBankTest {
         int capital = founder.deposit();
 
         PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        int oldDeposit = business.deposit();
         System.out.println("創業時");
         System.out.printf("bank: %s%n", bank.books().toString());
 
@@ -319,15 +320,15 @@ public class PrivateBankTest {
         System.out.printf("bank: %s%n", bank.books().toString());
 
         System.out.println("分割払いで支払い");
-        int oldDeposit = business.deposit();
         IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
         System.out.printf("bank: %s%n", bank.books().toString());
         System.out.printf("business: %s%n", business.books().toString());
         int paid = price - nation.expenditureBurden();
         int bondsAmount = bank.books().get(PrivateBankTitle.GOVERNMENT_BOND);
-        int expectCentralAccount = capital - bondsAmount + paid;
+        int expectCentralAccount = capital - bondsAmount + paid - business.books().get(PrivateBusinessTitle.TAX);
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(expectCentralAccount));
-        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(oldDeposit + paid));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT),
+                is(oldDeposit + paid - business.books().get(PrivateBusinessTitle.TAX)));
         checkAccount(bank);
 
         System.out.println("払いきると建物を引き替え");
@@ -339,8 +340,10 @@ public class PrivateBankTest {
         }
         System.out.printf("bank: %s%n", bank.books().toString());
         System.out.printf("business: %s%n", business.books().toString());
-        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(capital - bondsAmount + price));
-        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(oldDeposit + price));
+        int paidTax = business.books().get(PrivateBusinessTitle.TAX);
+        assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS),
+                is(capital - bondsAmount + price - paidTax));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(oldDeposit - paidTax + price));
         assertThat(bank.deposit() + bank.books().get(PrivateBankTitle.GOVERNMENT_BOND),
                 is(bank.books().get(PrivateBankTitle.DEPOSIT)));
         checkAccount(bank);
