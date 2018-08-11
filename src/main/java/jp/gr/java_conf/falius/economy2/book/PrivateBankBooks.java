@@ -30,7 +30,7 @@ public class PrivateBankBooks extends AbstractDoubleEntryBooks<PrivateBankTitle>
      * @since 1.0
      */
     private PrivateBankBooks(CentralAccount mainAccount) {
-        super(PrivateBankTitle.class);
+        super(PrivateBankTitle.class, false);
         mMyAccount = mainAccount;
     }
 

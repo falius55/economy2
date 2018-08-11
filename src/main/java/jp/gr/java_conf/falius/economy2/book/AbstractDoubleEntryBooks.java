@@ -15,15 +15,18 @@ import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & Title>
         extends AbstractBooks<T> implements DoubleEntryBooks<T> {
     private final FixedAssetManager mFixedAssetManager;
+    private final boolean mByDirect;
 
     /**
      *
-     * @param clazz
+     * @param clazz 利用する勘定科目の列挙クラス
+     * @param byDirect 直説法で減価償却するならtrue、間接法ならfalse
      * @since 1.0
      */
-    protected AbstractDoubleEntryBooks(Class<T> clazz) {
+    protected AbstractDoubleEntryBooks(Class<T> clazz, boolean byDirect) {
         super(clazz);
         mFixedAssetManager = new FixedAssetManager();
+        mByDirect = byDirect;
     }
 
     /**
@@ -74,6 +77,11 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & Title>
 
     // 以下は固定資産
 
+    @Override
+    public boolean byDirect() {
+        return mByDirect;
+    }
+
     /**
      * 固定資産を追加します
      * @param dateOfAcquisition 取得日
@@ -87,7 +95,11 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & Title>
 
     public int updateFixedAssets() {
         int amount = mFixedAssetManager.update();
-        depreciationByIndirect(amount);
+        if (mByDirect) {
+            depreciationByDirect(amount);
+        } else {
+            depreciationByIndirect(amount);
+        }
         return amount;
     }
 

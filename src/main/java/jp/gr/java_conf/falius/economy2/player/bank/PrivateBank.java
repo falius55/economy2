@@ -1,9 +1,8 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -36,9 +35,6 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      */
     public static final double BOND_RATIO = 0.3d;
 
-    private static final int SALARY = 50000;
-    private static final List<PrivateBank> sOwns = new ArrayList<PrivateBank>();
-
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
     private final Set<Loan> mLoans = new HashSet<>();
     private final Map<AccountOpenable, PrivateAccount> mAccounts = new HashMap<>();
@@ -50,21 +46,13 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @since 1.0
      */
     public static Stream<PrivateBank> stream() {
-        return sOwns.stream();
-    }
-
-    /**
-     * @since 1.0
-     */
-    public static void clear() {
-        sOwns.clear();
+        return Market.INSTANCE.entities(PrivateBank.class);
     }
 
     /**
      * @since 1.0
      */
     public PrivateBank() {
-        sOwns.add(this);
         Market.INSTANCE.aggregater().add(this);
         CentralAccount account = mainBank().createAccount(this);
         mBooks = PrivateBankBooks.newInstance(account);
@@ -147,6 +135,14 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
         int cash = mBooks.get(PrivateBankTitle.CASH);
         int checking = mBooks.get(PrivateBankTitle.CHECKING_ACCOUNTS);
         return cash + checking >= amount;
+    }
+
+    /**
+     * 日課処理を行います。
+     * @since 1.0
+     */
+    public void closeEndOfDay(LocalDate date) {
+
     }
 
     /**
@@ -253,12 +249,12 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @since 1.0
      */
     @Override
-    public int paySalary(Worker worker) {
-        int takeHome = mBooks.paySalary(SALARY);
-        worker.books().getSalary(SALARY);
+    public int paySalary(Worker worker, int salary) {
+        int takeHome = mBooks.paySalary(salary);
+        worker.books().getSalary(salary);
         PrivateAccount workerAccount = worker.books().mainAccount();
         mainBank().account(this).transfer(workerAccount, takeHome);
-        return SALARY;
+        return salary;
     }
 
     /**
@@ -271,6 +267,14 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
         mBooks.payIncomeTax(amount);
         mainBank().account(this).transfer(nationBooks.mainAccount(), amount);
         return this;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public Set<Worker> employers() {
+        return mStuffManager.employers();
     }
 
     /**

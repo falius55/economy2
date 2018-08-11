@@ -81,4 +81,8 @@ public class HumanResourcesDepartment {
     public boolean has(Worker worker) {
         return mEmployers.contains(worker);
     }
+
+    public int count() {
+        return mEmployers.size();
+    }
 }

@@ -31,7 +31,7 @@ public interface StockManager {
      * @return 仕入に要した費用
      * @since 1.0
      */
-    public Set<Deferment> purchasePayable();
+    public Set<Deferment> purchasePayables();
 
     /**
      * 現在の商品原価総額を返します。
@@ -39,9 +39,4 @@ public interface StockManager {
      * @since 1.0
      */
     public int stockCost();
-
-    /**
-     * @since 1.0
-     */
-    public void update();
 }

@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -34,9 +35,7 @@ import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
  */
 public class PrivateBusiness
         implements AccountOpenable, Employable, PrivateEntity, Borrowable, Deferrable, InstallmentReceivable {
-    private static final Set<PrivateBusiness> sOwns = new HashSet<PrivateBusiness>();
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
-    private static final int SALARY = 50000;
 
     private final Industry mIndustry;
     private final Set<Product> mProducts;
@@ -53,7 +52,7 @@ public class PrivateBusiness
      * @since 1.0
      */
     public static Stream<PrivateBusiness> stream() {
-        return sOwns.stream();
+        return Market.INSTANCE.entities(PrivateBusiness.class);
     }
 
     /**
@@ -63,14 +62,7 @@ public class PrivateBusiness
      * @since 1.0
      */
     public static Stream<PrivateBusiness> stream(Industry.Type type) {
-        return sOwns.stream().filter(pb -> pb.mIndustry.type() == type);
-    }
-
-    /**
-     * @since 1.0
-     */
-    public static void clear() {
-        sOwns.clear();
+        return stream().filter(pb -> pb.mIndustry.type() == type);
     }
 
     /**
@@ -92,7 +84,6 @@ public class PrivateBusiness
         PrivateAccount account = mMainBank.createAccount(this);
         mBooks = PrivateBusinessBooks.newInstance(account);
         mBooks.establish(initialCapital);
-        sOwns.add(this);
         Market.INSTANCE.aggregater().add(this);
         employ(founder);
     }
@@ -196,13 +187,21 @@ public class PrivateBusiness
     }
 
     /**
+     * 日課処理を行います。
+     * @since 1.0
+     */
+    public void closeEndOfDay(LocalDate date) {
+        recodePurchase();
+    }
+
+    /**
      * @since 1.0
      */
     @Override
     public void closeEndOfMonth() {
-        update();
         mPayables.stream()
                 .forEach(def -> def.settle(this));
+        mPayables.clear();
 
         int cash = cash();
         if (cash < 0) {
@@ -290,12 +289,12 @@ public class PrivateBusiness
      * @since 1.0
      */
     @Override
-    public int paySalary(Worker worker) {
-        int takeHome = mBooks.paySalary(SALARY);
-        worker.books().getSalary(SALARY);
+    public int paySalary(Worker worker, int salary) {
+        int takeHome = mBooks.paySalary(salary);
+        worker.books().getSalary(salary);
         PrivateAccount workerAccount = worker.books().mainAccount();
         mainBank().account(this).transfer(workerAccount, takeHome);
-        return SALARY;
+        return salary;
     }
 
     /**
@@ -308,6 +307,14 @@ public class PrivateBusiness
         mBooks.payIncomeTax(amount);
         mainBank().account(this).transfer(CentralBank.INSTANCE.nationAccount(), amount);
         return this;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public Set<Worker> employers() {
+        return mStuffManager.employers();
     }
 
     /**
@@ -388,22 +395,12 @@ public class PrivateBusiness
     }
 
     /**
-     * @since 1.0
-     */
-    public void update() {
-        // use in Market#closeEndOfMonth
-        mStockManagers.values().stream()
-                .forEach(StockManager::update);
-        recodePurchase();
-    }
-
-    /**
      * 未計上の仕入費を計上します。
      * @since 1.0
      */
-    private void recodePurchase() {
+    public void recodePurchase() {
         Set<Deferment> payables = mStockManagers.values().stream()
-                .map(StockManager::purchasePayable)
+                .map(StockManager::purchasePayables)
                 .flatMap(Set::stream) // Set<Deferment>のstreamからDefermentのstreamにする
                 .collect(Collectors.toSet());
         mPayables.addAll(payables);
@@ -412,6 +409,19 @@ public class PrivateBusiness
                 .mapToInt(Deferment::amount)
                 .sum();
         mBooks.purchase(purchase);
+    }
+
+    // テスト用
+    public boolean check() {
+        int loan = mLoans.stream().mapToInt(Loan::amount).sum();
+        if (loan != mBooks.get(PrivateBusinessTitle.LOANS_PAYABLE)) {
+            return false;
+        }
+        int payable = mPayables.stream().mapToInt(Deferment::amount).sum();
+        if (payable != mBooks.get(PrivateBusinessTitle.PAYABLE)) {
+            return false;
+        }
+        return true;
     }
 
 }

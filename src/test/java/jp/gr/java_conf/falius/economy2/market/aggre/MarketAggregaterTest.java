@@ -395,4 +395,30 @@ public class MarketAggregaterTest {
 
         System.out.println("--- order ---");
     }
+
+    @Test
+    public void orderAndFixedAssetsTest() {
+        System.out.println("--- fixed assets ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        int salary = cbank.paySalary(founder);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        check();
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+        while(true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        check();
+        IntStream.range(0, 3).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        check();
+
+        System.out.println("--- fixed assets ---");
+    }
 }

@@ -59,11 +59,9 @@ public class Repository implements StockManager {
         }
 
         if (mStock < require) {
-            OptionalInt optPurchaseExpence = purchase(require - mStock);
-            if (!optPurchaseExpence.isPresent()) {
+            if (!purchase(require - mStock)) {
                 return OptionalInt.empty();
             }
-            int purchaseExpence = optPurchaseExpence.getAsInt();
         }
 
         int cost = (mStockCost / mStock) * require;
@@ -73,12 +71,45 @@ public class Repository implements StockManager {
     }
 
     /**
+     * 仕入れます
+     * @return 仕入に要した費用。仕入に失敗すると空
+     * @since 1.0
+     */
+    private boolean purchase(int require) {
+        int sourceRequireLot = require % mProduct.numOfLot() == 0 ? require / mProduct.numOfLot()
+                : require / mProduct.numOfLot() + 1;
+        int sourceRequire = sourceRequireLot * mProduct.numOfLot();
+
+        // 仕入先の店を探す
+        Optional<PrivateBusiness> optStore = PrivateBusiness.stream(mProductSource)
+                .filter(e -> e.canSale(mProduct, sourceRequire))
+                .findAny();
+        if (!optStore.isPresent()) {
+            return false; // 仕入れできる店が見つからない
+        }
+        PrivateBusiness store = optStore.get();
+
+        // 購入する
+        Optional<Deferment> optPayable = store.saleByReceivable(mProduct, sourceRequire);
+        if (!optPayable.isPresent()) {
+            return false; // 購入できなかった
+        }
+        Deferment payable = optPayable.get();
+        int cost = payable.amount();
+
+        mPurchasePayable.add(payable);
+        mStock += sourceRequire;
+        mStockCost += cost;
+        return true;
+    }
+
+    /**
      * 仕入費用を集計します
      * @return 仕入に要した費用
      * @since 1.0
      */
     @Override
-    public Set<Deferment> purchasePayable() {
+    public Set<Deferment> purchasePayables() {
         Set<Deferment> ret = new HashSet<>(mPurchasePayable);
         mPurchasePayable.clear();
         return ret;
@@ -90,49 +121,6 @@ public class Repository implements StockManager {
     @Override
     public int stockCost() {
         return mStockCost;
-    }
-
-    /**
-     * 仕入れます
-     * @return 仕入に要した費用。仕入に失敗すると空
-     * @since 1.0
-     */
-    private OptionalInt purchase(int require) {
-        int sourceRequireLot = require % mProduct.numOfLot() == 0 ? require / mProduct.numOfLot()
-                : require / mProduct.numOfLot() + 1;
-        int sourceRequire = sourceRequireLot * mProduct.numOfLot();
-
-        // 仕入先の店を探す
-        Optional<PrivateBusiness> optStore = PrivateBusiness.stream(mProductSource)
-                .filter(e -> e.canSale(mProduct, sourceRequire))
-                .findAny();
-        if (!optStore.isPresent()) {
-            return OptionalInt.empty();
-        } // 仕入れできる店が見つからない
-        PrivateBusiness store = optStore.get();
-        store.update();
-
-        // 購入する
-        Optional<Deferment> optPayable = store.saleByReceivable(mProduct, sourceRequire);
-        if (!optPayable.isPresent()) {
-            return OptionalInt.empty();
-        } // 購入できなかった
-        Deferment payable = optPayable.get();
-        int cost = payable.amount();
-
-        mPurchasePayable.add(payable);
-        mStock += sourceRequire;
-        mStockCost += cost;
-        return OptionalInt.of(cost);
-    }
-
-    /**
-     * @since 1.0
-     */
-    @Override
-    public void update() {
-        // TODO 自動生成されたメソッド・スタブ
-
     }
 
 }

@@ -71,7 +71,8 @@ public class Farm implements StockManager {
      * @since 1.0
      */
     @Override
-    public Set<Deferment> purchasePayable() {
+    public Set<Deferment> purchasePayables() {
+        update();
         return Collections.emptySet();
     }
 
@@ -87,8 +88,7 @@ public class Farm implements StockManager {
      * 在庫や仕入れ情報を更新します。
      * @since 1.0
      */
-    @Override
-    public void update() {
+    private void update() {
         mLastManufacture = updateManufacture(mLastManufacture, mManufacturePeriod);
     }
 

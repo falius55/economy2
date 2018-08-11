@@ -1,7 +1,8 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
@@ -12,8 +13,8 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
  * @since 1.0
  *
  */
-public class PrivateBankAggregater {
-    private List<PrivateBank> mBanks = new ArrayList<>();
+class PrivateBankAggregater {
+    private Collection<PrivateBank> mBanks = new ArrayList<>();
 
     /**
      * @since 1.0
@@ -21,12 +22,16 @@ public class PrivateBankAggregater {
     PrivateBankAggregater() {
     }
 
+    Collection<PrivateBank> collection() {
+        return Collections.unmodifiableCollection(mBanks);
+    }
+
     /**
      *
      * @param privateBank
      * @since 1.0
      */
-    public void add(PrivateBank privateBank) {
+    void add(PrivateBank privateBank) {
         mBanks.add(privateBank);
     }
 
@@ -35,7 +40,7 @@ public class PrivateBankAggregater {
      * @return
      * @since 1.0
      */
-    public int deposits() {
+    int deposits() {
         return mBanks.stream()
                 .mapToInt(pb -> pb.books().get(PrivateBankTitle.DEPOSIT))
                 .sum();
@@ -46,7 +51,7 @@ public class PrivateBankAggregater {
      * @return
      * @since 1.0
      */
-    public int cashAndAccounts() {
+    int cashAndAccounts() {
         return mBanks.stream()
                 .mapToInt(pb -> pb.cash() + pb.deposit())
                 .sum();
@@ -57,7 +62,7 @@ public class PrivateBankAggregater {
      * @return
      * @since 1.0
      */
-    public int governmentBonds() {
+    int governmentBonds() {
         return mBanks.stream()
                 .map(PrivateBank::books)
                 .mapToInt(book -> book.get(PrivateBankTitle.GOVERNMENT_BOND))
@@ -67,7 +72,7 @@ public class PrivateBankAggregater {
     /**
      * @since 1.0
      */
-    public void clear() {
+    void clear() {
         mBanks.clear();
     }
 

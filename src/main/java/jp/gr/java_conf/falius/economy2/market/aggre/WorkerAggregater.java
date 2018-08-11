@@ -1,7 +1,8 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
@@ -12,8 +13,8 @@ import jp.gr.java_conf.falius.economy2.player.WorkerParson;
  * @since 1.0
  *
  */
-public class WorkerAggregater {
-    private final List<WorkerParson> mWorkers = new ArrayList<>();
+class WorkerAggregater {
+    private final Collection<WorkerParson> mWorkers = new ArrayList<>();
 
     /**
      * @since 1.0
@@ -21,12 +22,16 @@ public class WorkerAggregater {
     WorkerAggregater() {
     }
 
+    Collection<WorkerParson> collection() {
+        return Collections.unmodifiableCollection(mWorkers);
+    }
+
     /**
      *
      * @param worker
      * @since 1.0
      */
-    public void add(WorkerParson worker) {
+    void add(WorkerParson worker) {
         mWorkers.add(worker);
     }
 
@@ -35,7 +40,7 @@ public class WorkerAggregater {
      * @return
      * @since 1.0
      */
-    public int salary() {
+    int salary() {
         return mWorkers.stream()
                 .map(WorkerParson::books)
                 .mapToInt(book -> book.get(WorkerParsonTitle.SALARIES))
@@ -47,7 +52,7 @@ public class WorkerAggregater {
      * @return
      * @since 1.0
      */
-    public int consumption() {
+    int consumption() {
         return mWorkers.stream()
                 .map(WorkerParson::books)
                 .mapToInt(book -> book.get(WorkerParsonTitle.CONSUMPTION))
@@ -59,7 +64,7 @@ public class WorkerAggregater {
      * @return
      * @since 1.0
      */
-    public int cashAndDeposits() {
+    int cashAndDeposits() {
         return mWorkers.stream()
                 .mapToInt(worker -> worker.cash() + worker.deposit())
                 .sum();
@@ -68,7 +73,7 @@ public class WorkerAggregater {
     /**
      * @since 1.0
      */
-    public void clear() {
+    void clear() {
         mWorkers.clear();
     }
 

@@ -1,6 +1,8 @@
 package jp.gr.java_conf.falius.economy2.player.gorv;
 
+import java.time.LocalDate;
 import java.time.Period;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -90,7 +92,15 @@ public class Nation implements Government {
      * @since 1.0
      */
     public Set<Bond> bonds() {
-        return mBonds;
+        return Collections.unmodifiableSet(mBonds);
+    }
+
+    /**
+     * 日課処理を行います。
+     * @since 1.0
+     */
+    public void closeEndOfDay(LocalDate date) {
+
     }
 
     /**

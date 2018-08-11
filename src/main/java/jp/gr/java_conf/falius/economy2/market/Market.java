@@ -6,10 +6,8 @@ import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.market.aggre.MarketAggregater;
 import jp.gr.java_conf.falius.economy2.player.Employable;
-import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
-import jp.gr.java_conf.falius.economy2.player.WorkerParson;
+import jp.gr.java_conf.falius.economy2.player.Entity;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
-import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 /**
@@ -48,6 +46,23 @@ public class Market {
     }
 
     /**
+     * @return
+     * @since 1.0
+     */
+    public Stream<Entity> entities() {
+        return mAggregater.entities().stream();
+    }
+
+    /**
+     * @param clazz
+     * @return
+     * @since 1.0
+     */
+    public <T extends Entity> Stream<T> entities(Class<T> clazz) {
+        return mAggregater.entities().stream().filter(clazz::isInstance).map(clazz::cast);
+    }
+
+    /**
      *
      * @return
      * @since 1.0
@@ -62,11 +77,7 @@ public class Market {
      * @since 1.0
      */
     public Stream<Employable> employables() {
-        Stream.Builder<Employable> builder = Stream.builder();
-        PrivateBusiness.stream().forEach(pb -> builder.add(pb));
-        PrivateBank.stream().forEach(pb -> builder.add(pb));
-        builder.add(CentralBank.INSTANCE);
-        return builder.build();
+        return entities(Employable.class);
     }
 
     /**
@@ -87,8 +98,9 @@ public class Market {
      */
     public Market nextDay() {
         mDate = mDate.plusDays(1);
+        entities().forEach(e -> e.closeEndOfDay(mDate));
         if (mDate.getDayOfMonth() == mDate.lengthOfMonth()) {
-            closeEndOfMonth();
+            entities().forEach(Entity::closeEndOfMonth);
         }
         return this;
     }
@@ -110,21 +122,8 @@ public class Market {
     /**
      * @since 1.0
      */
-    private void closeEndOfMonth() {
-        PrivateBusiness.stream().forEach(PrivateBusiness::update);
-        PrivateBusiness.stream().forEach(PrivateBusiness::closeEndOfMonth);
-        PrivateBank.stream().forEach(PrivateBank::closeEndOfMonth);
-        Nation.INSTANCE.closeEndOfMonth();
-    }
-
-    /**
-     * @since 1.0
-     */
     public void clear() {
         mDate = LocalDate.now();
-        WorkerParson.clear();
-        PrivateBusiness.clear();
-        PrivateBank.clear();
         CentralBank.INSTANCE.clear();
         Nation.INSTANCE.clear();
         mAggregater.clear();

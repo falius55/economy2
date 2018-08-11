@@ -9,20 +9,22 @@ import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
  * @since 1.0
  *
  */
-public class CentralBankAggregater {
-    private CentralBank mBank = CentralBank.INSTANCE;
+class CentralBankAggregater {
+    private CentralBank mBank;
 
     /**
      * @since 1.0
      */
-    CentralBankAggregater() {}
+    CentralBankAggregater(CentralBank bank) {
+        mBank = bank;
+    }
 
     /**
      *
      * @return
      * @since 1.0
      */
-    public int salaries() {
+    int salaries() {
         return mBank.books().get(CentralBankTitle.SALARIES_EXPENSE);
     }
 
@@ -31,7 +33,7 @@ public class CentralBankAggregater {
      * @return
      * @since 1.0
      */
-    public int governmentBonds() {
+    int governmentBonds() {
         return mBank.books().get(CentralBankTitle.GOVERNMENT_BOND);
     }
 
@@ -40,7 +42,7 @@ public class CentralBankAggregater {
      * @return
      * @since 1.0
      */
-    public int bankNotes() {
+    int bankNotes() {
         return mBank.books().get(CentralBankTitle.BANK_NOTE);
     }
 

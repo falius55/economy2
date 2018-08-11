@@ -32,7 +32,7 @@ public class PrivateBusinessBooks extends AbstractDoubleEntryBooks<PrivateBusine
      * @since 1.0
      */
     private PrivateBusinessBooks(PrivateAccount mainAccount) {
-        super(PrivateBusinessTitle.class);
+        super(PrivateBusinessTitle.class, false);
         mAccount = mainAccount;
     }
 

@@ -24,7 +24,6 @@ import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
  *
  */
 public class Factory implements StockManager {
-    private int mCount = 0;
     /** 製造する製品 */
     private final Product mProduct;
     /** 製造期間 */
@@ -79,8 +78,7 @@ public class Factory implements StockManager {
      * 在庫や仕入れ情報を更新します。
      * @since 1.0
      */
-    @Override
-    public void update() {
+    private void update() {
         mLastManufacture = updateManufacture(mLastManufacture, mManufacturePeriod);
     }
 
@@ -124,7 +122,7 @@ public class Factory implements StockManager {
      * @since 1.0
      */
     @Override
-    public Set<Deferment> purchasePayable() {
+    public Set<Deferment> purchasePayables() {
         update();
         Set<Deferment> ret = new HashSet<>(mPurchasePayable);
         mPurchasePayable.clear();
@@ -214,7 +212,6 @@ public class Factory implements StockManager {
             return OptionalInt.empty();
         }
         PrivateBusiness store = optStore.get();
-        store.update();
 
         Optional<Deferment> optDeferment = store.saleByReceivable(product, require);
         if (!optDeferment.isPresent()) {

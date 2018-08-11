@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player.bank;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,7 +31,6 @@ import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
  */
 public class CentralBank implements Bank, Transferable {
     public static final CentralBank INSTANCE;
-    private static final int SALARY = 100000;
 
     private final CentralBankBooks mBooks = CentralBankBooks.newInstance();
     private final HumanResourcesDepartment mStuffManager = new HumanResourcesDepartment(5);
@@ -102,6 +102,14 @@ public class CentralBank implements Bank, Transferable {
     }
 
     /**
+     * 日課処理を行います。
+     * @since 1.0
+     */
+    public void closeEndOfDay(LocalDate date) {
+
+    }
+
+    /**
      * @since 1.0
      */
     @Override
@@ -163,12 +171,12 @@ public class CentralBank implements Bank, Transferable {
      * @since 1.0
      */
     @Override
-    public int paySalary(Worker worker) {
-        int takeHome = mBooks.paySalary(SALARY);
-        worker.books().getSalary(SALARY);
+    public int paySalary(Worker worker, int salary) {
+        int takeHome = mBooks.paySalary(salary);
+        worker.books().getSalary(salary);
         PrivateAccount workerAccount = worker.books().mainAccount();
         transfer(workerAccount, takeHome);
-        return SALARY;
+        return salary;
     }
 
     /**
@@ -181,6 +189,14 @@ public class CentralBank implements Bank, Transferable {
         mBooks.payIncomeTax(amount);
         transfer(mNationAccount, amount);
         return this;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public Set<Worker> employers() {
+        return mStuffManager.employers();
     }
 
     /**
@@ -303,7 +319,6 @@ public class CentralBank implements Bank, Transferable {
     /**
      * @since 1.0
      */
-//    @Override
     private int transfer(NationAccount target, int amount) {
         return target.increase(amount);
     }

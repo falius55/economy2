@@ -188,4 +188,41 @@ public class NationTest {
         checkAccount(nation);
         System.out.println("--- order ---");
     }
+
+    @Test
+    public void orderAndFixedAssetsTest() {
+        System.out.println("--- fixed assets ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        int salary = cbank.paySalary(founder);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+        while(true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        System.out.printf("nation: %s%n", nation.books().toString());
+        assertThat(nation.books().get(GovernmentTitle.BUILDINGS), is(price));
+
+
+        IntStream.range(0, 3).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        System.out.println("after depreciation");
+        System.out.printf("nation: %s%n", nation.books().toString());
+        int depreciation = nation.books().get(GovernmentTitle.DEPRECIATION);
+        assertThat(depreciation, is(not(0)));
+        if (nation.books().byDirect()) {
+            assertThat(nation.books().get(GovernmentTitle.BUILDINGS), is(price - depreciation));
+        } else {
+            assertThat(nation.books().get(GovernmentTitle.ACCUMULATED_DEPRECIATION), is(-depreciation));
+        }
+        assertThat(nation.books().fixedAssetsValue(), is(price - depreciation));
+
+        System.out.println("--- fixed assets ---");
+    }
 }

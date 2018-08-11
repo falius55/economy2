@@ -1,5 +1,6 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashSet;
 import java.util.Objects;
@@ -24,8 +25,6 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
  *
  */
 public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Borrowable {
-    private static final Set<WorkerParson> sOwns = new HashSet<WorkerParson>();
-
     private final PrivateBank mMainBank;
     private final WorkerParsonBooks mBooks;
     private final Set<Loan> mLoans = new HashSet<>();
@@ -38,14 +37,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * @since 1.0
      */
     public static Stream<WorkerParson> stream() {
-        return sOwns.stream();
-    }
-
-    /**
-     * @since 1.0
-     */
-    public static void clear() {
-        sOwns.clear();
+        return Market.INSTANCE.entities(WorkerParson.class);
     }
 
     /**
@@ -56,7 +48,6 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         PrivateAccount account = mMainBank.createAccount(this);
         mBooks = WorkerParsonBooks.newInstance(account);
         Market.INSTANCE.aggregater().add(this);
-        sOwns.add(this);
     }
 
     /**
@@ -108,6 +99,14 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     @Override
     public boolean hasJob() {
         return Objects.nonNull(mJob);
+    }
+
+    /**
+     * 日課処理を行います。
+     * @since 1.0
+     */
+    public void closeEndOfDay(LocalDate date) {
+
     }
 
     /**

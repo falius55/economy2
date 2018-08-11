@@ -11,14 +11,16 @@ import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
  * @since 1.0
  *
  */
-public class NationAggregater {
-    final Nation mNation = Nation.INSTANCE;
-    private final GovernmentBooks mBooks = Nation.INSTANCE.books();
+class NationAggregater {
+    private final Nation mNation;
+    private final GovernmentBooks mBooks;
 
     /**
      * @since 1.0
      */
-    NationAggregater() {
+    NationAggregater(Nation nation) {
+        mNation = nation;
+        mBooks = nation.books();
     }
 
     /**
@@ -26,7 +28,7 @@ public class NationAggregater {
      * @return
      * @since 1.0
      */
-    public int pureIncome() {
+    int pureIncome() {
         return mBooks.get(GovernmentTitle.CONSUMPTION_TAX)
                 - mBooks.get(GovernmentTitle.SUBSIDY);
     }
@@ -36,8 +38,12 @@ public class NationAggregater {
      * @return
      * @since 1.0
      */
-    public int salaries() {
+    int salaries() {
         return mBooks.get(GovernmentTitle.SALARIES_EXPENSE);
+    }
+
+    int depreciation() {
+        return mBooks.get(GovernmentTitle.DEPRECIATION);
     }
 
     /**
@@ -45,7 +51,7 @@ public class NationAggregater {
      * @return
      * @since 1.0
      */
-    public int cashAndDeposits() {
+    int cashAndDeposits() {
         return mNation.cash() + mNation.deposit();
     }
 
@@ -54,7 +60,7 @@ public class NationAggregater {
      * @return
      * @since 1.0
      */
-    public int bonds() {
+    int bonds() {
         return mBooks.get(GovernmentTitle.GOVERNMENT_BOND);
     }
 
@@ -63,7 +69,7 @@ public class NationAggregater {
      * @return
      * @since 1.0
      */
-    public int G() {
+    int G() {
         return mBooks.get(TitleType.EXPENSE) + mBooks.fixedAssetsValue()
                 + mBooks.get(GovernmentTitle.FIXEDASSET_SUSPENSE_ACCOUNT);
     }

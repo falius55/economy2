@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.enumpack.Title;
 import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
@@ -122,6 +123,42 @@ public abstract class AbstractBooks<T extends Enum<T> & Title> implements Mutabl
      */
     @Override
     public String toString() {
-        return mAccountsBook.toString();
+        return mAccountsBook.entrySet().stream()
+                .map(e -> {
+                    String title = String.format("[%s]", e.getKey().toString());
+
+                    String contents = e.getValue().entrySet().stream()
+                            .filter(e2 -> e2.getValue() != 0)
+                            .map(e2 -> String.join(": ", e2.getKey().toString(), e2.getValue().toString()))
+                            .collect(Collectors.joining(System.lineSeparator()));
+
+                    String lossOrBenefit = "";
+                    int sum = get(e.getKey());
+                    switch(e.getKey()) {
+                    case ASSETS:
+                    case REVENUE:
+                        if (benefit() < 0) {
+                            lossOrBenefit = String.format("損失: %d", -benefit());
+                            sum += -benefit();
+                        }
+                        break;
+                    case EQUITY:
+                    case EXPENSE:
+                        if (benefit() > 0) {
+                            lossOrBenefit = String.format("利潤: %d", benefit());
+                            sum += benefit();
+                        }
+                        break;
+                    case LIABILITIES:
+                    default:
+                        break;
+                    }
+                    String strSum = String.format("合計: %d", sum);
+
+                    return Stream.of(title, contents, lossOrBenefit, strSum)
+                            .filter(s -> !s.isEmpty())
+                            .collect(Collectors.joining(System.lineSeparator()));
+                })
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 }

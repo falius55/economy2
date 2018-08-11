@@ -28,7 +28,7 @@ public class GovernmentBooks extends AbstractDoubleEntryBooks<GovernmentTitle>
      * @since 1.0
      */
     private GovernmentBooks(Account mainAccount) {
-        super(GovernmentTitle.class);
+        super(GovernmentTitle.class, false);
         mAccount = mainAccount;
     }
 

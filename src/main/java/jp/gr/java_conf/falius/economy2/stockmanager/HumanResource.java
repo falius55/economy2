@@ -103,7 +103,7 @@ public class HumanResource implements StockManager {
      * @since 1.0
      */
     @Override
-    public Set<Deferment> purchasePayable() {
+    public Set<Deferment> purchasePayables() {
         update();
         Set<Deferment> ret = new HashSet<>(mPurchasePayable);
         mPurchasePayable.clear();
@@ -121,8 +121,7 @@ public class HumanResource implements StockManager {
     /**
      * @since 1.0
      */
-    @Override
-    public void update() {
+    private void update() {
         supplyMaterialAll();
         Set<Contract> completed = mContracts.stream()
                 .filter(Contract::isComplete)
@@ -159,7 +158,7 @@ public class HumanResource implements StockManager {
                 .findAny();
         if (!optStore.isPresent()) { return false; }
         PrivateBusiness store = optStore.get();
-        store.update();
+        store.recodePurchase();
 
         Optional<Deferment> optDeferment = store.saleByReceivable(product, require);
         if (!optDeferment.isPresent()) {

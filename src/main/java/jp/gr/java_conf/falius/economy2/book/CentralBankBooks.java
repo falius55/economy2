@@ -27,7 +27,7 @@ public class CentralBankBooks extends AbstractDoubleEntryBooks<CentralBankTitle>
      * @since 1.0
      */
     public CentralBankBooks() {
-        super(CentralBankTitle.class);
+        super(CentralBankTitle.class, false);
     }
 
     @Override

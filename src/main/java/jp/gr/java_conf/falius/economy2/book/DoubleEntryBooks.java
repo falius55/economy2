@@ -24,4 +24,6 @@ public interface DoubleEntryBooks<T extends Enum<T> & Title> extends Books<T> {
      */
     public void addRight(T item, int amount);
 
+    public boolean byDirect();
+
 }

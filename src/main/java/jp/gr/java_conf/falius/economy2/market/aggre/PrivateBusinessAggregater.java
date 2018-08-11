@@ -1,7 +1,8 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
 import jp.gr.java_conf.falius.economy2.book.Books;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
@@ -13,8 +14,8 @@ import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
  * @since 1.0
  *
  */
-public class PrivateBusinessAggregater {
-    private final List<PrivateBusiness> mPrivateBusinesses = new ArrayList<>();
+class PrivateBusinessAggregater {
+    private final Collection<PrivateBusiness> mPrivateBusinesses = new ArrayList<>();
 
     /**
      * @since 1.0
@@ -22,12 +23,16 @@ public class PrivateBusinessAggregater {
     PrivateBusinessAggregater() {
     }
 
+    Collection<PrivateBusiness>collection() {
+        return Collections.unmodifiableCollection(mPrivateBusinesses);
+    }
+
     /**
      *
      * @param privateBusiness
      * @since 1.0
      */
-    public void add(PrivateBusiness privateBusiness) {
+    void add(PrivateBusiness privateBusiness) {
         mPrivateBusinesses.add(privateBusiness);
     }
 
@@ -36,9 +41,9 @@ public class PrivateBusinessAggregater {
      * @return
      * @since 1.0
      */
-    public int addedValue() {
+    int addedValue() {
         mPrivateBusinesses.stream()
-                .forEach(PrivateBusiness::update); // 仕入れ費をすべて計上しなければ付加価値が水増しされてしまう
+                .forEach(PrivateBusiness::recodePurchase); // 仕入れ費をすべて計上しなければ付加価値が水増しされてしまう
         int allSales = mPrivateBusinesses.stream()
                 .mapToInt(pb -> pb.books().get(PrivateBusinessTitle.SALES))
                 .sum();
@@ -57,10 +62,10 @@ public class PrivateBusinessAggregater {
      * @return
      * @since 1.0
      */
-    public int depreciation() {
+    int depreciation() {
         return mPrivateBusinesses.stream()
                 .map(PrivateBusiness::books)
-                .mapToInt(book -> book.get(PrivateBusinessTitle.ACCUMULATED_DEPRECIATION))
+                .mapToInt(book -> book.get(PrivateBusinessTitle.DEPRECIATION))
                 .sum();
     }
 
@@ -69,9 +74,9 @@ public class PrivateBusinessAggregater {
      * @return
      * @since 1.0
      */
-    public int benefits() {
+    int benefits() {
         mPrivateBusinesses.stream()
-                .forEach(PrivateBusiness::update); // 仕入れ費をすべて計上しなければ利益が水増しされてしまう
+                .forEach(PrivateBusiness::recodePurchase); // 仕入れ費をすべて計上しなければ利益が水増しされてしまう
         int stock = mPrivateBusinesses.stream()
                 .mapToInt(PrivateBusiness::stockCost)
                 .sum();
@@ -87,7 +92,7 @@ public class PrivateBusinessAggregater {
      * @return
      * @since 1.0
      */
-    public int accruedConsumptionTax() {
+    int accruedConsumptionTax() {
         return mPrivateBusinesses.stream()
                 .map(PrivateBusiness::books)
                 .mapToInt(book -> book.get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX))
@@ -99,7 +104,7 @@ public class PrivateBusinessAggregater {
      * @return
      * @since 1.0
      */
-    public int cashAndDeposits() {
+    int cashAndDeposits() {
         return mPrivateBusinesses.stream()
                 .mapToInt(pb -> pb.cash() + pb.deposit())
                 .sum();
@@ -110,7 +115,7 @@ public class PrivateBusinessAggregater {
      * @return
      * @since 1.0
      */
-    public int I() {
+    int I() {
         return mPrivateBusinesses.stream()
                 .mapToInt(PrivateBusiness::stockCost)
                 .sum(); // - 初頭の在庫額
@@ -119,7 +124,7 @@ public class PrivateBusinessAggregater {
     /**
      * @since 1.0
      */
-    public void clear() {
+    void clear() {
         mPrivateBusinesses.clear();
     }
 

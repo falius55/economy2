@@ -1,8 +1,14 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
+import java.util.Collection;
+import java.util.HashSet;
+
+import jp.gr.java_conf.falius.economy2.player.Entity;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
+import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
+import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
 /**
  *
@@ -11,8 +17,8 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
  *
  */
 public class MarketAggregater {
-    private final NationAggregater mNationAggregater = new NationAggregater();
-    private final CentralBankAggregater mCentralBankAggregater = new CentralBankAggregater();
+    private final NationAggregater mNationAggregater = new NationAggregater(Nation.INSTANCE);
+    private final CentralBankAggregater mCentralBankAggregater = new CentralBankAggregater(CentralBank.INSTANCE);
     private final PrivateBusinessAggregater mPrivateBusinessAggregater = new PrivateBusinessAggregater();
     private final WorkerAggregater mWorkerAggregater = new WorkerAggregater();
     private final PrivateBankAggregater mPrivateBankAggregater = new PrivateBankAggregater();
@@ -22,6 +28,16 @@ public class MarketAggregater {
      */
     public MarketAggregater() {
 
+    }
+
+    public Collection<Entity> entities() {
+        Collection<Entity> ret = new HashSet<>();
+        ret.add(Nation.INSTANCE);
+        ret.add(CentralBank.INSTANCE);
+        ret.addAll(mPrivateBusinessAggregater.collection());
+        ret.addAll(mWorkerAggregater.collection());
+        ret.addAll(mPrivateBankAggregater.collection());
+        return ret;
     }
 
     /**
@@ -90,8 +106,15 @@ public class MarketAggregater {
      * @since 1.0
      */
     public int NDP() {
-        return GDP()
-                - mPrivateBusinessAggregater.depreciation();
+        return GDP() - depreciation();
+    }
+
+    /**
+     * 総固定資本減耗
+     * @return
+     */
+    public int depreciation() {
+        return mPrivateBusinessAggregater.depreciation() + mNationAggregater.depreciation();
     }
 
     /**
