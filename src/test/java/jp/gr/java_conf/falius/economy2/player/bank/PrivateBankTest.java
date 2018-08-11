@@ -28,9 +28,10 @@ public class PrivateBankTest {
         Market.INSTANCE.clear();
     }
 
-    private void checkAccount(PrivateBank bank) {
+    private void check(PrivateBank bank) {
         assertThat(bank.mainBank().account(bank).amount(), is(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)));
         assertThat(bank.realDeposits(), is(bank.books().get(PrivateBankTitle.DEPOSIT)));
+        assertThat(bank.check(), is(true));
     }
 
     @Test
@@ -42,14 +43,14 @@ public class PrivateBankTest {
         int salary = cbank.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int capital = salary - tax;
-        checkAccount(bank);
+        check(bank);
 
         System.out.println(bank.books().toString());
 
         PrivateBusiness pb = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(capital));
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(capital));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println("--- establish business ---");
     }
@@ -64,7 +65,7 @@ public class PrivateBankTest {
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int capital = salary - tax;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
-        checkAccount(bank);
+        check(bank);
 
         System.out.println(bank.books().toString());
         int amount = capital;
@@ -73,7 +74,7 @@ public class PrivateBankTest {
         assertThat(bank.deposit(), is(capital - amount + amount)); // 自分に振り込むので変化なし
         assertThat(bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE), is(amount));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(capital + amount));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println(cbank.books().toString());
 
@@ -90,14 +91,14 @@ public class PrivateBankTest {
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int capital = salary - tax;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
-        checkAccount(bank);
+        check(bank);
 
         int amount = capital;
         farmer.borrow(amount);
         assertThat(bank.deposit(), is(capital - amount + amount)); // 自分に振り込むので変化なし
         assertThat(bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE), is(amount));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(capital + amount));
-        checkAccount(bank);
+        check(bank);
         System.out.println("--- borrow to business ---");
     }
 
@@ -129,35 +130,30 @@ public class PrivateBankTest {
         Product product = Product.RICE_BALL;
         int require = 3;
         worker.buy(product, require);
+        check(bank);
 
-        int countToEndOfMonth = Market.INSTANCE.nowDate().lengthOfMonth()
-                - Market.INSTANCE.nowDate().getDayOfMonth();
-        IntStream.range(0, countToEndOfMonth).forEach(n -> Market.INSTANCE.nextDay());
-        System.out.printf("worker: %s%n", worker.books().toString());
-        System.out.printf("farmer: %s%n", farmer.books().toString());
-        System.out.printf("maker: %s%n", maker.books().toString());
-        System.out.printf("coop: %s%n", coop.books().toString());
-        System.out.printf("bank : %s%n", bank.books().toString());
+        Market.INSTANCE.nextEndOfMonth();
+        System.out.printf("worker:%n%s%n", worker.books().toString());
+        System.out.printf("farmer:%n%s%n", farmer.books().toString());
+        System.out.printf("maker:%n%s%n", maker.books().toString());
+        System.out.printf("coop:%n%s%n", coop.books().toString());
+        System.out.printf("bank :%n%s%n", bank.books().toString());
 
-        int loan = 0;
-        loan += worker.books().get(WorkerParsonTitle.LOANS_PAYABLE);
-        loan += farmer.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
-        loan += maker.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
-        loan += coop.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
-        assertThat(bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE), is(loan));
+        int workerLoan = Market.INSTANCE.entities(WorkerParson.class)
+                .mapToInt(w -> w.books().get(WorkerParsonTitle.LOANS_PAYABLE)).sum();
+        int businessLoan = Market.INSTANCE.entities(PrivateBusiness.class)
+                .mapToInt(b -> b.books().get(PrivateBusinessTitle.LOANS_PAYABLE)).sum();
+        assertThat(bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE), is(workerLoan + businessLoan));
 
-        int deposit = 0;
-        deposit += worker.books().get(WorkerParsonTitle.ORDINARY_DEPOSIT);
-        deposit += farmer.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS);
-        deposit += maker.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS);
-        deposit += coop.books().get(PrivateBusinessTitle.CHECKING_ACCOUNTS);
-        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(deposit));
+        int workerDeposit = Market.INSTANCE.entities(WorkerParson.class).mapToInt(WorkerParson::deposit).sum();
+        int businessDeposit = Market.INSTANCE.entities(PrivateBusiness.class).mapToInt(PrivateBusiness::deposit).sum();
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(workerDeposit + businessDeposit));
 
         assertThat(bank.books().get(PrivateBankTitle.CASH)
                 + bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)
                 + bank.books().get(PrivateBankTitle.LOANS_RECEIVABLE),
-                is(deposit));
-        checkAccount(bank);
+                is(workerDeposit + businessDeposit));
+        check(bank);
 
         System.out.println("--- distribution ---");
     }
@@ -176,7 +172,7 @@ public class PrivateBankTest {
 
         int count = 10;
         int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
-        checkAccount(bank);
+        check(bank);
 
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.advertiseBonds();
@@ -186,7 +182,7 @@ public class PrivateBankTest {
         System.out.printf("nation: %s%n", nation.books().toString());
         assertThat(bank.deposit(), is(moneyStock - price * count));
         assertThat(bank.books().get(PrivateBankTitle.GOVERNMENT_BOND), is(price * count));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println("--- nationBond ---");
     }
@@ -203,7 +199,7 @@ public class PrivateBankTest {
         nation.makeUnderwriteBonds(cbank);
         PrivateBank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
-        checkAccount(bank);
+        check(bank);
         int salary = cbank.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int amount = Math.min(salary - tax, price * count);
@@ -212,7 +208,7 @@ public class PrivateBankTest {
 
         assertThat(bank.books().get(PrivateBankTitle.GOVERNMENT_BOND), is(amount));
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(salary - tax - amount));
-        checkAccount(bank);
+        check(bank);
         System.out.println("--- operate selling ---");
     }
 
@@ -227,20 +223,20 @@ public class PrivateBankTest {
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int moneyStock = salary - tax;
         System.out.println(bank.books().toString());
-        checkAccount(bank);
+        check(bank);
 
         int count = 10;
         int price = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
         IntStream.range(0, count).forEach(n -> nation.issueBonds(price));
         nation.advertiseBonds();
         System.out.println(bank.books().toString());
-        checkAccount(bank);
+        check(bank);
 
         cbank.operateBuying(price * count);
         System.out.println(bank.books().toString());
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(moneyStock));
         assertThat(bank.books().get(PrivateBankTitle.GOVERNMENT_BOND), is(0));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println("--- operate buying ---");
     }
@@ -265,7 +261,7 @@ public class PrivateBankTest {
         // 自分に振り込まれるので変わらず ↓
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(beforeChecking));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(beforeDeposit + bankSalary - bankTax));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println("--- paySalary ---");
     }
@@ -286,7 +282,7 @@ public class PrivateBankTest {
         assertThat(bank.deposit(), is(oldDeposit));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(founder.deposit() + company.deposit()));
 
-        checkAccount(bank);
+        check(bank);
         System.out.println("--- pay salary from private business ---");
     }
 
@@ -301,7 +297,7 @@ public class PrivateBankTest {
         int salary = cbank.paySalary(worker);
         int tax = Taxes.computeIncomeTaxFromManthly(salary);
         int moneyStock = salary - tax;
-        checkAccount(bank);
+        check(bank);
 
         int count = 10;
         int faceValue = (int) (moneyStock * PrivateBank.BOND_RATIO / count);
@@ -313,7 +309,7 @@ public class PrivateBankTest {
         assertThat(bank.books().get(PrivateBankTitle.GOVERNMENT_BOND), is(allAmount));
         assertThat(bank.deposit(), is(moneyStock - allAmount));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(moneyStock));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println("--- advertise ---");
     }
@@ -357,7 +353,7 @@ public class PrivateBankTest {
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(expectCentralAccount));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT),
                 is(oldDeposit + paid - newIncomeTax - consumptionTax));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println("払いきると建物を引き替え");
         while (true) {
@@ -374,7 +370,7 @@ public class PrivateBankTest {
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(oldDeposit - paidTax + price));
         assertThat(bank.deposit() + bank.books().get(PrivateBankTitle.GOVERNMENT_BOND),
                 is(bank.books().get(PrivateBankTitle.DEPOSIT)));
-        checkAccount(bank);
+        check(bank);
 
         System.out.println("--- order ---");
     }

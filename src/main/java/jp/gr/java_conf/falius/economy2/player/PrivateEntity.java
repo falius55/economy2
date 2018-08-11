@@ -6,6 +6,6 @@ package jp.gr.java_conf.falius.economy2.player;
  * @since 1.0
  *
  */
-public interface PrivateEntity extends Entity {
+public interface PrivateEntity extends AccountOpenable {
 
 }

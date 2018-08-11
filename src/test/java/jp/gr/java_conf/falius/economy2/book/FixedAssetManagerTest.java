@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import org.junit.After;
 import org.junit.Test;
 
+import jp.gr.java_conf.falius.economy2.book.FixedAssetManager.FixedAsset;
+import jp.gr.java_conf.falius.economy2.helper.MyCollectors;
 import jp.gr.java_conf.falius.economy2.market.Market;
 
 public class FixedAssetManagerTest {
@@ -63,6 +65,14 @@ public class FixedAssetManagerTest {
         // 結果の表示
         fm.printAll();
         System.out.printf("現在日: %s, 減価償却累計額:%d%n", date, depreciatedBalance);
+
+        fm.assets().stream()
+        .map(FixedAsset::recordMap).forEach(recode -> {
+            boolean periodCheck = recode.keySet().stream().collect(MyCollectors.integrationIsSameAll((d1, d2) -> d1.until(d2)));
+            assertThat(periodCheck, is(true));
+            boolean amountCheck = recode.values().stream().collect(MyCollectors.integrationIsSameAll((i1, i2) -> i1 - i2));
+            assertThat(amountCheck, is(true));
+        });;
     }
 
 }

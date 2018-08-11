@@ -35,19 +35,23 @@ public class MarketAggregaterTest {
         int realDepositsOfCentralBank = CentralBank.INSTANCE.realDeposits();
         int depositsOfCentralBankOfBooks = CentralBank.INSTANCE.books().get(CentralBankTitle.DEPOSIT);
         assertThat(realDepositsOfCentralBank, is(depositsOfCentralBankOfBooks));
-        int checkingAccountsOfPrivateBanksOfBooks =
-                PrivateBank.stream().mapToInt(pb -> pb.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)).sum();
+        int checkingAccountsOfPrivateBanksOfBooks = Market.INSTANCE.entities(PrivateBank.class)
+                .mapToInt(pb -> pb.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)).sum();
         assertThat(checkingAccountsOfPrivateBanksOfBooks, is(realDepositsOfCentralBank));
-        int realDepositsOfPrivateBank = PrivateBank.stream().mapToInt(PrivateBank::realDeposits).sum();
-        int depositsOfPrivateBankOfBooks =
-                PrivateBank.stream().map(PrivateBank::books).mapToInt(book -> book.get(PrivateBankTitle.DEPOSIT)).sum();
+        int realDepositsOfPrivateBank = Market.INSTANCE.entities(PrivateBank.class).mapToInt(PrivateBank::realDeposits)
+                .sum();
+        int depositsOfPrivateBankOfBooks = Market.INSTANCE.entities(PrivateBank.class).map(PrivateBank::books)
+                .mapToInt(book -> book.get(PrivateBankTitle.DEPOSIT)).sum();
         assertThat(realDepositsOfPrivateBank, is(depositsOfPrivateBankOfBooks));
-        int workerDeposits = WorkerParson.stream().mapToInt(WorkerParson::deposit).sum();
-        int businessDeposits = PrivateBusiness.stream().mapToInt(PrivateBusiness::deposit).sum();
+        int workerDeposits = Market.INSTANCE.entities(WorkerParson.class).mapToInt(WorkerParson::deposit).sum();
+        int businessDeposits = Market.INSTANCE.entities(PrivateBusiness.class).mapToInt(PrivateBusiness::deposit).sum();
         assertThat(workerDeposits + businessDeposits, is(realDepositsOfPrivateBank));
-        WorkerParson.stream().forEach(worker -> assertThat(worker.mainBank().account(worker).amount(), is(worker.deposit())));
-        PrivateBusiness.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
-        PrivateBank.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
+        Market.INSTANCE.entities(WorkerParson.class)
+                .forEach(worker -> assertThat(worker.mainBank().account(worker).amount(), is(worker.deposit())));
+        Market.INSTANCE.entities(PrivateBusiness.class)
+                .forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
+        Market.INSTANCE.entities(PrivateBank.class)
+                .forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
         int nationDepositOfCentralOfBooks = CentralBank.INSTANCE.books().get(CentralBankTitle.GOVERNMENT_DEPOSIT);
         assertThat(CentralBank.INSTANCE.nationAccount().amount(), is(nationDepositOfCentralOfBooks));
         assertThat(Nation.INSTANCE.deposit(), is(nationDepositOfCentralOfBooks));
@@ -409,7 +413,7 @@ public class MarketAggregaterTest {
         PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
         check();
         int price = nation.order(Product.BUILDINGS).getAsInt();
-        while(true) {
+        while (true) {
             Market.INSTANCE.nextEndOfMonth();
             if (nation.expenditureBurden() <= 0) {
                 break;

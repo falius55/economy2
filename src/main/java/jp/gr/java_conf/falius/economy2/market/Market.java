@@ -1,6 +1,7 @@
 package jp.gr.java_conf.falius.economy2.market;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -25,6 +26,33 @@ public class Market {
 
     static {
         INSTANCE = new Market(LocalDate.now());
+    }
+
+    /**
+     *
+     * @param start 含む
+     * @param end 含まない
+     * @return
+     */
+    public static Stream<LocalDate> dateStream(LocalDate start, LocalDate end) {
+        return dateStream(start, end, Period.ofDays(1));
+    }
+
+    /**
+     * startからend(含まない)までの日付の順次ストリームを返します。
+     * startとendが同じ日付の場合、またはstartがendより後の日付の場合は空のストリームが返ります。
+     * @param start 含む
+     * @param end 含まない
+     * @param period
+     * @return
+     * @since 1.0
+     */
+    public static Stream<LocalDate> dateStream(LocalDate start, LocalDate end, Period period) {
+        Stream.Builder<LocalDate> builder = Stream.builder();
+        for (LocalDate next = start; next.isBefore(end); next = next.plus(period)) {
+            builder.add(next);
+        }
+        return builder.build();
     }
 
     /**

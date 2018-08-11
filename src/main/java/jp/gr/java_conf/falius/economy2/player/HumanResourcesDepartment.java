@@ -85,4 +85,9 @@ public class HumanResourcesDepartment {
     public int count() {
         return mEmployers.size();
     }
+
+    public void clear() {
+        mEmployers.clear();
+        mWorkingRecord.clear();
+    }
 }

@@ -15,7 +15,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
  * @param T 勘定科目一覧を定義した列挙型。AccountTitleインターフェースを実装していなければならない
  * @since 1.0
  */
-public abstract class AbstractBooks<T extends Enum<T> & Title> implements MutableBooks<T> {
+public abstract class AbstractBooks<T extends Enum<T> & Title> implements Books<T> {
     private final Class<T> mClass;
     private final Map<TitleType, Map<T, Integer>> mAccountsBook; // 帳簿(EnumMap) 科目種別から、勘定科目からその金額へのマップ、へのマップ
 
@@ -33,7 +33,6 @@ public abstract class AbstractBooks<T extends Enum<T> & Title> implements Mutabl
      * 引数の会計を、自分の会計に吸収併合します。結婚、合併など
      * @since 1.0
      */
-    @Override
     public AbstractBooks<T> merge(Books<T> another) {
         if (!(another instanceof AbstractBooks)) {
             throw new IllegalArgumentException();
@@ -62,7 +61,7 @@ public abstract class AbstractBooks<T extends Enum<T> & Title> implements Mutabl
     /**
      * @since 1.0
      */
-    public void clearBook() {
+    public void clear() {
         mAccountsBook.values().stream()
                 .forEach(m -> m.forEach((k, v) -> m.compute(k, (t, i) -> 0)));
     }

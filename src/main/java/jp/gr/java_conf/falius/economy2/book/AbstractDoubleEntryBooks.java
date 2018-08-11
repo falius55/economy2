@@ -33,8 +33,8 @@ public abstract class AbstractDoubleEntryBooks<T extends Enum<T> & Title>
      * @since 1.0
      */
     @Override
-    public void clearBook() {
-        super.clearBook();
+    public void clear() {
+        super.clear();
         mFixedAssetManager.clear();
     }
 

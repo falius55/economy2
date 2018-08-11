@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -17,6 +18,7 @@ import jp.gr.java_conf.falius.economy2.agreement.Bond;
 import jp.gr.java_conf.falius.economy2.book.CentralBankBooks;
 import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
+import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.AccountOpenable;
 import jp.gr.java_conf.falius.economy2.player.Employable;
 import jp.gr.java_conf.falius.economy2.player.HumanResourcesDepartment;
@@ -62,7 +64,8 @@ public class CentralBank implements Bank, Transferable {
      * @since 1.0
      */
     public CentralAccount account(PrivateBank owner) {
-        return mAccounts.get(owner);
+        return Objects.requireNonNull(mAccounts.get(owner),
+                () -> String.format("%s has no account of %s", this.toString(), owner.toString()));
     }
 
     /**
@@ -205,7 +208,8 @@ public class CentralBank implements Bank, Transferable {
      * @since 1.0
      */
     public void clear() {
-        mBooks.clearBook();
+        mBooks.clear();
+        mStuffManager.clear();
         mAccounts.clear();
         mNationAccount.clear();
     }
@@ -275,7 +279,7 @@ public class CentralBank implements Bank, Transferable {
                         return true;
                     }
                 }).collect(Collectors.toSet());
-        PrivateBank.stream().forEach(pb -> pb.searchBonds(sells));
+        Market.INSTANCE.entities(PrivateBank.class).forEach(pb -> pb.searchBonds(sells));
     }
 
     /**
@@ -314,7 +318,7 @@ public class CentralBank implements Bank, Transferable {
     private int transfer(PrivateAccount target, int amount) {
         target.bank().books().transfered(amount);
         PrivateBank targetBank = target.bank();
-        CentralBank.INSTANCE.account(targetBank).increase(amount);
+        this.account(targetBank).increase(amount);
         return target.increase(amount);
     }
 

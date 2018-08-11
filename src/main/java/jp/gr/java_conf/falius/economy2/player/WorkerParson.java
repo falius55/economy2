@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
 import jp.gr.java_conf.falius.economy2.agreement.Loan;
@@ -24,21 +23,12 @@ import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
  * @since 1.0
  *
  */
-public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Borrowable {
+public class WorkerParson implements Worker, PrivateEntity, Borrowable {
     private final PrivateBank mMainBank;
     private final WorkerParsonBooks mBooks;
     private final Set<Loan> mLoans = new HashSet<>();
 
     private Employable mJob = null;
-
-    /**
-     *
-     * @return
-     * @since 1.0
-     */
-    public static Stream<WorkerParson> stream() {
-        return Market.INSTANCE.entities(WorkerParson.class);
-    }
 
     /**
      * @since 1.0
@@ -54,7 +44,7 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      * @since 1.0
      */
     private PrivateBank searchBank() {
-        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
+        Optional<PrivateBank> opt = Market.INSTANCE.entities(PrivateBank.class).findAny();
         if (!opt.isPresent()) {
             throw new IllegalStateException("market has no banks");
         }
@@ -224,7 +214,10 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
      */
     @Override
     public boolean borrow(int amount) {
-        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        Optional<PrivateBank> opt = Market.INSTANCE
+                .entities(PrivateBank.class)
+                .filter(pb -> pb.canLend(amount))
+                .findAny();
         if (!opt.isPresent()) { return false; }
         PrivateBank bank = opt.get();
         Loan loan = offerDebt(amount);

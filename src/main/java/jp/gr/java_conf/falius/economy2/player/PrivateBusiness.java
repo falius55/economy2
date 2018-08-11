@@ -34,7 +34,7 @@ import jp.gr.java_conf.falius.economy2.stockmanager.StockManager;
  *
  */
 public class PrivateBusiness
-        implements AccountOpenable, Employable, PrivateEntity, Borrowable, Deferrable, InstallmentReceivable {
+        implements Employable, PrivateEntity, Borrowable, Deferrable, InstallmentReceivable {
     private static final double MARGIN = 0.2; // 原価に上乗せするマージン
 
     private final Industry mIndustry;
@@ -48,21 +48,12 @@ public class PrivateBusiness
 
     /**
      *
-     * @return
-     * @since 1.0
-     */
-    public static Stream<PrivateBusiness> stream() {
-        return Market.INSTANCE.entities(PrivateBusiness.class);
-    }
-
-    /**
-     *
      * @param type
      * @return
      * @since 1.0
      */
     public static Stream<PrivateBusiness> stream(Industry.Type type) {
-        return stream().filter(pb -> pb.mIndustry.type() == type);
+        return Market.INSTANCE.entities(PrivateBusiness.class).filter(pb -> pb.mIndustry.type() == type);
     }
 
     /**
@@ -93,7 +84,7 @@ public class PrivateBusiness
      * @since 1.0
      */
     private PrivateBank searchBank() {
-        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
+        Optional<PrivateBank> opt = Market.INSTANCE.entities(PrivateBank.class).findAny();
         if (!opt.isPresent()) {
             throw new IllegalStateException("market has no banks");
         }
@@ -146,22 +137,6 @@ public class PrivateBusiness
     @Override
     public boolean has(Worker worker) {
         return mStuffManager.has(worker);
-    }
-
-    /**
-     * 業種が同じかどうかを判定します
-     * @since 1.0
-     */
-    public boolean is(Industry industry) {
-        return industry == mIndustry;
-    }
-
-    /**
-     * 業態が同じかどうかを判定します
-     * @since 1.0
-     */
-    public boolean is(Industry.Type type) {
-        return type == mIndustry.type();
     }
 
     /**
@@ -241,7 +216,10 @@ public class PrivateBusiness
      */
     @Override
     public boolean borrow(int amount) {
-        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        Optional<PrivateBank> opt = Market.INSTANCE
+                .entities(PrivateBank.class)
+                .filter(pb -> pb.canLend(amount))
+                .findAny();
         if (!opt.isPresent()) {
             return false;
         }
@@ -427,7 +405,7 @@ public class PrivateBusiness
     }
 
     // テスト用
-    public boolean check() {
+    boolean check() {
         int loan = mLoans.stream().mapToInt(Loan::amount).sum();
         if (loan != mBooks.get(PrivateBusinessTitle.LOANS_PAYABLE)) {
             return false;

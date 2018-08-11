@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.CentralAccount;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
@@ -29,7 +29,7 @@ import jp.gr.java_conf.falius.economy2.player.Worker;
  * @since 1.0
  *
  */
-public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendable {
+public class PrivateBank implements Bank, PrivateEntity, Lendable {
     /**
      * 債券購入に充てられる最高割合(保有している現預金のうち何割までなら債券購入に使っていいか)
      */
@@ -39,15 +39,6 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
     private final Set<Loan> mLoans = new HashSet<>();
     private final Map<AccountOpenable, PrivateAccount> mAccounts = new HashMap<>();
     private final PrivateBankBooks mBooks;
-
-    /**
-     *
-     * @return
-     * @since 1.0
-     */
-    public static Stream<PrivateBank> stream() {
-        return Market.INSTANCE.entities(PrivateBank.class);
-    }
 
     /**
      * @since 1.0
@@ -81,7 +72,8 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @since 1.0
      */
     public PrivateAccount account(AccountOpenable accountOpenable) {
-        return mAccounts.get(accountOpenable);
+        return Objects.requireNonNull(mAccounts.get(accountOpenable),
+                () -> String.format("%s has no account of %s", this.toString(), accountOpenable.toString()));
     }
 
     /**
@@ -299,6 +291,24 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
         return mAccounts.values().stream()
                 .mapToInt(PrivateAccount::amount)
                 .sum();
+    }
+
+    boolean check() {
+        int loan = mLoans.stream().mapToInt(Loan::amount).sum();
+        if (loan != mBooks.get(PrivateBankTitle.LOANS_RECEIVABLE)) {
+            return false;
+        }
+        int accountDeposit = mAccounts.values().stream()
+                .mapToInt(PrivateAccount::amount)
+                .sum();
+        if (accountDeposit != mBooks.get(PrivateBankTitle.DEPOSIT)) {
+            return false;
+        }
+        int centralAccountDeposit = mainBank().account(this).amount();
+        if (centralAccountDeposit != deposit()) {
+            return false;
+        }
+        return true;
     }
 
 }

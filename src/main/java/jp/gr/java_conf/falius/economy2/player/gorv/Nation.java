@@ -202,7 +202,9 @@ public class Nation implements Government {
      * @return 成約した国債総額
      */
     public int advertiseBonds() {
-        return PrivateBank.stream().mapToInt(this::makeUnderwriteBonds).sum();
+        return Market.INSTANCE.entities(PrivateBank.class)
+                .mapToInt(this::makeUnderwriteBonds)
+                .sum();
     }
 
     /**
@@ -211,7 +213,7 @@ public class Nation implements Government {
     @Override
     public Government collectTaxes() {
         Market.INSTANCE.employables().forEach(ep -> ep.payIncomeTax(mBooks));
-        PrivateBusiness.stream().forEach(pb -> pb.payConsumptionTax(mBooks));
+        Market.INSTANCE.entities(PrivateBusiness.class).forEach(pb -> pb.payConsumptionTax(mBooks));
         return this;
     }
 
@@ -260,7 +262,7 @@ public class Nation implements Government {
      * @since 1.0
      */
     public void clear() {
-        mBooks.clearBook();
+        mBooks.clear();
         mBondMarket.clear();
         mBonds.clear();
         mInstallments.clear();

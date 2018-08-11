@@ -100,10 +100,9 @@ public class Farm implements StockManager {
      */
     private LocalDate updateManufacture(LocalDate start, Period period) {
         LocalDate today = Market.INSTANCE.nowDate();
-        LocalDate ret = start;
-        for (LocalDate next = start.plus(period); next.isBefore(today); ret = next, next = ret.plus(period)) {
-            mStock += mProductionVolume;
-        }
-        return ret;
+        return Market.dateStream(start.plus(period), today, period)
+                .peek(d -> mStock += mProductionVolume)
+                .reduce((f, s) -> s)
+                .orElseGet(() -> start);
     }
 }

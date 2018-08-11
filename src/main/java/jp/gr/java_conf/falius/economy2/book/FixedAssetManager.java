@@ -1,6 +1,8 @@
 package jp.gr.java_conf.falius.economy2.book;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -58,12 +60,10 @@ final class FixedAssetManager {
      * @since 1.0
      */
     int update() {
-        int ret = 0;
         LocalDate today = Market.INSTANCE.nowDate();
-        for (LocalDate date = mLastUpdate.plusDays(1); date.isBefore(today)
-                || date.equals(today); date = date.plusDays(1)) {
-            ret += record(date);
-        }
+        int ret = Market.dateStream(mLastUpdate.plusDays(1), today.plusDays(1))
+                .mapToInt(this::record)
+                .sum();
         mLastUpdate = today;
         return ret;
     }
@@ -101,6 +101,11 @@ final class FixedAssetManager {
         return mFixedAssets.stream()
                 .mapToInt(FixedAsset::unDepreciatedBalance)
                 .sum();
+    }
+
+    // テスト用メソッド
+    Set<FixedAsset> assets() {
+        return Collections.unmodifiableSet(mFixedAssets);
     }
 
     /**
@@ -153,7 +158,7 @@ final class FixedAssetManager {
 
             int amortizable = acquisitionCost - mResidualValue; // 償却可能額
             mRecordMap = new TreeMap<LocalDate, Integer>(); //  償却日から残存額へのマップ 償却日でソートされる
-            mRecordMap.put(Market.INSTANCE.nowDate(), amortizable);
+            mRecordMap.put(dateOfAcquisition, amortizable);
         }
 
         /**
@@ -195,8 +200,8 @@ final class FixedAssetManager {
             if (date.isBefore(mDateOfAcquisition)) {
                 return false;
             } // 取得日より前
-            // TODO: 営業日を考慮する
-            // 償却が終わっている
+              // TODO: 営業日を考慮する
+              // 償却が終わっている
             if (unDepreciatedBalance() <= 0) {
                 return false;
             }
@@ -253,6 +258,11 @@ final class FixedAssetManager {
         @Override
         public int compareTo(FixedAsset another) {
             return this.dateOfAcquisition().compareTo(another.dateOfAcquisition());
+        }
+
+        // テスト用メソッド
+        Map<LocalDate, Integer> recordMap() {
+            return Collections.unmodifiableMap(mRecordMap);
         }
     }
 
