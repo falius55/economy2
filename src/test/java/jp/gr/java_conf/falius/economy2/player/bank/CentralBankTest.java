@@ -229,7 +229,6 @@ public class CentralBankTest {
         int salary3 = cbank.paySalary(worker3);
         int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
         int capital3 = salary3 - tax3;
-        int centralIncomeTax = tax + tax2 + tax3;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
@@ -243,13 +242,14 @@ public class CentralBankTest {
         int require = 3;
         worker.buy(product, require);
 
+        int autoCollectIncomeTax = nation.books().get(GovernmentTitle.INCOME_TAX);
         int allIncomeTax = 0;
         allIncomeTax += cbank.books().get(CentralBankTitle.DEPOSITS_RECEIVED);
         allIncomeTax += bank.books().get(PrivateBankTitle.DEPOSITS_RECEIVED);
         allIncomeTax += farmer.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         allIncomeTax += maker.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         allIncomeTax += coop.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += centralIncomeTax;
+        allIncomeTax += autoCollectIncomeTax;
         int allConsumptionTax = 0;
         allConsumptionTax += farmer.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
         allConsumptionTax += maker.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
@@ -279,6 +279,7 @@ public class CentralBankTest {
         int capital = founder.deposit();
 
         PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        int oldIncomeTax = founder.books().get(WorkerParsonTitle.TAX);
         System.out.println("創業時");
         System.out.printf("cbank: %s%n", cbank.books().toString());
         System.out.printf("bank: %s%n", bank.books().toString());
@@ -306,7 +307,9 @@ public class CentralBankTest {
         System.out.printf("business: %s%n", business.books().toString());
         int paid = price - nation.expenditureBurden();
         int pbBonds = bank.books().get(PrivateBankTitle.GOVERNMENT_BOND);
-        int expectCentralAccount = capital - pbBonds + paid - business.books().get(PrivateBusinessTitle.TAX);
+        int newIncomeTax = founder.books().get(WorkerParsonTitle.TAX) - oldIncomeTax;
+        int consumptionTax = business.books().get(PrivateBusinessTitle.TAX);
+        int expectCentralAccount = capital - pbBonds + paid - newIncomeTax - consumptionTax;
         assertThat(cbank.books().get(CentralBankTitle.DEPOSIT), is(expectCentralAccount));
         assertThat(cbank.books().get(CentralBankTitle.GOVERNMENT_DEPOSIT), is(issued + newCollectedTaxes - paid));
         check(cbank);
@@ -320,11 +323,12 @@ public class CentralBankTest {
         }
         int lastCollectedTaxes = nation.books().get(GovernmentTitle.INCOME_TAX)
                 + nation.books().get(GovernmentTitle.CONSUMPTION_TAX);
+        int paidTax = founder.books().get(WorkerParsonTitle.TAX) - oldIncomeTax + consumptionTax;
         System.out.printf("cbank: %s%n", cbank.books().toString());
         System.out.printf("bank: %s%n", bank.books().toString());
         System.out.printf("business: %s%n", business.books().toString());
         assertThat(cbank.books().get(CentralBankTitle.DEPOSIT),
-                is(capital - pbBonds + price - business.books().get(PrivateBusinessTitle.TAX)));
+                is(capital - pbBonds + price - paidTax));
         assertThat(cbank.books().get(CentralBankTitle.DEPOSIT),
                 is(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)));
         assertThat(cbank.books().get(CentralBankTitle.GOVERNMENT_DEPOSIT), is(issued + lastCollectedTaxes - price));

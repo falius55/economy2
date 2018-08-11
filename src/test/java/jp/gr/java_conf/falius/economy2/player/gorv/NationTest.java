@@ -15,6 +15,7 @@ import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
@@ -75,7 +76,7 @@ public class NationTest {
 
     @Test
     public void collectTaxesTest() {
-        System.out.println("collect taxes");
+        System.out.println("--- collect taxes ---");
         Nation nation = Nation.INSTANCE;
         CentralBank cbank = CentralBank.INSTANCE;
         PrivateBank bank = new PrivateBank();
@@ -91,14 +92,13 @@ public class NationTest {
         int salary3 = cbank.paySalary(worker3);
         int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
         int capital3 = salary3 - tax3;
-        int centralIncomeTax = tax + tax2 + tax3;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness maker = worker2.establish(Industry.FOOD_MAKER, capital2).get();
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
         PrivateBusiness coop = worker3.establish(Industry.SUPER_MARKET, capital3).get();
-        assertThat(nation.books().get(GovernmentTitle.INCOME_TAX), is(centralIncomeTax));
         int autoCollectConsumptionTax = nation.books().get(GovernmentTitle.CONSUMPTION_TAX);
+        int autoCollectIncomeTax = nation.books().get(GovernmentTitle.INCOME_TAX);
 
         cbank.paySalary(worker);
 
@@ -112,7 +112,7 @@ public class NationTest {
         allIncomeTax += farmer.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         allIncomeTax += maker.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
         allIncomeTax += coop.books().get(PrivateBusinessTitle.DEPOSITS_RECEIVED);
-        allIncomeTax += centralIncomeTax;
+        allIncomeTax += autoCollectIncomeTax;
         int allConsumptionTax = 0;
          allConsumptionTax+= farmer.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
          allConsumptionTax+= maker.books().get(PrivateBusinessTitle.ACCRUED_CONSUMPTION_TAX);
@@ -132,7 +132,18 @@ public class NationTest {
                 is(nation.books().get(GovernmentTitle.DEPOSIT) ));
         checkAccount(nation);
 
-        System.out.println("collect taxes");
+        int workerTax = Market.INSTANCE.entities(WorkerParson.class)
+                .map(WorkerParson::books)
+                .mapToInt(books -> books.get(WorkerParsonTitle.TAX))
+                .sum();
+        assertThat(nation.books().get(GovernmentTitle.INCOME_TAX), is(workerTax));
+        int consumptionTax = Market.INSTANCE.entities(PrivateBusiness.class)
+                .map(PrivateBusiness::books)
+                .mapToInt(books -> books.get(PrivateBusinessTitle.TAX))
+                .sum();
+        assertThat(nation.books().get(GovernmentTitle.CONSUMPTION_TAX), is(consumptionTax));
+
+        System.out.println("--- collect taxes ---");
     }
 
     @Test

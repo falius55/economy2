@@ -106,7 +106,9 @@ public class CentralBank implements Bank, Transferable {
      * @since 1.0
      */
     public void closeEndOfDay(LocalDate date) {
-
+        if (date.getDayOfMonth() == 21) {
+            paySalaries();
+        }
     }
 
     /**
@@ -331,8 +333,8 @@ public class CentralBank implements Bank, Transferable {
      */
     public int realDeposits() {
         return mAccounts.values().stream()
-        .mapToInt(CentralAccount::amount)
-        .sum();
+                .mapToInt(CentralAccount::amount)
+                .sum();
     }
 
 }

@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Test;
 
+import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
@@ -270,6 +271,26 @@ public class PrivateBankTest {
     }
 
     @Test
+    public void paySalaryFromPrivateBusiness() {
+        System.out.println("--- pay salary from private business ---");
+        CentralBank central = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        int salary = central.paySalary(founder);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+
+        PrivateBusiness company = founder.establish(Industry.FARMER, capital).get();
+        int oldDeposit = bank.deposit();
+        company.paySalary(founder);
+        assertThat(bank.deposit(), is(oldDeposit));
+        assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(founder.deposit() + company.deposit()));
+
+        checkAccount(bank);
+        System.out.println("--- pay salary from private business ---");
+    }
+
+    @Test
     public void advertiseBondsTest() {
         System.out.println("--- advertise ---");
         Nation nation = Nation.INSTANCE;
@@ -310,25 +331,32 @@ public class PrivateBankTest {
 
         PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
         int oldDeposit = business.deposit();
+        int oldIncomeTax = founder.books().get(WorkerParsonTitle.TAX);
         System.out.println("創業時");
-        System.out.printf("bank: %s%n", bank.books().toString());
+        System.out.printf("bank:%n%s%n", bank.books().toString());
+        System.out.printf("founder:%n%s%n", founder.books().toString());
+        System.out.printf("business:%n%s%n%n", business.books().toString());
 
         int price = nation.order(Product.BUILDINGS).getAsInt();
 
         System.out.println("支出負担分、国債を発行する。");
         nation.closeEndOfMonth();
-        System.out.printf("bank: %s%n", bank.books().toString());
+        System.out.printf("bank: %s%n%n", bank.books().toString());
 
         System.out.println("分割払いで支払い");
         IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
-        System.out.printf("bank: %s%n", bank.books().toString());
-        System.out.printf("business: %s%n", business.books().toString());
+        System.out.printf("bank:%n%s%n", bank.books().toString());
+        System.out.printf("business:%n%s%n", business.books().toString());
+        System.out.printf("founder:%n%s%n", founder.books().toString());
+        System.out.printf("nation:%n%s%n", nation.books().toString());
         int paid = price - nation.expenditureBurden();
         int bondsAmount = bank.books().get(PrivateBankTitle.GOVERNMENT_BOND);
-        int expectCentralAccount = capital - bondsAmount + paid - business.books().get(PrivateBusinessTitle.TAX);
+        int newIncomeTax = nation.books().get(GovernmentTitle.INCOME_TAX) - oldIncomeTax;
+        int consumptionTax = business.books().get(PrivateBusinessTitle.TAX);
+        int expectCentralAccount = capital - bondsAmount + paid - consumptionTax - newIncomeTax;
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS), is(expectCentralAccount));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT),
-                is(oldDeposit + paid - business.books().get(PrivateBusinessTitle.TAX)));
+                is(oldDeposit + paid - newIncomeTax - consumptionTax));
         checkAccount(bank);
 
         System.out.println("払いきると建物を引き替え");
@@ -338,9 +366,9 @@ public class PrivateBankTest {
                 break;
             }
         }
-        System.out.printf("bank: %s%n", bank.books().toString());
-        System.out.printf("business: %s%n", business.books().toString());
-        int paidTax = business.books().get(PrivateBusinessTitle.TAX);
+        System.out.printf("bank:%n%s%n", bank.books().toString());
+        System.out.printf("business:%n%s%n", business.books().toString());
+        int paidTax = founder.books().get(WorkerParsonTitle.TAX) - oldIncomeTax + consumptionTax;
         assertThat(bank.books().get(PrivateBankTitle.CHECKING_ACCOUNTS),
                 is(capital - bondsAmount + price - paidTax));
         assertThat(bank.books().get(PrivateBankTitle.DEPOSIT), is(oldDeposit - paidTax + price));

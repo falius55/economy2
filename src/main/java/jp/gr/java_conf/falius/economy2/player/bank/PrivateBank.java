@@ -142,7 +142,9 @@ public class PrivateBank implements Bank, AccountOpenable, PrivateEntity, Lendab
      * @since 1.0
      */
     public void closeEndOfDay(LocalDate date) {
-
+        if (date.getDayOfMonth() == 21) {
+            paySalaries();
+        }
     }
 
     /**

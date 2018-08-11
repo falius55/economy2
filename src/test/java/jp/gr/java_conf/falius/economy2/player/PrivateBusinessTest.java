@@ -225,7 +225,9 @@ public class PrivateBusinessTest {
         IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
         System.out.printf("business:%n%s%n", business.books().toString());
         int received = price - nation.expenditureBurden();
-        assertThat(business.deposit(), is(oldDeposit + received));
+        int salaries = business.books().get(PrivateBusinessTitle.SALARIES_EXPENSE);
+        int loans = business.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
+        assertThat(business.deposit(), is(oldDeposit - salaries + loans + received));
         assertThat(business.books().get(PrivateBusinessTitle.SALES), is(received));
         check(business);
 
@@ -236,8 +238,10 @@ public class PrivateBusinessTest {
                 break;
             }
         }
+        int lastSalaries = business.books().get(PrivateBusinessTitle.SALARIES_EXPENSE);
+        int lastLoans = business.books().get(PrivateBusinessTitle.LOANS_PAYABLE);
         System.out.printf("business:%n%s%n", business.books().toString());
-        assertThat(business.deposit(), is(oldDeposit + price));
+        assertThat(business.deposit(), is(oldDeposit - lastSalaries + lastLoans + price));
         assertThat(business.books().get(PrivateBusinessTitle.SALES), is(price));
         check(business);
 

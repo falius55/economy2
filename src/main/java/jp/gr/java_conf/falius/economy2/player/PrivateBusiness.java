@@ -192,6 +192,9 @@ public class PrivateBusiness
      */
     public void closeEndOfDay(LocalDate date) {
         recodePurchase();
+        if (date.getDayOfMonth() == 21) {
+            paySalaries();
+        }
     }
 
     /**
@@ -294,6 +297,10 @@ public class PrivateBusiness
         worker.books().getSalary(salary);
         PrivateAccount workerAccount = worker.books().mainAccount();
         mainBank().account(this).transfer(workerAccount, takeHome);
+
+        if (deposit() < 0) {
+            borrow(-deposit());
+        }
         return salary;
     }
 
@@ -306,6 +313,10 @@ public class PrivateBusiness
         nationBooks.collectIncomeTaxes(amount);
         mBooks.payIncomeTax(amount);
         mainBank().account(this).transfer(CentralBank.INSTANCE.nationAccount(), amount);
+
+        if (deposit() < 0) {
+            borrow(-deposit());
+        }
         return this;
     }
 
@@ -325,6 +336,10 @@ public class PrivateBusiness
         nationBooks.collectConsumptionTax(amount);
         mBooks.payConsumptionTax(amount);
         mainBank().account(this).transfer(CentralBank.INSTANCE.nationAccount(), amount);
+
+        if (deposit() < 0) {
+            borrow(-deposit());
+        }
         return this;
     }
 
