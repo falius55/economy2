@@ -3,7 +3,7 @@ package jp.gr.java_conf.falius.economy2.book;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 /**
  *

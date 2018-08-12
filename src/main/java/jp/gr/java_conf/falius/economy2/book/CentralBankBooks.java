@@ -2,8 +2,8 @@ package jp.gr.java_conf.falius.economy2.book;
 
 import jp.gr.java_conf.falius.economy2.account.Transferable;
 import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 /**
  *

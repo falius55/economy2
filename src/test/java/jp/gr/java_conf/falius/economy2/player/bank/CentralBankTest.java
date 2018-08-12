@@ -17,11 +17,11 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 public class CentralBankTest {
 

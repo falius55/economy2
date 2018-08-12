@@ -5,11 +5,16 @@ import static org.hamcrest.Matchers.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.Test;
+
+import jp.gr.java_conf.falius.economy2.util.MyCollectors;
+import jp.gr.java_conf.falius.util.calc.Calculator;
 
 public class MyCollectorsTest {
 
@@ -38,7 +43,7 @@ public class MyCollectorsTest {
     @Test
     public void toIntegrationTest() {
         Stream<LocalDate> model = Stream.iterate(LocalDate.now(), date -> date.plusDays(1));
-        List<Long> result = model.limit(10).collect(MyCollectors.toIntegretionList((d1, d2) -> ChronoUnit.DAYS.between(d1, d2)));
+        List<Long> result = model.limit(10).collect(MyCollectors.toIntegrationList((d1, d2) -> ChronoUnit.DAYS.between(d1, d2)));
         for (Long n : result) {
             assertThat(n, is(1L));
         }
@@ -47,7 +52,7 @@ public class MyCollectorsTest {
     @Test
     public void toIntegrationTest2() {
         Stream<LocalDate> model = Stream.iterate(LocalDate.now(), date -> date.plusMonths(2));
-        List<Period> result = model.limit(10).collect(MyCollectors.toIntegretionList((d1, d2) -> d1.until(d2)));
+        List<Period> result = model.limit(10).collect(MyCollectors.toIntegrationList((d1, d2) -> d1.until(d2)));
         assertThat(result.stream().allMatch(period -> period.equals(Period.ofMonths(2))), is(true));
         assertThat(result.stream().collect(MyCollectors.sameAll()), is(true));
     }
@@ -103,5 +108,27 @@ public class MyCollectorsTest {
         Stream<String> model = Stream.of("abc", "ac", "bcd", "bc"  );
         boolean result = model.collect(MyCollectors.sameAll());
         assertThat(result, is(false));
+    }
+
+    @Test
+    public void toCombinationTest() {
+        Stream<Integer> model = Stream.of(3, 5, 2, 9);
+        Set<Integer> result = model.collect(MyCollectors.toCombination((i1, i2) -> i1 + i2, HashSet<Integer>::new));
+        assertThat(result.contains(3 + 5), is(true));
+        assertThat(result.contains(3 + 2), is(true));
+        assertThat(result.contains(3 + 9), is(true));
+        assertThat(result.contains(5 + 2), is(true));
+        assertThat(result.contains(5 + 9), is(true));
+        assertThat(result.contains(2 + 9), is(true));
+        int expectSize = Calculator.conbination(4, 2);
+        assertThat(result.size(), is(expectSize));
+    }
+
+    @Test
+    public void toCombinationTest2() {
+        Stream<Integer> model = Stream.of(10, 10, 10, 10, 10);
+        Set<Integer> result = model.collect(MyCollectors.toCombination((i1, i2) -> i1 * i2, HashSet<Integer>::new));
+        assertThat(result.contains(100), is(true));
+        assertThat(result.size(), is(1));
     }
 }

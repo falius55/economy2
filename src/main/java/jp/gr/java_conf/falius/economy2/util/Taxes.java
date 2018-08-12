@@ -1,4 +1,4 @@
-package jp.gr.java_conf.falius.economy2.helper;
+package jp.gr.java_conf.falius.economy2.util;
 
 import jp.gr.java_conf.falius.util.range.IntRange;
 

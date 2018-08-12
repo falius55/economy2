@@ -3,6 +3,7 @@ package jp.gr.java_conf.falius.economy2.book;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -128,23 +129,23 @@ public abstract class AbstractBooks<T extends Enum<T> & Title> implements Books<
 
                     String contents = e.getValue().entrySet().stream()
                             .filter(e2 -> e2.getValue() != 0)
-                            .map(e2 -> String.join(": ", e2.getKey().toString(), e2.getValue().toString()))
+                            .map(e2 -> String.format("%-8s: %,d", e2.getKey().toString(), e2.getValue()))
                             .collect(Collectors.joining(System.lineSeparator()));
 
-                    String lossOrBenefit = "";
+                    String lossOrBenefit = null;
                     int sum = get(e.getKey());
                     switch(e.getKey()) {
                     case ASSETS:
                     case REVENUE:
                         if (benefit() < 0) {
-                            lossOrBenefit = String.format("損失: %d", -benefit());
+                            lossOrBenefit = String.format("%-8s: %,d", "損失", -benefit());
                             sum += -benefit();
                         }
                         break;
                     case EQUITY:
                     case EXPENSE:
                         if (benefit() > 0) {
-                            lossOrBenefit = String.format("利潤: %d", benefit());
+                            lossOrBenefit = String.format("%-8s: %,d", "利潤", benefit());
                             sum += benefit();
                         }
                         break;
@@ -152,10 +153,12 @@ public abstract class AbstractBooks<T extends Enum<T> & Title> implements Books<
                     default:
                         break;
                     }
-                    String strSum = String.format("合計: %d", sum);
+                    String strSum = String.format("%6s: %,d", "計", sum);
 
                     return Stream.of(title, contents, lossOrBenefit, strSum)
+                            .filter(Objects::nonNull)
                             .filter(s -> !s.isEmpty())
+//                            .filter(Predicate.isEqual("").negate())
                             .collect(Collectors.joining(System.lineSeparator()));
                 })
                 .collect(Collectors.joining(System.lineSeparator()));

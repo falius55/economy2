@@ -16,12 +16,12 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 public class PrivateBusinessTest {
 
@@ -246,6 +246,25 @@ public class PrivateBusinessTest {
         check(business);
 
         System.out.println("--- installments ---");
+    }
+
+    @Test
+    public void contractFailTest() {
+        System.out.println("--- contract fail ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        int salary = cbank.paySalary(founder);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+
+        OptionalInt result = nation.order(Product.BUILDINGS);
+        assertThat(result.isPresent(), is(false));
+        System.out.println("--- contract fail ---");
     }
 
 }

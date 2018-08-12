@@ -15,11 +15,11 @@ import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 public class WorkerParsonTest {
 
@@ -28,7 +28,7 @@ public class WorkerParsonTest {
         Market.INSTANCE.clear();
     }
 
-    private void checkAccount(WorkerParson worker) {
+    private void check(WorkerParson worker) {
         assertThat(worker.mainBank().account(worker).amount(),
                 is(worker.books().get(WorkerParsonTitle.ORDINARY_DEPOSIT)));
     }
@@ -77,9 +77,9 @@ public class WorkerParsonTest {
         int salary3 = cbank.paySalary(founder3);
         int tax3 = Taxes.computeIncomeTaxFromManthly(salary3);
         int capital3 = salary3 - tax3;
-        checkAccount(founder);
-        checkAccount(founder2);
-        checkAccount(founder3);
+        check(founder);
+        check(founder2);
+        check(founder3);
 
         PrivateBusiness farmar = founder.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         IntStream.range(0, 380).forEach(n -> Market.INSTANCE.nextDay());
@@ -88,9 +88,9 @@ public class WorkerParsonTest {
         IntStream.range(0, 5).forEach(n -> Market.INSTANCE.nextDay());
 
         PrivateBusiness coop = founder3.establish(Industry.SUPER_MARKET, capital3).get();
-        checkAccount(founder);
-        checkAccount(founder2);
-        checkAccount(founder3);
+        check(founder);
+        check(founder2);
+        check(founder3);
 
         WorkerParson worker = new WorkerParson();
         assertThat(worker.cash(), is(0));
@@ -99,14 +99,14 @@ public class WorkerParsonTest {
         int salary = cbank.paySalary(worker);
         assertThat(worker.cash(), is(0));
         assertThat(worker.deposit(), is(salary - tax));
-        checkAccount(worker);
+        check(worker);
 
         Product product = Product.RICE_BALL;
         int require = 3;
         OptionalInt optPrice = worker.buy(product, require);
         int price = optPrice.getAsInt();
         assertThat(price, is(not(0)));
-        checkAccount(worker);
+        check(worker);
 
         Optional<WorkerParsonTitle> optTitle = WorkerParsonTitle.titleFrom(product);
         WorkerParsonTitle title = optTitle.get();
@@ -134,13 +134,13 @@ public class WorkerParsonTest {
 
         assertThat(worker.deposit(), is(salary - tax - initial));
         assertThat(worker.books().get(WorkerParsonTitle.ESTABLISH_EXPENSES), is(initial));
-        checkAccount(worker);
+        check(worker);
 
     }
 
     @Test
     public void borrowTest() {
-        System.out.println("borrow");
+        System.out.println("--- borrow ---");
         CentralBank cbank = CentralBank.INSTANCE;
         Bank bank = new PrivateBank();
         WorkerParson worker = new WorkerParson();
@@ -149,15 +149,15 @@ public class WorkerParsonTest {
         int capital = salary - tax;
         PrivateBusiness farmer = worker.establish(Industry.FARMER, EnumSet.of(Product.RICE), capital).get();
         assertThat(worker.cash() + worker.deposit(), is(0));
-        checkAccount(worker);
+        check(worker);
 
         worker.borrow(capital);
         System.out.println(worker.books().toString());
         assertThat(worker.deposit(), is(capital));
         assertThat(worker.books().get(WorkerParsonTitle.LOANS_PAYABLE), is(capital));
-        checkAccount(worker);
+        check(worker);
 
-        System.out.println("borrow");
+        System.out.println("--- borrow ---");
     }
 
 }

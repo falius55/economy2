@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Test;
 
 import jp.gr.java_conf.falius.economy2.book.FixedAssetManager.FixedAsset;
-import jp.gr.java_conf.falius.economy2.helper.MyCollectors;
 import jp.gr.java_conf.falius.economy2.market.Market;
+import jp.gr.java_conf.falius.economy2.util.MyCollectors;
 
 public class FixedAssetManagerTest {
 

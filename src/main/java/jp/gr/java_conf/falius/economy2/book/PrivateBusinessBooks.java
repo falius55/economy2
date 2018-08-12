@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 /**
  *

@@ -15,11 +15,11 @@ import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.PrivateBusinessTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
 import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 public class PrivateBankTest {
 
@@ -138,6 +138,7 @@ public class PrivateBankTest {
         System.out.printf("maker:%n%s%n", maker.books().toString());
         System.out.printf("coop:%n%s%n", coop.books().toString());
         System.out.printf("bank :%n%s%n", bank.books().toString());
+        System.out.printf("cbank :%n%s%n", cbank.books().toString());
 
         int workerLoan = Market.INSTANCE.entities(WorkerParson.class)
                 .mapToInt(w -> w.books().get(WorkerParsonTitle.LOANS_PAYABLE)).sum();
