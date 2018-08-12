@@ -63,7 +63,7 @@ public class PrivateBankBooks extends AbstractDoubleEntryBooks<PrivateBankTitle>
 
     /**
      * 間接法で減価償却する
-     * @param date 減価償却日。この日が減価償却日である固定資産が減価償却される
+     * @param amount
      * @since 1.0
      */
     @Override

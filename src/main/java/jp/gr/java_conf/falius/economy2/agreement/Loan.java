@@ -30,7 +30,6 @@ public class Loan {
     /**
      *
      * @param debtor
-     * @param account
      * @param amount
      * @param period
      * @since 1.0

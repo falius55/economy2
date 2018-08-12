@@ -208,7 +208,7 @@ public enum Industry {
         /**
          *
          * @param product
-         * @param HumanResourcesDepartment
+         * @param stuffs
          * @return
          * @since 1.0
          */
