@@ -1,98 +1,131 @@
 package jp.gr.java_conf.falius.economy2.player;
 
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import jp.gr.java_conf.falius.economy2.account.PrivateAccount;
+import jp.gr.java_conf.falius.economy2.agreement.Loan;
 import jp.gr.java_conf.falius.economy2.book.WorkerParsonBooks;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
-import jp.gr.java_conf.falius.economy2.loan.Loan;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
-public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Borrowable {
-    private static final Set<WorkerParson> sOwns = new HashSet<WorkerParson>();
-
-    private final WorkerParsonBooks mBooks = WorkerParsonBooks.newInstance();
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
+public class WorkerParson implements Worker, PrivateEntity, Borrowable {
     private final PrivateBank mMainBank;
+    private final WorkerParsonBooks mBooks;
     private final Set<Loan> mLoans = new HashSet<>();
 
     private Employable mJob = null;
 
-    public static Stream<WorkerParson> stream() {
-        return sOwns.stream();
-    }
-
-    public static void clear() {
-        sOwns.clear();
-    }
-
+    /**
+     * @since 1.0
+     */
     public WorkerParson() {
         mMainBank = searchBank();
-        mMainBank.createAccount(this);
+        PrivateAccount account = mMainBank.createAccount(this);
+        mBooks = WorkerParsonBooks.newInstance(account);
         Market.INSTANCE.aggregater().add(this);
-        sOwns.add(this);
     }
 
+    /**
+     * @since 1.0
+     */
     private PrivateBank searchBank() {
-        Optional<PrivateBank> opt = PrivateBank.stream().findAny();
+        Optional<PrivateBank> opt = Market.INSTANCE.entities(PrivateBank.class).findAny();
         if (!opt.isPresent()) {
             throw new IllegalStateException("market has no banks");
         }
         return opt.get();
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public final WorkerParsonBooks books() {
         return mBooks;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public PrivateBank mainBank() {
         return mMainBank;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int cash() {
-        return mBooks.get(WorkerParsonAccountTitle.CASH);
+        return mBooks.get(WorkerParsonTitle.CASH);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public int deposit() {
-        return mBooks.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
+        return mBooks.get(WorkerParsonTitle.ORDINARY_DEPOSIT);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean hasJob() {
         return Objects.nonNull(mJob);
     }
 
+    /**
+     * 日課処理を行います。
+     * @since 1.0
+     */
+    public void closeEndOfDay(LocalDate date) {
+
+    }
+
+    /**
+     * @since 1.0
+     */
     @Override
     public void closeEndOfMonth() {
         // TODO 自動生成されたメソッド・スタブ
 
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public OptionalInt buy(Product product) {
         return buy(product, 1);
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public OptionalInt buy(Product product, int require) {
-        Optional<WorkerParsonAccountTitle> optTitle = WorkerParsonAccountTitle.titleFrom(product);
+        Optional<WorkerParsonTitle> optTitle = WorkerParsonTitle.titleFrom(product);
         if (!optTitle.isPresent()) {
             return OptionalInt.empty();
         } // 労働者が買うような代物じゃない
-        WorkerParsonAccountTitle title = optTitle.get();
+        WorkerParsonTitle title = optTitle.get();
 
         Optional<PrivateBusiness> optStore = PrivateBusiness.stream(Industry.Type.RETAIL)
                 .filter(pb -> pb.canSale(product, require)).findAny();
@@ -127,16 +160,8 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     }
 
     /**
-     * 給料を受け取る
+     * @since 1.0
      */
-    @Override
-    public void getSalary(Employable from, int amount) {
-        mBooks.getSalary(amount);
-        PrivateAccount workerAccount = mainBank().account(this);
-        int tax = Taxes.computeIncomeTaxFromManthly(amount);
-        from.transfer(workerAccount, amount - tax);
-    }
-
     @Override
     public boolean seekJob() {
         Optional<Employable> optEp = Market.INSTANCE.employables()
@@ -153,6 +178,9 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         return true;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public void retireJob() {
         if (hasJob()) {
@@ -161,6 +189,9 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         mJob = null;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public AccountOpenable saveMoney(int amount) {
         mBooks.saveMoney(amount);
@@ -168,6 +199,9 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public AccountOpenable downMoney(int amount) {
         mBooks.downMoney(amount);
@@ -175,9 +209,15 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
         return this;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public boolean borrow(int amount) {
-        Optional<PrivateBank> opt = PrivateBank.stream().filter(pb -> pb.canLend(amount)).findAny();
+        Optional<PrivateBank> opt = Market.INSTANCE
+                .entities(PrivateBank.class)
+                .filter(pb -> pb.canLend(amount))
+                .findAny();
         if (!opt.isPresent()) { return false; }
         PrivateBank bank = opt.get();
         Loan loan = offerDebt(amount);
@@ -188,34 +228,51 @@ public class WorkerParson implements Worker, AccountOpenable, PrivateEntity, Bor
     /**
      * 借金をするため、申し込むために使うDebtMediatorオブジェクトを作成する
      * 借金が不成立の場合は想定外
+     * @since 1.0
      */
     private Loan offerDebt(int amount) {
-        Loan debt = new Loan(this, mainBank().account(this), amount, Period.ofYears(1));
+        Loan debt = new Loan(this, amount, Period.ofYears(1));
         mLoans.add(debt);
         return debt;
     }
 
     /**
      * 借金を返済します
+     * @since 1.0
      */
     @Override
     public void repay(int amount) {
     }
 
+    /**
+     *
+     * @param industry
+     * @param initialCapital
+     * @return
+     * @since 1.0
+     */
     public Optional<PrivateBusiness> establish(Industry industry, int initialCapital) {
         return establish(industry, industry.products(), initialCapital);
     }
 
+    /**
+     *
+     * @param industry
+     * @param products
+     * @param initialCapital
+     * @return
+     * @since 1.0
+     */
     public Optional<PrivateBusiness> establish(Industry industry, Set<Product> products, int initialCapital) {
-        int cash = mBooks.get(WorkerParsonAccountTitle.CASH);
-        int deposit = mBooks.get(WorkerParsonAccountTitle.ORDINARY_DEPOSIT);
+        int cash = mBooks.get(WorkerParsonTitle.CASH);
+        int deposit = mBooks.get(WorkerParsonTitle.ORDINARY_DEPOSIT);
         if (cash + deposit < initialCapital) {
             return Optional.empty();
         }
 
         if (deposit < initialCapital) {
-            int shortfall = initialCapital - deposit;
-            saveMoney(shortfall);
+            int shortage = initialCapital - deposit;
+            saveMoney(shortage);
         }
         mBooks.establish(initialCapital);
         PrivateBusiness business = new PrivateBusiness(this, industry, products, initialCapital);

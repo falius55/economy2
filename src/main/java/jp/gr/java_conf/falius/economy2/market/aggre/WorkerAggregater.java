@@ -1,50 +1,79 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
-import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.WorkerParsonTitle;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
 
-public class WorkerAggregater {
-    private final List<WorkerParson> mWorkers = new ArrayList<>();
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
+class WorkerAggregater {
+    private final Collection<WorkerParson> mWorkers = new ArrayList<>();
 
+    /**
+     * @since 1.0
+     */
     WorkerAggregater() {
     }
 
-    public void add(WorkerParson worker) {
+    Collection<WorkerParson> collection() {
+        return Collections.unmodifiableCollection(mWorkers);
+    }
+
+    /**
+     *
+     * @param worker
+     * @since 1.0
+     */
+    void add(WorkerParson worker) {
         mWorkers.add(worker);
     }
 
     /**
      * 雇用者報酬
      * @return
+     * @since 1.0
      */
-    public int salary() {
+    int salary() {
         return mWorkers.stream()
                 .map(WorkerParson::books)
-                .mapToInt(book -> book.get(WorkerParsonAccountTitle.SALARIES))
+                .mapToInt(book -> book.get(WorkerParsonTitle.SALARIES))
                 .sum();
     }
 
     /**
      * 消費総額
      * @return
+     * @since 1.0
      */
-    public int consumption() {
+    int consumption() {
         return mWorkers.stream()
                 .map(WorkerParson::books)
-                .mapToInt(book -> book.get(WorkerParsonAccountTitle.CONSUMPTION))
+                .mapToInt(book -> book.get(WorkerParsonTitle.CONSUMPTION))
                 .sum();
     }
 
-    public int cashAndDeposits() {
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
+    int cashAndDeposits() {
         return mWorkers.stream()
                 .mapToInt(worker -> worker.cash() + worker.deposit())
                 .sum();
     }
 
-    public void clear() {
+    /**
+     * @since 1.0
+     */
+    void clear() {
         mWorkers.clear();
     }
 

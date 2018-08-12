@@ -1,32 +1,57 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 
-public class PrivateBankAggregater {
-    private List<PrivateBank> mBanks = new ArrayList<>();
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
+class PrivateBankAggregater {
+    private Collection<PrivateBank> mBanks = new ArrayList<>();
 
+    /**
+     * @since 1.0
+     */
     PrivateBankAggregater() {
     }
 
-    public void add(PrivateBank privateBank) {
+    Collection<PrivateBank> collection() {
+        return Collections.unmodifiableCollection(mBanks);
+    }
+
+    /**
+     *
+     * @param privateBank
+     * @since 1.0
+     */
+    void add(PrivateBank privateBank) {
         mBanks.add(privateBank);
     }
 
     /**
      * 預金総額
      * @return
+     * @since 1.0
      */
-    public int deposits() {
+    int deposits() {
         return mBanks.stream()
-                .mapToInt(pb -> pb.books().get(PrivateBankAccountTitle.DEPOSIT))
+                .mapToInt(pb -> pb.books().get(PrivateBankTitle.DEPOSIT))
                 .sum();
     }
 
-    public int cashAndAccounts() {
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
+    int cashAndAccounts() {
         return mBanks.stream()
                 .mapToInt(pb -> pb.cash() + pb.deposit())
                 .sum();
@@ -35,15 +60,19 @@ public class PrivateBankAggregater {
     /**
      * 民間保有国債総額
      * @return
+     * @since 1.0
      */
-    public int governmentBonds() {
+    int governmentBonds() {
         return mBanks.stream()
                 .map(PrivateBank::books)
-                .mapToInt(book -> book.get(PrivateBankAccountTitle.GOVERNMENT_BOND))
+                .mapToInt(book -> book.get(PrivateBankTitle.GOVERNMENT_BOND))
                 .sum();
     }
 
-    public void clear() {
+    /**
+     * @since 1.0
+     */
+    void clear() {
         mBanks.clear();
     }
 

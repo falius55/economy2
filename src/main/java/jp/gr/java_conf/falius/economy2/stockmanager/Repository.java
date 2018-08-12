@@ -5,13 +5,14 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 
+import jp.gr.java_conf.falius.economy2.agreement.Deferment;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.loan.Deferment;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 
 /**
  * 倉庫
+ * @since 1.0
  */
 public class Repository implements StockManager {
     private final Product mProduct; // 製造する製品
@@ -30,6 +31,7 @@ public class Repository implements StockManager {
 
     /**
      * 在庫があるかどうか。あるいは、在庫補充のめどが立つかどうか
+     * @since 1.0
      */
     @Override
     public boolean canShipOut(int require) {
@@ -48,6 +50,7 @@ public class Repository implements StockManager {
     /**
      * 出荷します
      * @return 原価。出荷に失敗すると空のOptionalInt
+     * @since 1.0
      */
     @Override
     public OptionalInt shipOut(int require) {
@@ -56,11 +59,9 @@ public class Repository implements StockManager {
         }
 
         if (mStock < require) {
-            OptionalInt optPurchaseExpence = purchase(require - mStock);
-            if (!optPurchaseExpence.isPresent()) {
+            if (!purchase(require - mStock)) {
                 return OptionalInt.empty();
             }
-            int purchaseExpence = optPurchaseExpence.getAsInt();
         }
 
         int cost = (mStockCost / mStock) * require;
@@ -70,26 +71,11 @@ public class Repository implements StockManager {
     }
 
     /**
-     * 仕入費用を集計します
-     * @return 仕入に要した費用
-     */
-    @Override
-    public Set<Deferment> purchasePayable() {
-        Set<Deferment> ret = new HashSet<>(mPurchasePayable);
-        mPurchasePayable.clear();
-        return ret;
-    }
-
-    @Override
-    public int stockCost() {
-        return mStockCost;
-    }
-
-    /**
      * 仕入れます
      * @return 仕入に要した費用。仕入に失敗すると空
+     * @since 1.0
      */
-    private OptionalInt purchase(int require) {
+    private boolean purchase(int require) {
         int sourceRequireLot = require % mProduct.numOfLot() == 0 ? require / mProduct.numOfLot()
                 : require / mProduct.numOfLot() + 1;
         int sourceRequire = sourceRequireLot * mProduct.numOfLot();
@@ -99,29 +85,42 @@ public class Repository implements StockManager {
                 .filter(e -> e.canSale(mProduct, sourceRequire))
                 .findAny();
         if (!optStore.isPresent()) {
-            return OptionalInt.empty();
-        } // 仕入れできる店が見つからない
+            return false; // 仕入れできる店が見つからない
+        }
         PrivateBusiness store = optStore.get();
-        store.update();
 
         // 購入する
         Optional<Deferment> optPayable = store.saleByReceivable(mProduct, sourceRequire);
         if (!optPayable.isPresent()) {
-            return OptionalInt.empty();
-        } // 購入できなかった
+            return false; // 購入できなかった
+        }
         Deferment payable = optPayable.get();
         int cost = payable.amount();
 
         mPurchasePayable.add(payable);
         mStock += sourceRequire;
         mStockCost += cost;
-        return OptionalInt.of(cost);
+        return true;
     }
 
+    /**
+     * 仕入費用を集計します
+     * @return 仕入に要した費用
+     * @since 1.0
+     */
     @Override
-    public void update() {
-        // TODO 自動生成されたメソッド・スタブ
+    public Set<Deferment> purchasePayables() {
+        Set<Deferment> ret = new HashSet<>(mPurchasePayable);
+        mPurchasePayable.clear();
+        return ret;
+    }
 
+    /**
+     * @since 1.0
+     */
+    @Override
+    public int stockCost() {
+        return mStockCost;
     }
 
 }

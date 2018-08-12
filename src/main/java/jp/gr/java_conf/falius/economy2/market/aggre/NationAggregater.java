@@ -1,42 +1,76 @@
 package jp.gr.java_conf.falius.economy2.market.aggre;
 
-import jp.gr.java_conf.falius.economy2.book.Books;
-import jp.gr.java_conf.falius.economy2.enumpack.AccountType;
-import jp.gr.java_conf.falius.economy2.enumpack.GovernmentAccountTitle;
+import jp.gr.java_conf.falius.economy2.book.GovernmentBooks;
+import jp.gr.java_conf.falius.economy2.enumpack.GovernmentTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.TitleType;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
 
-public class NationAggregater {
-    final Nation mNation = Nation.INSTANCE;
-    private final Books<GovernmentAccountTitle> mBooks = Nation.INSTANCE.books();
+/**
+ *
+ * @author "ymiyauchi"
+ * @since 1.0
+ *
+ */
+class NationAggregater {
+    private final Nation mNation;
+    private final GovernmentBooks mBooks;
 
-    NationAggregater() {}
+    /**
+     * @since 1.0
+     */
+    NationAggregater(Nation nation) {
+        mNation = nation;
+        mBooks = nation.books();
+    }
 
     /**
      * 政府所得(純間接税) = 間接税 - 補助金
      * @return
+     * @since 1.0
      */
-    public int pureIncome() {
-        return mBooks.get(GovernmentAccountTitle.CONSUMPTION_TAX)
-                - mBooks.get(GovernmentAccountTitle.SUBSIDY);
+    int pureIncome() {
+        return mBooks.get(GovernmentTitle.CONSUMPTION_TAX)
+                - mBooks.get(GovernmentTitle.SUBSIDY);
     }
 
-    public int salaries() {
-        return mBooks.get(GovernmentAccountTitle.SALARIES_EXPENSE);
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
+    int salaries() {
+        return mBooks.get(GovernmentTitle.SALARIES_EXPENSE);
     }
 
-    public int cashAndDeposits() {
+    int depreciation() {
+        return mBooks.get(GovernmentTitle.DEPRECIATION);
+    }
+
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
+    int cashAndDeposits() {
         return mNation.cash() + mNation.deposit();
     }
 
     /**
      * 国債残高
      * @return
+     * @since 1.0
      */
-    public int bonds() {
-        return mBooks.get(GovernmentAccountTitle.GOVERNMENT_BOND);
+    int bonds() {
+        return mBooks.get(GovernmentTitle.GOVERNMENT_BOND);
     }
 
-    public int G() {
-        return mBooks.get(AccountType.EXPENSE);
+    /**
+     *
+     * @return
+     * @since 1.0
+     */
+    int G() {
+        return mBooks.get(TitleType.EXPENSE) + mBooks.fixedAssetsValue()
+                + mBooks.get(GovernmentTitle.FIXEDASSET_SUSPENSE_ACCOUNT);
     }
 }

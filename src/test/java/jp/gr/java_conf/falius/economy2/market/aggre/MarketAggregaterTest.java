@@ -10,11 +10,10 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Test;
 
-import jp.gr.java_conf.falius.economy2.enumpack.CentralBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.CentralBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Industry;
-import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankAccountTitle;
+import jp.gr.java_conf.falius.economy2.enumpack.PrivateBankTitle;
 import jp.gr.java_conf.falius.economy2.enumpack.Product;
-import jp.gr.java_conf.falius.economy2.helper.Taxes;
 import jp.gr.java_conf.falius.economy2.market.Market;
 import jp.gr.java_conf.falius.economy2.player.PrivateBusiness;
 import jp.gr.java_conf.falius.economy2.player.WorkerParson;
@@ -22,6 +21,7 @@ import jp.gr.java_conf.falius.economy2.player.bank.Bank;
 import jp.gr.java_conf.falius.economy2.player.bank.CentralBank;
 import jp.gr.java_conf.falius.economy2.player.bank.PrivateBank;
 import jp.gr.java_conf.falius.economy2.player.gorv.Nation;
+import jp.gr.java_conf.falius.economy2.util.Taxes;
 
 public class MarketAggregaterTest {
 
@@ -31,26 +31,32 @@ public class MarketAggregaterTest {
     }
 
     private void check() {
+        // account check
         int realDepositsOfCentralBank = CentralBank.INSTANCE.realDeposits();
-        int depositsOfCentralBankOfBooks = CentralBank.INSTANCE.books().get(CentralBankAccountTitle.DEPOSIT);
+        int depositsOfCentralBankOfBooks = CentralBank.INSTANCE.books().get(CentralBankTitle.DEPOSIT);
         assertThat(realDepositsOfCentralBank, is(depositsOfCentralBankOfBooks));
-        int checkingAccountsOfPrivateBanksOfBooks =
-                PrivateBank.stream().mapToInt(pb -> pb.books().get(PrivateBankAccountTitle.CHECKING_ACCOUNTS)).sum();
+        int checkingAccountsOfPrivateBanksOfBooks = Market.INSTANCE.entities(PrivateBank.class)
+                .mapToInt(pb -> pb.books().get(PrivateBankTitle.CHECKING_ACCOUNTS)).sum();
         assertThat(checkingAccountsOfPrivateBanksOfBooks, is(realDepositsOfCentralBank));
-        int realDepositsOfPrivateBank = PrivateBank.stream().mapToInt(PrivateBank::realDeposits).sum();
-        int depositsOfPrivateBankOfBooks =
-                PrivateBank.stream().map(PrivateBank::books).mapToInt(book -> book.get(PrivateBankAccountTitle.DEPOSIT)).sum();
+        int realDepositsOfPrivateBank = Market.INSTANCE.entities(PrivateBank.class).mapToInt(PrivateBank::realDeposits)
+                .sum();
+        int depositsOfPrivateBankOfBooks = Market.INSTANCE.entities(PrivateBank.class).map(PrivateBank::books)
+                .mapToInt(book -> book.get(PrivateBankTitle.DEPOSIT)).sum();
         assertThat(realDepositsOfPrivateBank, is(depositsOfPrivateBankOfBooks));
-        int workerDeposits = WorkerParson.stream().mapToInt(WorkerParson::deposit).sum();
-        int businessDeposits = PrivateBusiness.stream().mapToInt(PrivateBusiness::deposit).sum();
+        int workerDeposits = Market.INSTANCE.entities(WorkerParson.class).mapToInt(WorkerParson::deposit).sum();
+        int businessDeposits = Market.INSTANCE.entities(PrivateBusiness.class).mapToInt(PrivateBusiness::deposit).sum();
         assertThat(workerDeposits + businessDeposits, is(realDepositsOfPrivateBank));
-        WorkerParson.stream().forEach(worker -> assertThat(worker.mainBank().account(worker).amount(), is(worker.deposit())));
-        PrivateBusiness.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
-        PrivateBank.stream().forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
-        int nationDepositOfCentralOfBooks = CentralBank.INSTANCE.books().get(CentralBankAccountTitle.GOVERNMENT_DEPOSIT);
+        Market.INSTANCE.entities(WorkerParson.class)
+                .forEach(worker -> assertThat(worker.mainBank().account(worker).amount(), is(worker.deposit())));
+        Market.INSTANCE.entities(PrivateBusiness.class)
+                .forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
+        Market.INSTANCE.entities(PrivateBank.class)
+                .forEach(pb -> assertThat(pb.mainBank().account(pb).amount(), is(pb.deposit())));
+        int nationDepositOfCentralOfBooks = CentralBank.INSTANCE.books().get(CentralBankTitle.GOVERNMENT_DEPOSIT);
         assertThat(CentralBank.INSTANCE.nationAccount().amount(), is(nationDepositOfCentralOfBooks));
         assertThat(Nation.INSTANCE.deposit(), is(nationDepositOfCentralOfBooks));
 
+        // GDP check
         MarketAggregater aggregater = Market.INSTANCE.aggregater();
         System.out.printf("GDP: %d%n", aggregater.GDP());
         System.out.printf("sGDP: %d%n", aggregater.sGDP());
@@ -58,6 +64,8 @@ public class MarketAggregaterTest {
         assertThat(aggregater.GDP(), is(aggregater.sGDP()));
         assertThat(aggregater.sGDP(), is(aggregater.GDE()));
         assertThat(aggregater.GDP(), is(aggregater.GDE()));
+
+        System.out.printf("M: %d%n", aggregater.M());
     }
 
     @Test
@@ -261,6 +269,7 @@ public class MarketAggregaterTest {
         System.out.printf("M: %d%n", Market.INSTANCE.aggregater().M());
         assertThat(Market.INSTANCE.aggregater().M(), is(capital + capital));
 
+        check();
         System.out.println("--- worker borrow money stock ---");
     }
 
@@ -278,6 +287,7 @@ public class MarketAggregaterTest {
 
         farmer.borrow(capital);
         assertThat(Market.INSTANCE.aggregater().M(), is(capital + capital));
+        check();
         System.out.println("--- business borrow money stock ---");
     }
 
@@ -350,5 +360,69 @@ public class MarketAggregaterTest {
         nation.collectTaxes();
         check();
         System.out.println("--- collect taxes ---");
+    }
+
+    @Test
+    public void nationOrderTest() {
+        System.out.println("--- order ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        IntStream.range(0, 100).map(n -> cbank.paySalary(founder)).sum();
+        int capital = founder.deposit();
+
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        System.out.println("創業時");
+        check();
+
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+        check();
+
+        System.out.println("支出負担分、国債を発行する。");
+        nation.closeEndOfMonth();
+        check();
+
+        System.out.println("分割払いで支払い");
+        IntStream.range(0, 6).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        check();
+
+        System.out.println("払いきると建物を引き替え");
+        while (true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        check();
+
+        System.out.println("--- order ---");
+    }
+
+    @Test
+    public void orderAndFixedAssetsTest() {
+        System.out.println("--- fixed assets ---");
+        Nation nation = Nation.INSTANCE;
+        CentralBank cbank = CentralBank.INSTANCE;
+        PrivateBank bank = new PrivateBank();
+        WorkerParson founder = new WorkerParson();
+        int salary = cbank.paySalary(founder);
+        int tax = Taxes.computeIncomeTaxFromManthly(salary);
+        int capital = salary - tax;
+        PrivateBusiness business = founder.establish(Industry.ARCHITECTURE, capital).get();
+        check();
+        int price = nation.order(Product.BUILDINGS).getAsInt();
+        while (true) {
+            Market.INSTANCE.nextEndOfMonth();
+            if (nation.expenditureBurden() <= 0) {
+                break;
+            }
+        }
+        check();
+        IntStream.range(0, 3).forEach(n -> Market.INSTANCE.nextEndOfMonth());
+        check();
+
+        System.out.println("--- fixed assets ---");
     }
 }
